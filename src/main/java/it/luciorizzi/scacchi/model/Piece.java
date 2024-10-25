@@ -3,6 +3,7 @@ package it.luciorizzi.scacchi.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -11,7 +12,8 @@ public abstract class Piece {
     private final PieceColor color;
     Position position;
 
-    public Set<Move> getPossibleMoves(GameBoard gameBoard) {
+    public MoveSet getPossibleMoves(GameBoard gameBoard) {
+        return new MoveSet();
     }
 
     public void move() {
