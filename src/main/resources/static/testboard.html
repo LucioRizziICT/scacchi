@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scacchiera</title>
+    <style>
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+        }
+        .square {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .white {
+            background-color: #f0d9b5;
+        }
+        .black {
+            background-color: #b58863;
+        }
+        .piece {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .highlight-move {
+            background-color: yellow;
+        }
+        .highlight-capture {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="chessboard" id="chessboard"></div>
+
+<script>
+    const pieces = {
+        'R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟',
+        'r': '♖', 'n': '♘', 'b': '♗', 'q': '♕', 'k': '♔', 'p': '♙'
+    };
+
+    const initialBoard = [
+        ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
+        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+        ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
+    ];
+
+    function createChessboard() {
+        const chessboard = document.getElementById('chessboard');
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const square = document.createElement('div');
+                square.className = `square ${(row + col) % 2 === 0 ? 'white' : 'black'}`;
+                square.className = `square ${(row + col) % 2 === 0 ? 'white' : 'black'}`;
+                square.dataset.row = row;
+                square.dataset.col = col;
+                square.addEventListener('click', onSquareClick);
+                if (initialBoard[row][col]) {
+                    const piece = document.createElement('span');
+                    piece.className = 'piece';
+                    piece.textContent = pieces[initialBoard[row][col]];
+                    piece.dataset.row = row;
+                    piece.dataset.col = col;
+                    piece.addEventListener('click', onPieceClick);
+                    square.appendChild(piece);
+                }
+                chessboard.appendChild(square);
+            }
+        }
+    }
+
+    function onPieceClick(event) {
+        const piece = event.target;
+        const row = piece.dataset.row;
+        const col = piece.dataset.col;
+        fetch(`http://localhost:8080/scacchi/possibleMoves?row=${row}&col=${col}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Possible moves:', data);
+                removeHighlights();
+
+                data.moves.forEach(move => {
+                    console.log(`.square[data-row='${move.destination.row}'][data-col='${move.destination.column}']`);
+                    const square = document.querySelector(`.square[data-row='${move.destination.row}'][data-col='${move.destination.column}']`);
+                    if (square) {
+                        if (move.isCapture) {
+                            square.classList.add('highlight-capture');
+                        } else {
+                            square.classList.add('highlight-move');
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching possible moves:', error));
+    }
+
+    function onSquareClick(event) {
+        console.log('Square clicked:', event.target);
+        const square = event.target;
+        removeHighlights();
+        if (!square.classList.contains('highlight-move') && !square.classList.contains('highlight-capture')) {
+            return;
+        }
+        const row = square.dataset.row;
+        const col = square.dataset.col;
+        fetch(`http://localhost:8080/scacchi/move?row=${row}&col=${col}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Move result:', data);
+                removeHighlights()
+            })
+            .catch(error => console.error('Error moving piece:', error));
+    }
+
+
+    function removeHighlights() {
+        const highlightedSquares = document.querySelectorAll('.highlight-move, .highlight-capture');
+        highlightedSquares.forEach(square => {
+            square.classList.remove('highlight-move', 'highlight-capture');
+        });
+    }
+
+    createChessboard();
+</script>
+</body>
+</html>
