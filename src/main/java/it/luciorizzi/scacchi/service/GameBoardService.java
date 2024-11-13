@@ -14,7 +14,7 @@ public class GameBoardService {
     public void printGameBoard() {
         System.out.println("Printing game board...");
 
-        new GameBoard().print();
+        gameBoard.print();
 
         System.out.println("Game board printed");
     }

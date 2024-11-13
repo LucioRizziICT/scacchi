@@ -4,10 +4,10 @@ public class GameBoard {
     public final static int ROWS = 8;
     public final static int COLUMNS = 8;
 
-    private final Piece[][] board;
+    private final Piece[][] board = new Piece[ROWS][COLUMNS];
+    private PieceColor turn = PieceColor.WHITE;
 
     public GameBoard() {
-        board = new Piece[ROWS][COLUMNS];
         initialize();
     }
 
@@ -75,29 +75,34 @@ public class GameBoard {
         if (isEmpty(move.origin())) {
             return false;
         }
+        if (getPiece(move.origin()).getColor() != turn) {
+            return false;
+        }
         if (getPiece(move.origin()).move(this, move)) {
             applyMove(move);
+            turn = turn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
             return true;
         }
         return false;
     }
 
     private void applyMove(Move move) {
+        getPiece(move.origin()).move(this, move);
         board[move.destination().row()][move.destination().column()] = board[move.origin().row()][move.origin().column()];
         board[move.origin().row()][move.origin().column()] = new EmptyPiece(move.origin());
     }
 
-    public boolean print() {
+    public void print() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {
                 System.out.print(board[i][j].getSymbol() + " ");
             }
             System.out.println();
         }
-        return true;
     }
 
     public void reset() {
+        turn = PieceColor.WHITE;
         initialize();
     }
 }

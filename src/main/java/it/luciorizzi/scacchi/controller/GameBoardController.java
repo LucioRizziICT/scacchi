@@ -31,7 +31,11 @@ public class GameBoardController {
     @GetMapping("/move")
     public ResponseEntity<String> move(int fromRow, int fromCol, int toRow, int toCol) {
         System.out.println("Moving piece from (" + fromRow + ", " + fromCol + ") to (" + toRow + ", " + toCol + ")");
-        gameBoardService.move(new Position(fromRow, fromCol), new Position(toRow, toCol));
-        return ResponseEntity.ok("Moved piece");
+        if(gameBoardService.move(new Position(fromRow, fromCol), new Position(toRow, toCol))) {
+            System.out.println("Piece moved");
+            return ResponseEntity.ok("Moved piece");
+        }
+        System.out.println("Invalid move");
+        return ResponseEntity.badRequest().body("Invalid move");
     }
 }

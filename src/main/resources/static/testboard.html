@@ -39,6 +39,8 @@
 <div class="chessboard" id="chessboard"></div>
 
 <script>
+    let blockClick = false;
+    let currentSelectedPiece = null;
     const pieces = {
         'R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟',
         'r': '♖', 'n': '♘', 'b': '♗', 'q': '♕', 'k': '♔', 'p': '♙'
@@ -81,8 +83,14 @@
 
     function onPieceClick(event) {
         const piece = event.target;
+        const square = piece.parentElement;
+
+        if (blockClick || square.classList.contains('highlight-capture'))
+            return;
+
         const row = piece.dataset.row;
         const col = piece.dataset.col;
+        currentSelectedPiece = {row: row, col: col};
         fetch(`http://localhost:8080/scacchi/possibleMoves?row=${row}&col=${col}`)
             .then(response => response.json())
             .then(data => {
@@ -90,7 +98,6 @@
                 removeHighlights();
 
                 data.moves.forEach(move => {
-                    console.log(`.square[data-row='${move.destination.row}'][data-col='${move.destination.column}']`);
                     const square = document.querySelector(`.square[data-row='${move.destination.row}'][data-col='${move.destination.column}']`);
                     if (square) {
                         if (move.isCapture) {
@@ -105,21 +112,38 @@
     }
 
     function onSquareClick(event) {
-        console.log('Square clicked:', event.target);
-        const square = event.target;
-        removeHighlights();
+        if (blockClick)
+            return;
+        let square = event.target;
+        if (square.classList.contains("piece"))
+            square = square.parentElement;
+        console.log('Square clicked:', square);
         if (!square.classList.contains('highlight-move') && !square.classList.contains('highlight-capture')) {
+            removeHighlights();
             return;
         }
-        const row = square.dataset.row;
-        const col = square.dataset.col;
-        fetch(`http://localhost:8080/scacchi/move?row=${row}&col=${col}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Move result:', data);
-                removeHighlights()
+        if (!currentSelectedPiece)
+            return;
+
+        blockClick = true;
+
+        const toRow = square.dataset.row;
+        const toCol = square.dataset.col;
+
+        console.log('Square clicked val :', currentSelectedPiece, toRow, toCol );
+        fetch(`http://localhost:8080/scacchi/move?fromRow=${currentSelectedPiece.row}&fromCol=${currentSelectedPiece.col}&toRow=${toRow}&toCol=${toCol}`)
+            .then(response => {
+                console.log('Move result:', response);
+                if(response.status === 200)
+                    applyMove(currentSelectedPiece, {row: toRow, col: toCol});
             })
-            .catch(error => console.error('Error moving piece:', error));
+            .catch(error => console.error('Error moving piece:', error))
+            .then(() => {
+                blockClick = false;
+                currentSelectedPiece = null;
+                removeHighlights();
+            });
+
     }
 
 
@@ -128,6 +152,16 @@
         highlightedSquares.forEach(square => {
             square.classList.remove('highlight-move', 'highlight-capture');
         });
+    }
+
+    function applyMove(origin, destination) {
+        const originSquare = document.querySelector(`.square[data-row='${origin.row}'][data-col='${origin.col}']`);
+        const destinationSquare = document.querySelector(`.square[data-row='${destination.row}'][data-col='${destination.col}']`);
+        const piece = originSquare.querySelector('.piece');
+        destinationSquare.innerHTML = '';
+        destinationSquare.appendChild(piece);
+        piece.dataset.row = destination.row;
+        piece.dataset.col = destination.col;
     }
 
     createChessboard();
