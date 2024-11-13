@@ -6,7 +6,12 @@ public class Rook extends Piece {
     }
 
     @Override
-    public MoveSet getPossibleMoves(GameBoard gameBoard) {
+    public boolean canMoveHorizontally() {
+        return true;
+    }
+
+    @Override
+    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
         super.addMovesInDirection(possibleMoves, gameBoard, 1, 0);
         super.addMovesInDirection(possibleMoves, gameBoard, -1, 0);

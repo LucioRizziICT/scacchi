@@ -10,7 +10,26 @@ public abstract class Piece {
     Position position;
     char symbol;
 
+    public boolean canMoveDiagonally() {
+        return false;
+    }
+
+    public boolean canMoveHorizontally() {
+        return false;
+    }
+
+    public boolean canMoveInL() {
+        return false;
+    }
+
     public MoveSet getPossibleMoves(GameBoard gameBoard) {
+        if (!gameBoard.isCurrentPlayer(getColor())) {
+            return new MoveSet();
+        }
+        return getPossibleMovesInternal(gameBoard);
+    }
+
+    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         return new MoveSet();
     }
 
@@ -47,5 +66,13 @@ public abstract class Piece {
                 break;
             }
         }
+    }
+
+    public boolean canReach(GameBoard gameBoard, Position kingPosition) {
+        return getPossibleMoves(gameBoard).canReach(kingPosition);
+    }
+
+    public boolean couldReach(GameBoard gameBoard, Position kingPosition) {
+        return getPossibleMovesInternal(gameBoard).canReach(kingPosition);
     }
 }

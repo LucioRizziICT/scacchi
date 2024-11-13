@@ -6,6 +6,8 @@ import it.luciorizzi.scacchi.model.MoveSet;
 import it.luciorizzi.scacchi.model.Position;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class GameBoardService {
 
@@ -26,5 +28,12 @@ public class GameBoardService {
 
     public boolean move(Position from, Position to) {
         return gameBoard.movePiece(from, to);
+    }
+
+    public Map<String, Object> isCheck() {
+        if (gameBoard.isCheck()) {
+            return Map.of("isCheck", true, "isCheckmate", gameBoard.isCheckmate(), "king", gameBoard.getCurrentPlayerKingPosition());
+        }
+        return Map.of("isCheck", false);
     }
 }

@@ -6,7 +6,7 @@ public class King extends Piece {
     }
 
     @Override
-    public MoveSet getPossibleMoves(GameBoard gameBoard) {
+    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {

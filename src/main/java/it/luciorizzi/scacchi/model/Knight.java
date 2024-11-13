@@ -6,7 +6,12 @@ public class Knight extends Piece {
     }
 
     @Override
-    public MoveSet getPossibleMoves(GameBoard gameBoard) {
+    public boolean canMoveInL() {
+        return true;
+    }
+
+    @Override
+    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
         for (int i = -2; i <= 2; i++) {
             for (int j = -2; j <= 2; j++) {

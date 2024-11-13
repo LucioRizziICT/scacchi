@@ -31,6 +31,9 @@
             background-color: yellow;
         }
         .highlight-capture {
+            background-color: orange;
+        }
+        .highlight-check {
             background-color: red;
         }
     </style>
@@ -64,14 +67,14 @@
                 const square = document.createElement('div');
                 square.className = `square ${(row + col) % 2 === 0 ? 'white' : 'black'}`;
                 square.className = `square ${(row + col) % 2 === 0 ? 'white' : 'black'}`;
-                square.dataset.row = row;
+                square.dataset.row = 7 - row;
                 square.dataset.col = col;
                 square.addEventListener('click', onSquareClick);
                 if (initialBoard[row][col]) {
                     const piece = document.createElement('span');
                     piece.className = 'piece';
                     piece.textContent = pieces[initialBoard[row][col]];
-                    piece.dataset.row = row;
+                    piece.dataset.row = 7 - row;
                     piece.dataset.col = col;
                     piece.addEventListener('click', onPieceClick);
                     square.appendChild(piece);
@@ -138,19 +141,31 @@
                     applyMove(currentSelectedPiece, {row: toRow, col: toCol});
             })
             .catch(error => console.error('Error moving piece:', error))
-            .then(() => {
+            .then(async () => {
                 blockClick = false;
                 currentSelectedPiece = null;
                 removeHighlights();
+
+                await fetch(`http://localhost:8080/scacchi/isCheck`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Is check:', data);
+                        if (data.isCheck) {
+                            const kingSquare = document.querySelector(`.square[data-row='${data.king.row}'][data-col='${data.king.column}']`);
+                            kingSquare.classList.add('highlight-check');
+                        }
+                    })
+                    .catch(error => console.error('Error fetching check:', error));
+
             });
 
     }
 
 
     function removeHighlights() {
-        const highlightedSquares = document.querySelectorAll('.highlight-move, .highlight-capture');
+        const highlightedSquares = document.querySelectorAll('.highlight-move, .highlight-capture, .highlight-check');
         highlightedSquares.forEach(square => {
-            square.classList.remove('highlight-move', 'highlight-capture');
+            square.classList.remove('highlight-move', 'highlight-capture', 'highlight-check');
         });
     }
 

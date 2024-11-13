@@ -7,6 +7,9 @@ public class GameBoard {
     private final Piece[][] board = new Piece[ROWS][COLUMNS];
     private PieceColor turn = PieceColor.WHITE;
 
+    private Position whiteKingPosition;
+    private Position blackKingPosition;
+
     public GameBoard() {
         initialize();
     }
@@ -37,6 +40,8 @@ public class GameBoard {
         board[7][3] = new Queen(PieceColor.BLACK, new Position(7, 3));
         board[0][4] = new King(PieceColor.WHITE, new Position(0, 4));
         board[7][4] = new King(PieceColor.BLACK, new Position(7, 4));
+        whiteKingPosition = new Position(0, 4);
+        blackKingPosition = new Position(7, 4);
     }
 
     public Piece getPiece(Position position) {
@@ -87,7 +92,15 @@ public class GameBoard {
     }
 
     private void applyMove(Move move) {
-        getPiece(move.origin()).move(this, move);
+        Piece movedPiece = getPiece(move.origin());
+        movedPiece.move(this, move);
+        if (movedPiece instanceof King) {
+            if (movedPiece.getColor() == PieceColor.WHITE) {
+                whiteKingPosition = move.destination();
+            } else {
+                blackKingPosition = move.destination();
+            }
+        }
         board[move.destination().row()][move.destination().column()] = board[move.origin().row()][move.origin().column()];
         board[move.origin().row()][move.origin().column()] = new EmptyPiece(move.origin());
     }
@@ -104,5 +117,32 @@ public class GameBoard {
     public void reset() {
         turn = PieceColor.WHITE;
         initialize();
+    }
+
+    public boolean isCurrentPlayer(PieceColor color) {
+        return turn == color;
+    }
+
+    public Position getCurrentPlayerKingPosition() {
+        return turn == PieceColor.WHITE ? whiteKingPosition : blackKingPosition;
+    }
+
+    public boolean isCheck() {
+        Position kingPosition = getCurrentPlayerKingPosition();
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                if (isEnemy(new Position(i, j), turn)) {
+                    if (getPiece(new Position(i, j)).couldReach(this, kingPosition)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public Object isCheckmate() {
+        return false;
     }
 }

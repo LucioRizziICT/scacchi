@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 public class GameBoardController {
 
@@ -37,5 +39,12 @@ public class GameBoardController {
         }
         System.out.println("Invalid move");
         return ResponseEntity.badRequest().body("Invalid move");
+    }
+
+    @GetMapping("/isCheck")
+    public ResponseEntity<Map<String, Object>> isCheck() {
+        System.out.println("Checking if the current player is in check");
+        Map<String, Object> response = gameBoardService.isCheck();
+        return ResponseEntity.ok(response);
     }
 }

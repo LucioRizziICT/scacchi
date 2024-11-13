@@ -10,7 +10,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public MoveSet getPossibleMoves(@NonNull GameBoard gameBoard) {
+    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
         if (gameBoard.isEmpty(new Position(position.row() + getColor().getValue(), position.column()))) {
             possibleMoves.addMovement(getPosition(), position.row() + getColor().getValue(), position.column());
