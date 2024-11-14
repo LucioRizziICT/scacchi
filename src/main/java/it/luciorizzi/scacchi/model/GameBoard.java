@@ -1,5 +1,8 @@
 package it.luciorizzi.scacchi.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class GameBoard {
     public final static int ROWS = 8;
     public final static int COLUMNS = 8;
@@ -9,9 +12,30 @@ public class GameBoard {
 
     private Position whiteKingPosition;
     private Position blackKingPosition;
+    private final Map<String, Integer> previousStates = new HashMap<>();
 
     public GameBoard() {
         initialize();
+        saveCurrentState();
+    }
+
+    private void saveCurrentState() {
+        String state = getPositionHash();
+        if (previousStates.containsKey(state)) {
+            previousStates.put(state, previousStates.get(state) + 1);
+        } else {
+            previousStates.put(state, 1);
+        }
+    }
+
+    private String getPositionHash() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                sb.append(board[i][j].getSymbol());
+            }
+        }
+        return sb.toString();
     }
 
     private void initialize() {
@@ -103,6 +127,7 @@ public class GameBoard {
         }
         board[move.destination().row()][move.destination().column()] = board[move.origin().row()][move.origin().column()];
         board[move.origin().row()][move.origin().column()] = new EmptyPiece(move.origin());
+        saveCurrentState();
     }
 
     public void print() {
@@ -117,21 +142,63 @@ public class GameBoard {
     public void reset() {
         turn = PieceColor.WHITE;
         initialize();
+        previousStates.clear();
+    }
+
+    public GameStatus checkGameStatus() {
+        if (isCheckmate()) {
+            return turn == PieceColor.WHITE ? GameStatus.BLACK_WIN : GameStatus.WHITE_WIN;
+        }
+        if (hasSurrendered(PieceColor.WHITE)) {
+            return GameStatus.BLACK_WIN;
+        }
+        if (hasSurrendered(PieceColor.BLACK)) {
+            return GameStatus.WHITE_WIN;
+        }
+        if (gameRepeatedThreeTimes() || isMaterialInsufficient() || isStalemate() || isAgreedDraw()) { //TODO if time will be added add draw by time vs insufficient material
+            return GameStatus.DRAW;
+        }
+        return GameStatus.ONGOING;
+    }
+
+    private boolean hasSurrendered(PieceColor pieceColor) {
+        //Only cowards flee from the battlefield
+        return false;
+    }
+
+    private boolean isAgreedDraw() {
+        //Peace was never an option...
+        return false;
+    }
+
+    private boolean isStalemate() {
+        return false;
+    }
+
+    private boolean isMaterialInsufficient() {
+        return false;
+    }
+
+    private boolean gameRepeatedThreeTimes() {
+        return false;
     }
 
     public boolean isCurrentPlayer(PieceColor color) {
         return turn == color;
     }
 
-    public Position getCurrentPlayerKingPosition() {
+    public Position getCurrentPlayerKingPosition() { //TODO: MAKE PRIVATE
         return turn == PieceColor.WHITE ? whiteKingPosition : blackKingPosition;
     }
 
     public boolean isCheck() {
-        Position kingPosition = getCurrentPlayerKingPosition();
+        return isCheckInternal(getCurrentPlayerKingPosition(), turn);
+    }
+
+    private boolean isCheckInternal(Position kingPosition, PieceColor color) {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {
-                if (isEnemy(new Position(i, j), turn)) {
+                if (isEnemy(new Position(i, j), color)) {
                     if (getPiece(new Position(i, j)).couldReach(this, kingPosition)) {
                         return true;
                     }
@@ -142,7 +209,7 @@ public class GameBoard {
         return false;
     }
 
-    public Object isCheckmate() {
+    public boolean isCheckmate() {
         return false;
     }
 }
