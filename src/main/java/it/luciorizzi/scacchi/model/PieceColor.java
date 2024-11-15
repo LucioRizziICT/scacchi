@@ -12,4 +12,8 @@ public enum PieceColor {
         this.value = value;
     }
 
+    public PieceColor opposite() {
+        return this == WHITE ? BLACK : WHITE;
+    }
+
 }

@@ -1,7 +1,6 @@
 package it.luciorizzi.scacchi.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class GameBoard {
     public final static int ROWS = 8;
@@ -9,6 +8,8 @@ public class GameBoard {
 
     private final Piece[][] board = new Piece[ROWS][COLUMNS];
     private PieceColor turn = PieceColor.WHITE;
+    private Set<Piece> whitePieces = new HashSet<>();
+    private Set<Piece> blackPieces = new HashSet<>();
 
     private Position whiteKingPosition;
     private Position blackKingPosition;
@@ -46,24 +47,42 @@ public class GameBoard {
         }
         for (int i = 0; i < COLUMNS; i++) {
             board[1][i] = new Pawn(PieceColor.WHITE, new Position(1, i));
+            whitePieces.add(board[1][i]);
             board[6][i] = new Pawn(PieceColor.BLACK, new Position(6, i));
+            blackPieces.add(board[6][i]);
         }
         board[0][0] = new Rook(PieceColor.WHITE, new Position(0, 0));
         board[0][7] = new Rook(PieceColor.WHITE, new Position(0, 7));
+        whitePieces.add(board[0][0]);
+        whitePieces.add(board[0][7]);
         board[7][0] = new Rook(PieceColor.BLACK, new Position(7, 0));
         board[7][7] = new Rook(PieceColor.BLACK, new Position(7, 7));
+        whitePieces.add(board[7][0]);
+        whitePieces.add(board[7][7]);
         board[0][1] = new Knight(PieceColor.WHITE, new Position(0, 1));
         board[0][6] = new Knight(PieceColor.WHITE, new Position(0, 6));
+        whitePieces.add(board[0][1]);
+        whitePieces.add(board[0][6]);
         board[7][1] = new Knight(PieceColor.BLACK, new Position(7, 1));
         board[7][6] = new Knight(PieceColor.BLACK, new Position(7, 6));
+        whitePieces.add(board[7][1]);
+        whitePieces.add(board[7][6]);
         board[0][2] = new Bishop(PieceColor.WHITE, new Position(0, 2));
         board[0][5] = new Bishop(PieceColor.WHITE, new Position(0, 5));
+        whitePieces.add(board[0][2]);
+        whitePieces.add(board[0][5]);
         board[7][2] = new Bishop(PieceColor.BLACK, new Position(7, 2));
         board[7][5] = new Bishop(PieceColor.BLACK, new Position(7, 5));
+        whitePieces.add(board[7][2]);
+        whitePieces.add(board[7][5]);
         board[0][3] = new Queen(PieceColor.WHITE, new Position(0, 3));
+        whitePieces.add(board[0][3]);
         board[7][3] = new Queen(PieceColor.BLACK, new Position(7, 3));
+        whitePieces.add(board[7][3]);
         board[0][4] = new King(PieceColor.WHITE, new Position(0, 4));
+        whitePieces.add(board[0][4]);
         board[7][4] = new King(PieceColor.BLACK, new Position(7, 4));
+        whitePieces.add(board[7][4]);
         whiteKingPosition = new Position(0, 4);
         blackKingPosition = new Position(7, 4);
     }
@@ -125,6 +144,9 @@ public class GameBoard {
                 blackKingPosition = move.destination();
             }
         }
+        if (move.isCapture())
+            getPieces(getPiece(move.destination()).getColor()).remove(board[move.destination().row()][move.destination().column()]);
+
         board[move.destination().row()][move.destination().column()] = board[move.origin().row()][move.origin().column()];
         board[move.origin().row()][move.origin().column()] = new EmptyPiece(move.origin());
         saveCurrentState();
@@ -143,6 +165,8 @@ public class GameBoard {
         turn = PieceColor.WHITE;
         initialize();
         previousStates.clear();
+        whitePieces.clear();
+        blackPieces.clear();
     }
 
     public GameStatus checkGameStatus() {
@@ -172,23 +196,55 @@ public class GameBoard {
     }
 
     private boolean isStalemate() {
-        return false;
+        if (isCheck()) {
+            return false;
+        }
+        for (Piece piece : getCurrentPlayerPieces()) {
+            if (!piece.getPossibleMoves(this).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isMaterialInsufficient() {
+        if(whitePieces.size() >= 3 || blackPieces.size() >= 3)
+            return false;
+        for (Piece piece : whitePieces) {
+            if (piece instanceof Bishop || piece instanceof Knight) {
+                return true;
+            }
+        }
+        for (Piece piece : blackPieces) {
+            if (piece instanceof Bishop || piece instanceof Knight) {
+                return true;
+            }
+        }
         return false;
     }
 
     private boolean gameRepeatedThreeTimes() {
-        return false;
+        return previousStates.get(getPositionHash()) >= 3;
     }
 
     public boolean isCurrentPlayer(PieceColor color) {
         return turn == color;
     }
 
+    public PieceColor getCurrentPlayer() {
+        return turn;
+    }
+
     public Position getCurrentPlayerKingPosition() { //TODO: MAKE PRIVATE
         return turn == PieceColor.WHITE ? whiteKingPosition : blackKingPosition;
+    }
+
+    private Set<Piece> getCurrentPlayerPieces() {
+        return getPieces(turn);
+    }
+
+    private Set<Piece> getPieces(PieceColor color) {
+        return color == PieceColor.WHITE ? whitePieces : blackPieces;
     }
 
     public boolean isCheck() {
@@ -196,13 +252,9 @@ public class GameBoard {
     }
 
     private boolean isCheckInternal(Position kingPosition, PieceColor color) {
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLUMNS; j++) {
-                if (isEnemy(new Position(i, j), color)) {
-                    if (getPiece(new Position(i, j)).couldReach(this, kingPosition)) {
-                        return true;
-                    }
-                }
+        for (Piece piece : getPieces(color.opposite())) {
+            if (!piece.canReach(this, kingPosition)) {
+                return true;
             }
         }
 
@@ -210,6 +262,14 @@ public class GameBoard {
     }
 
     public boolean isCheckmate() {
-        return false;
+        if (!isCheck()) {
+            return false;
+        }
+        for (Piece piece : getCurrentPlayerPieces()) {
+            if (!piece.getPossibleMoves(this).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

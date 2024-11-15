@@ -28,4 +28,8 @@ public class MoveSet {
     public boolean canReach(Position position) {
         return moves.stream().anyMatch(move -> move.destination().equals(position));
     }
+
+    public boolean isEmpty() {
+        return moves.isEmpty();
+    }
 }
