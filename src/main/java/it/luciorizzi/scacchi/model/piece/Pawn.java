@@ -1,6 +1,10 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.piece;
 
-import lombok.NonNull;
+import it.luciorizzi.scacchi.model.*;
+import it.luciorizzi.scacchi.model.movement.Move;
+import it.luciorizzi.scacchi.model.movement.MoveSet;
+import it.luciorizzi.scacchi.model.movement.Position;
+import it.luciorizzi.scacchi.model.type.PieceColor;
 
 public class Pawn extends Piece {
     private boolean neverMoved = true;
@@ -10,7 +14,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
+    protected MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
         if (gameBoard.isEmpty(new Position(position.row() + getColor().getValue(), position.column()))) {
             possibleMoves.addMovement(getPosition(), position.row() + getColor().getValue(), position.column());

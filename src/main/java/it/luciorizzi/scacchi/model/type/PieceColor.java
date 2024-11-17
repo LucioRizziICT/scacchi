@@ -1,6 +1,5 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.type;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

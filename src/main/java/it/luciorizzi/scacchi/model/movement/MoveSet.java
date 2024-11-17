@@ -1,7 +1,8 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.movement;
 
 import lombok.Getter;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,5 +32,17 @@ public class MoveSet {
 
     public boolean isEmpty() {
         return moves.isEmpty();
+    }
+
+    public Set<Move> getMoves() {
+        return moves;
+    }
+
+    public void remove(Move move) {
+        moves.remove(move);
+    }
+
+    public void removeAll(Collection<Move> moves) {
+        this.moves.removeAll(moves);
     }
 }

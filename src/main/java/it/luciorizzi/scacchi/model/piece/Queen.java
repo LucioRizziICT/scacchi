@@ -1,4 +1,9 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.piece;
+
+import it.luciorizzi.scacchi.model.GameBoard;
+import it.luciorizzi.scacchi.model.movement.MoveSet;
+import it.luciorizzi.scacchi.model.type.PieceColor;
+import it.luciorizzi.scacchi.model.movement.Position;
 
 public class Queen extends Piece {
     public Queen(PieceColor pieceColor, Position position) {
@@ -15,7 +20,7 @@ public class Queen extends Piece {
     }
 
     @Override
-    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
+    protected MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
         super.addMovesInDirection(possibleMoves, gameBoard, 1, 0);
         super.addMovesInDirection(possibleMoves, gameBoard, -1, 0);

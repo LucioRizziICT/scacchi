@@ -1,7 +1,16 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.piece;
 
+import it.luciorizzi.scacchi.model.*;
+import it.luciorizzi.scacchi.model.movement.Move;
+import it.luciorizzi.scacchi.model.movement.MoveSet;
+import it.luciorizzi.scacchi.model.movement.Position;
+import it.luciorizzi.scacchi.model.type.PieceColor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor
@@ -26,10 +35,20 @@ public abstract class Piece {
         if (!gameBoard.isCurrentPlayer(getColor())) {
             return new MoveSet();
         }
-        return getPossibleMovesInternal(gameBoard);
+        MoveSet possibleMoves = getPossibleMovesInternal(gameBoard);
+        List<Move> toRemove = new ArrayList<>();
+        for (Move move : possibleMoves.getMoves()) {
+            if (gameBoard.isIllegalMove(move)) {
+                toRemove.add(move);
+            }
+        }
+        for (Move move : toRemove) {
+            possibleMoves.remove(move);
+        }
+        return possibleMoves;
     }
 
-    public MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
+    protected MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         return new MoveSet();
     }
 
@@ -68,11 +87,12 @@ public abstract class Piece {
         }
     }
 
-    public boolean canReach(GameBoard gameBoard, Position kingPosition) {
-        return getPossibleMoves(gameBoard).canReach(kingPosition);
+    public boolean canReach(GameBoard gameBoard, Position position) {
+        return getPossibleMoves(gameBoard).canReach(position);
     }
 
     public boolean couldReach(GameBoard gameBoard, Position kingPosition) {
         return getPossibleMovesInternal(gameBoard).canReach(kingPosition);
     }
+
 }

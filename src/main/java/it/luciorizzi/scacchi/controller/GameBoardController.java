@@ -2,7 +2,7 @@ package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.luciorizzi.scacchi.model.Position;
+import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.service.GameBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

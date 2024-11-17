@@ -1,9 +1,8 @@
 package it.luciorizzi.scacchi.service;
 
 import it.luciorizzi.scacchi.model.GameBoard;
-import it.luciorizzi.scacchi.model.Move;
-import it.luciorizzi.scacchi.model.MoveSet;
-import it.luciorizzi.scacchi.model.Position;
+import it.luciorizzi.scacchi.model.movement.MoveSet;
+import it.luciorizzi.scacchi.model.movement.Position;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
