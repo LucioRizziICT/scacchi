@@ -136,6 +136,9 @@ public class GameBoard {
 
     public boolean movePiece(Position origin, Position destination) {
         Piece movedPiece = getPiece(origin);
+        if (movedPiece instanceof Pawn && (destination.row() == 0 || destination.row() == 7)) {
+            return false;
+        }
         if (isEnemy(destination, movedPiece.getColor())) {
             return movePiece(Move.capture(origin, destination)); //TODO: THERE CAN ALSO BE A PROMOTION + CAPTURE
         }
@@ -159,6 +162,14 @@ public class GameBoard {
             return false;
         }
         if (getPiece(move.getOrigin()).move(this, move)) {
+            if (move.isCastling()) {
+                if (move.getDestination().column() == 2) {
+                    getPiece(new Position(move.getDestination().row(), 0)).move(this, new Position(move.getDestination().row(), 3));
+                } else {
+                    getPiece(new Position(move.getDestination().row(), 7)).move(this, new Position(move.getDestination().row(), 5));
+                }
+            }
+
             applyMove(move);
             executePostMoveOperations(move);
             return true;
@@ -208,9 +219,32 @@ public class GameBoard {
             board[takenPiecePosition.row()][takenPiecePosition.column()] = new EmptyPiece(takenPiecePosition);
             getPieces(turn.opposite()).remove(takenPiece);
         }
+        if (move.isCastling()) {
+            Position rookOrigin = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 7 : 0);
+            Position rookDestination = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 5 : 3);
+            board[rookDestination.row()][rookDestination.column()] = getPiece(rookOrigin);
+            board[rookOrigin.row()][rookOrigin.column()] = new EmptyPiece(rookOrigin);
+        }
 
-        board[move.getDestination().row()][move.getDestination().column()] = board[move.getOrigin().row()][move.getOrigin().column()];
+        board[move.getDestination().row()][move.getDestination().column()] = getPiece(move.getOrigin());
         board[move.getOrigin().row()][move.getOrigin().column()] = new EmptyPiece(move.getOrigin());
+
+        if (move.getPromotion() != null) {
+            promotePiece(move, movedPiece);
+        }
+    }
+
+    private void promotePiece(Move move, Piece movedPiece) {
+        Piece promotedPiece = switch (move.getPromotion()) {
+            case 'Q' -> new Queen(turn, move.getDestination());
+            case 'R' -> new Rook(turn, move.getDestination());
+            case 'N' -> new Knight(turn, move.getDestination());
+            case 'B' -> new Bishop(turn, move.getDestination());
+            default -> null;
+        };
+        getPieces(turn).remove(movedPiece);
+        getPieces(turn).add(promotedPiece);
+        board[move.getDestination().row()][move.getDestination().column()] = promotedPiece;
     }
 
     private void updateKingPosition(Move move, Piece movedPiece) {
@@ -360,19 +394,7 @@ public class GameBoard {
         for (int i = 0; i < ROWS; i++) {
             System.arraycopy(board[i], 0, copy.board[i], 0, COLUMNS);
         }
-        Piece movedPiece = copy.getPiece(move.getOrigin());
-        if (movedPiece instanceof King) {
-            if (movedPiece.getColor() == PieceColor.WHITE) {
-                copy.whiteKingPosition = move.getDestination();
-            } else {
-                copy.blackKingPosition = move.getDestination();
-            }
-        }
-        if (move.isCapture())
-            copy.getPieces(copy.getPiece(move.getDestination()).getColor()).remove(copy.board[move.getDestination().row()][move.getDestination().column()]);
-
-        copy.board[move.getDestination().row()][move.getDestination().column()] = copy.board[move.getOrigin().row()][move.getOrigin().column()];
-        copy.board[move.getOrigin().row()][move.getOrigin().column()] = new EmptyPiece(move.getOrigin());
+        copy.applyMove(move);
         return copy.isCheck();
     }
 }
