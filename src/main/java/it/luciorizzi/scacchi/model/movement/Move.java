@@ -14,8 +14,6 @@ public class Move {
     private final Position destination;
     private final MoveType moveType;
     @Setter
-    private ThreatType threatType = null;
-    @Setter
     private Character promotion = null;
 
     public Move(Position origin, Position destination, MoveType moveType) {
@@ -77,7 +75,6 @@ public class Move {
     public boolean isEnPassant() {
         return moveType == MoveType.EN_PASSANT;
     }
-
 
     @Override
     public boolean equals(Object o) {

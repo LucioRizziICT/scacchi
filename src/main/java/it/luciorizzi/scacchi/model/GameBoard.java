@@ -3,6 +3,7 @@ package it.luciorizzi.scacchi.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.movement.Move;
+import it.luciorizzi.scacchi.model.movement.MoveHistory;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.movement.ThreatType;
 import it.luciorizzi.scacchi.model.piece.*;
@@ -27,7 +28,7 @@ public class GameBoard {
     private Pawn enPassantablePawn = null;
 
     @Getter
-    private final List<Move> movesHistory = new ArrayList<>();
+    private final MoveHistory movesHistory = new MoveHistory();
 
     public GameBoard() {
         initialize();
@@ -178,27 +179,29 @@ public class GameBoard {
     }
 
     private void executePostMoveOperations(Move move) {
-        setMoveThreatType(move);
         handleEnPassantable(move);
-        movesHistory.add(move);
+        addMoveToHistory(move);
         saveCurrentState();
         gameStatus = checkGameStatus();
         turn = turn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+        movesHistory.print();
     }
 
-    private void setMoveThreatType(Move move) {
+    private void addMoveToHistory(Move move) {
+        Piece movedPiece = getPiece(move.getDestination());
         if (isCheck()) {
-            move.setThreatType(isCheckmate() ? ThreatType.CHECKMATE : ThreatType.CHECK);
+            if (isCheckmate()) {
+                movesHistory.addCheckmate(move, movedPiece);
+            } else {
+                movesHistory.addCheck(move, movedPiece);
+            }
+        } else {
+            movesHistory.add(move, movedPiece);
         }
     }
 
     private void handleEnPassantable(Move move) {
         if (enPassantablePawn != null) {
-            try {
-                System.out.println(new ObjectMapper().writeValueAsString(enPassantablePawn));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             enPassantablePawn.setEnPassantable(false);
             enPassantablePawn = null;
         }
