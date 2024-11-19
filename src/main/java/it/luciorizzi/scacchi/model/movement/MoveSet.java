@@ -34,6 +34,18 @@ public class MoveSet {
         moves.add(Move.enPassant(origin, destination));
     }
 
+    public void addPromotion(Position origin, Position destination, Character promotion) {
+        moves.add(Move.promotion(origin, destination, promotion));
+    }
+
+    public void addPromotionMovement(Position origin, Position destination, Character promotion) {
+        moves.add(Move.promotionMovement(origin, destination, promotion));
+    }
+
+    public void addPromotionCapture(Position origin, Position destination, Character promotion) {
+        moves.add(Move.promotionCapture(origin, destination, promotion));
+    }
+
     public boolean canReach(Position position) {
         return moves.stream().anyMatch(move -> move.getDestination().equals(position));
     }

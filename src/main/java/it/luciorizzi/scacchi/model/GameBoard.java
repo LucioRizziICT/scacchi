@@ -138,9 +138,6 @@ public class GameBoard {
         Piece movedPiece = getPiece(origin);
         if (isEnemy(destination, movedPiece.getColor())) {
             return movePiece(Move.capture(origin, destination)); //TODO: THERE CAN ALSO BE A PROMOTION + CAPTURE
-        } //TODO TEST DIFFERENT MOVES
-        if (movedPiece instanceof Pawn && (destination.row() == 0 || destination.row() == 7)) {
-            return movePiece(Move.promotion(origin, destination)); //TODO: add all promotions
         }
         if (movedPiece instanceof Pawn && Math.abs(destination.column() - origin.column()) == 1) {
             return movePiece(Move.enPassant(origin, destination));
@@ -170,7 +167,7 @@ public class GameBoard {
     }
 
     private void executePostMoveOperations(Move move) {
-        setThreadType(move);
+        setMoveThreatType(move);
         handleEnPassantable(move);
         movesHistory.add(move);
         saveCurrentState();
@@ -178,7 +175,7 @@ public class GameBoard {
         turn = turn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
     }
 
-    private void setThreadType(Move move) {
+    private void setMoveThreatType(Move move) {
         if (isCheck()) {
             move.setThreatType(isCheckmate() ? ThreatType.CHECKMATE : ThreatType.CHECK);
         }
