@@ -103,7 +103,7 @@
                 data.moves.forEach(move => {
                     const square = document.querySelector(`.square[data-row='${move.destination.row}'][data-col='${move.destination.column}']`);
                     if (square) {
-                        if (move.isCapture) {
+                        if (move.capture || move.enPassant) {
                             square.classList.add('highlight-capture');
                         } else {
                             square.classList.add('highlight-move');

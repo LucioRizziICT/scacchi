@@ -22,14 +22,8 @@ public class Queen extends Piece {
     @Override
     protected MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
-        super.addMovesInDirection(possibleMoves, gameBoard, 1, 0);
-        super.addMovesInDirection(possibleMoves, gameBoard, -1, 0);
-        super.addMovesInDirection(possibleMoves, gameBoard, 0, 1);
-        super.addMovesInDirection(possibleMoves, gameBoard, 0, -1);
-        super.addMovesInDirection(possibleMoves, gameBoard, 1, 1);
-        super.addMovesInDirection(possibleMoves, gameBoard, 1, -1);
-        super.addMovesInDirection(possibleMoves, gameBoard, -1, 1);
-        super.addMovesInDirection(possibleMoves, gameBoard, -1, -1);
+        super.addDiagonalMoves(possibleMoves, gameBoard);
+        super.addStraightMoves(possibleMoves, gameBoard);
         return possibleMoves;
     }
 }

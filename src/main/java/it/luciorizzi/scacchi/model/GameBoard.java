@@ -1,10 +1,14 @@
 package it.luciorizzi.scacchi.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.movement.Move;
 import it.luciorizzi.scacchi.model.movement.Position;
+import it.luciorizzi.scacchi.model.movement.ThreatType;
 import it.luciorizzi.scacchi.model.piece.*;
 import it.luciorizzi.scacchi.model.type.GameStatus;
 import it.luciorizzi.scacchi.model.type.PieceColor;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -20,6 +24,9 @@ public class GameBoard {
     private Position whiteKingPosition;
     private Position blackKingPosition;
     private final Map<String, Integer> previousStates = new HashMap<>();
+    private Pawn enPassantablePawn = null;
+
+    @Getter
     private final List<Move> movesHistory = new ArrayList<>();
 
     public GameBoard() {
@@ -30,6 +37,7 @@ public class GameBoard {
     public void reset() {
         turn = PieceColor.WHITE;
         initialize();
+        saveCurrentState();
         previousStates.clear();
         whitePieces.clear();
         blackPieces.clear();
@@ -50,7 +58,7 @@ public class GameBoard {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {
-                sb.append(board[i][j].getSymbol());
+                sb.append(board[i][j].getColorSymbol());
             }
         }
         return sb.toString();
@@ -127,53 +135,101 @@ public class GameBoard {
     }
 
     public boolean movePiece(Position origin, Position destination) {
-        if (isEnemy(destination, getPiece(origin).getColor())) {
-            return movePiece(new Move(origin, destination, true));
+        Piece movedPiece = getPiece(origin);
+        if (isEnemy(destination, movedPiece.getColor())) {
+            return movePiece(Move.capture(origin, destination)); //TODO: THERE CAN ALSO BE A PROMOTION + CAPTURE
+        } //TODO TEST DIFFERENT MOVES
+        if (movedPiece instanceof Pawn && (destination.row() == 0 || destination.row() == 7)) {
+            return movePiece(Move.promotion(origin, destination)); //TODO: add all promotions
         }
-        return movePiece(new Move(origin, destination, false));
+        if (movedPiece instanceof Pawn && Math.abs(destination.column() - origin.column()) == 1) {
+            return movePiece(Move.enPassant(origin, destination));
+        }
+        if (movedPiece instanceof King && Math.abs(destination.column() - origin.column()) == 2) {
+            return movePiece(Move.castling(origin, destination));
+        }
+        return movePiece(Move.movement(origin, destination));
     }
 
     public boolean movePiece(Move move) {
         if (move == null) {
             return false;
         }
-        if (isEmpty(move.origin())) {
+        if (isEmpty(move.getOrigin())) {
             return false;
         }
-        if (getPiece(move.origin()).getColor() != turn) {
+        if (getPiece(move.getOrigin()).getColor() != turn) {
             return false;
         }
-        if (getPiece(move.origin()).move(this, move)) {
+        if (getPiece(move.getOrigin()).move(this, move)) {
             applyMove(move);
-            turn = turn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+            executePostMoveOperations(move);
             return true;
         }
         return false;
     }
 
-    private void applyMove(Move move) {
-        Piece movedPiece = getPiece(move.origin());
-        movedPiece.move(this, move);
-        if (movedPiece instanceof King) {
-            if (movedPiece.getColor() == PieceColor.WHITE) {
-                whiteKingPosition = move.destination();
-            } else {
-                blackKingPosition = move.destination();
-            }
-        }
-        if (move.isCapture())
-            getPieces(getPiece(move.destination()).getColor()).remove(board[move.destination().row()][move.destination().column()]);
-
-        board[move.destination().row()][move.destination().column()] = board[move.origin().row()][move.origin().column()];
-        board[move.origin().row()][move.origin().column()] = new EmptyPiece(move.origin());
+    private void executePostMoveOperations(Move move) {
+        setThreadType(move);
+        handleEnPassantable(move);
+        movesHistory.add(move);
         saveCurrentState();
         gameStatus = checkGameStatus();
+        turn = turn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+    }
+
+    private void setThreadType(Move move) {
+        if (isCheck()) {
+            move.setThreatType(isCheckmate() ? ThreatType.CHECKMATE : ThreatType.CHECK);
+        }
+    }
+
+    private void handleEnPassantable(Move move) {
+        if (enPassantablePawn != null) {
+            try {
+                System.out.println(new ObjectMapper().writeValueAsString(enPassantablePawn));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            enPassantablePawn.setEnPassantable(false);
+            enPassantablePawn = null;
+        }
+        Piece movedPiece = getPiece(move.getDestination());
+        if (movedPiece instanceof Pawn && ((Pawn) movedPiece).isEnPassantable()) {
+            enPassantablePawn = (Pawn) movedPiece;
+        }
+    }
+
+    private void applyMove(Move move) {
+        Piece movedPiece = getPiece(move.getOrigin());
+        updateKingPosition(move, movedPiece);
+        if (move.isCapture())
+            getPieces(getPiece(move.getDestination()).getColor()).remove(board[move.getDestination().row()][move.getDestination().column()]);
+        if (move.isEnPassant()) {
+            Position takenPiecePosition = new Position(move.getDestination().row() - turn.getValue(), move.getDestination().column());
+            Piece takenPiece = getPiece(takenPiecePosition);
+            board[takenPiecePosition.row()][takenPiecePosition.column()] = new EmptyPiece(takenPiecePosition);
+            getPieces(turn.opposite()).remove(takenPiece);
+        }
+
+        board[move.getDestination().row()][move.getDestination().column()] = board[move.getOrigin().row()][move.getOrigin().column()];
+        board[move.getOrigin().row()][move.getOrigin().column()] = new EmptyPiece(move.getOrigin());
+    }
+
+    private void updateKingPosition(Move move, Piece movedPiece) {
+        if (movedPiece instanceof King) {
+            if (movedPiece.getColor() == PieceColor.WHITE) {
+                whiteKingPosition = move.getDestination();
+            } else {
+                blackKingPosition = move.getDestination();
+            }
+        }
     }
 
     public void print() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {
-                System.out.print(board[i][j].getSymbol() + " ");
+                System.out.print(board[i][j].getColorSymbol() + " ");
             }
             System.out.println();
         }
@@ -221,8 +277,8 @@ public class GameBoard {
         if(whitePieces.size() >= 3 || blackPieces.size() >= 3)
             return false;
         for (Piece piece : whitePieces) {
-            if (piece instanceof Bishop || piece instanceof Knight) {
-                return true;
+            if (!(piece instanceof Bishop || piece instanceof Knight || piece instanceof King)) {
+                return false;
             }
         }
         for (Piece piece : blackPieces) {
@@ -287,10 +343,10 @@ public class GameBoard {
         if (move == null) {
             return true;
         }
-        if (isEmpty(move.origin())) {
+        if (isEmpty(move.getOrigin())) {
             return true;
         }
-        if (getPiece(move.origin()).getColor() != turn) {
+        if (getPiece(move.getOrigin()).getColor() != turn) {
             return true;
         }
         return whouldAllowCheck(move);
@@ -307,19 +363,19 @@ public class GameBoard {
         for (int i = 0; i < ROWS; i++) {
             System.arraycopy(board[i], 0, copy.board[i], 0, COLUMNS);
         }
-        Piece movedPiece = copy.getPiece(move.origin());
+        Piece movedPiece = copy.getPiece(move.getOrigin());
         if (movedPiece instanceof King) {
             if (movedPiece.getColor() == PieceColor.WHITE) {
-                copy.whiteKingPosition = move.destination();
+                copy.whiteKingPosition = move.getDestination();
             } else {
-                copy.blackKingPosition = move.destination();
+                copy.blackKingPosition = move.getDestination();
             }
         }
         if (move.isCapture())
-            copy.getPieces(copy.getPiece(move.destination()).getColor()).remove(copy.board[move.destination().row()][move.destination().column()]);
+            copy.getPieces(copy.getPiece(move.getDestination()).getColor()).remove(copy.board[move.getDestination().row()][move.getDestination().column()]);
 
-        copy.board[move.destination().row()][move.destination().column()] = copy.board[move.origin().row()][move.origin().column()];
-        copy.board[move.origin().row()][move.origin().column()] = new EmptyPiece(move.origin());
+        copy.board[move.getDestination().row()][move.getDestination().column()] = copy.board[move.getOrigin().row()][move.getOrigin().column()];
+        copy.board[move.getOrigin().row()][move.getOrigin().column()] = new EmptyPiece(move.getOrigin());
         return copy.isCheck();
     }
 }

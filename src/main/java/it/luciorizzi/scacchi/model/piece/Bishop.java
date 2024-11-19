@@ -18,10 +18,7 @@ public class Bishop extends Piece {
     @Override
     protected MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
-        super.addMovesInDirection(possibleMoves, gameBoard, 1, 1);
-        super.addMovesInDirection(possibleMoves, gameBoard, 1, -1);
-        super.addMovesInDirection(possibleMoves, gameBoard, -1, 1);
-        super.addMovesInDirection(possibleMoves, gameBoard, -1, -1);
+        super.addDiagonalMoves(possibleMoves, gameBoard);
         return possibleMoves;
     }
 }

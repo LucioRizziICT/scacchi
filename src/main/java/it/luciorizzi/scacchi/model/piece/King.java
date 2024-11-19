@@ -10,6 +10,8 @@ public class King extends Piece {
         super(pieceColor, position, 'K');
     }
 
+    private boolean neverMoved = true;
+
     @Override
     protected MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
         MoveSet possibleMoves = new MoveSet();
@@ -27,6 +29,7 @@ public class King extends Piece {
                 }
             }
         }
+        //TODO add castling
         return possibleMoves;
     }
 }

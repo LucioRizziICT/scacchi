@@ -36,16 +36,14 @@ public abstract class Piece {
             return new MoveSet();
         }
         MoveSet possibleMoves = getPossibleMovesInternal(gameBoard);
-        List<Move> toRemove = new ArrayList<>();
+        MoveSet result = new MoveSet();
+
         for (Move move : possibleMoves.getMoves()) {
-            if (gameBoard.isIllegalMove(move)) {
-                toRemove.add(move);
+            if (!gameBoard.isIllegalMove(move)) {
+                result.addMove(move);
             }
         }
-        for (Move move : toRemove) {
-            possibleMoves.remove(move);
-        }
-        return possibleMoves;
+        return result;
     }
 
     protected MoveSet getPossibleMovesInternal(GameBoard gameBoard) {
@@ -67,10 +65,24 @@ public abstract class Piece {
         if (move == null) {
             return false;
         }
-        if (!move.origin().equals(position)) {
+        if (!move.getOrigin().equals(position)) {
             return false;
         }
-        return move(gameBoard, move.destination());
+        return move(gameBoard, move.getDestination());
+    }
+
+    protected void addStraightMoves(MoveSet possibleMoves, GameBoard gameBoard) {
+        addMovesInDirection(possibleMoves, gameBoard, 1, 0);
+        addMovesInDirection(possibleMoves, gameBoard, -1, 0);
+        addMovesInDirection(possibleMoves, gameBoard, 0, 1);
+        addMovesInDirection(possibleMoves, gameBoard, 0, -1);
+    }
+
+    protected void addDiagonalMoves(MoveSet possibleMoves, GameBoard gameBoard) {
+        addMovesInDirection(possibleMoves, gameBoard, 1, 1);
+        addMovesInDirection(possibleMoves, gameBoard, -1, -1);
+        addMovesInDirection(possibleMoves, gameBoard, 1, -1);
+        addMovesInDirection(possibleMoves, gameBoard, -1, 1);
     }
 
     protected void addMovesInDirection(MoveSet possibleMoves, GameBoard gameBoard, int rowIncrement, int colIncrement) {
@@ -95,4 +107,7 @@ public abstract class Piece {
         return getPossibleMovesInternal(gameBoard).canReach(kingPosition);
     }
 
+    public char getColorSymbol() {
+        return color == PieceColor.WHITE ? Character.toUpperCase(symbol) : Character.toLowerCase(symbol);
+    }
 }

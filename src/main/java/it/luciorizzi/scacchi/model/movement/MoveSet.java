@@ -11,31 +11,35 @@ public class MoveSet {
     private final Set<Move> moves = new HashSet<>();
 
     public void addMovement(Position origin, int row, int column) {
-        moves.add(new Move(origin, new Position(row, column), false));
+        moves.add(Move.movement(origin, new Position(row, column)));
     }
 
     public void addMovement(Position origin, Position destination) {
-        moves.add(new Move(origin, destination, false));
+        moves.add(Move.movement(origin, destination));
     }
 
     public void addCapture(Position origin, int row, int column) {
-        moves.add(new Move(origin, new Position(row, column), true));
+        moves.add(Move.capture(origin, new Position(row, column)));
     }
 
     public void addCapture(Position origin, Position destination) {
-        moves.add(new Move(origin, destination, true));
+        moves.add(Move.capture(origin, destination));
+    }
+
+    public void addCastling(Position origin, Position destination) {
+        moves.add(Move.castling(origin, destination));
+    }
+
+    public void addEnPassant(Position origin, Position destination) {
+        moves.add(Move.enPassant(origin, destination));
     }
 
     public boolean canReach(Position position) {
-        return moves.stream().anyMatch(move -> move.destination().equals(position));
+        return moves.stream().anyMatch(move -> move.getDestination().equals(position));
     }
 
     public boolean isEmpty() {
         return moves.isEmpty();
-    }
-
-    public Set<Move> getMoves() {
-        return moves;
     }
 
     public void remove(Move move) {
@@ -44,5 +48,9 @@ public class MoveSet {
 
     public void removeAll(Collection<Move> moves) {
         this.moves.removeAll(moves);
+    }
+
+    public void addMove(Move move) {
+        moves.add(move);
     }
 }
