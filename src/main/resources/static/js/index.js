@@ -1,17 +1,17 @@
 function createGame() {
-    fetch('scacchi/createNewGame', {
-        method: 'POST',
-        headers: {
-            'Player-Token': localStorage.getItem('playerToken')
-        }
+    let lobbyName = encodeURIComponent(document.getElementById('lobbyName').value);
+    let playerName = encodeURIComponent(document.getElementById('playerName').value);
+
+    fetch(`scacchi/lobby/createNewGame?lobbyName=${lobbyName}&playerName=${playerName}`, {
+        method: 'POST'
     }).then(response => {
         if (response.ok) {
             response.json().then(data => {
-                localStorage.setItem('gameId', data.id);
-                window.location.href = 'game.html';
+                localStorage.setItem('playerToken', data.playerToken);
+                window.location.href = 'lobby/'+data.lobbyId;
             });
         } else {
             alert('Errore durante la creazione della partita');
         }
-    }
+    });
 }

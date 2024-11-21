@@ -90,4 +90,8 @@ public class LobbyService {
         }
         return player;
     }
+
+    public String getLobbyInfo(String token, String lobbyId) {
+        return "susamogus"; //TODO: Implement
+    }
 }

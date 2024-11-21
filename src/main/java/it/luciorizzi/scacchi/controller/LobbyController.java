@@ -21,18 +21,18 @@ public class LobbyController {
         this.lobbyService = lobbyService;
     }
 
-    @PostMapping("/createNewGame")
+    @PostMapping("/lobby/createNewGame")
     public ResponseEntity<String> createNewGame(PieceColor color, String lobbyName, String playerName) {
         return ResponseEntity.ok(lobbyService.createNewGame(color, lobbyName, playerName));
     }
 
 
-    @GetMapping("/{lobbyId}/possibleMoves")
+    @GetMapping("/lobby/{lobbyId}/possibleMoves")
     public ResponseEntity<MoveSet> possibleMoves(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId, int row, int col) throws JsonProcessingException {
         return ResponseEntity.ok(lobbyService.getPossibleMoves(token, lobbyId, row, col));
     }
 
-    @GetMapping("/{lobbyId}/move")
+    @GetMapping("/lobby/{lobbyId}/move")
     public ResponseEntity<Boolean> move(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
         if(lobbyService.move(token, lobbyId, fromRow, fromCol, toRow, toCol, promotion)) {
             return ResponseEntity.ok(true);
@@ -40,18 +40,23 @@ public class LobbyController {
         return ResponseEntity.badRequest().body(false);
     }
 
-    @GetMapping("/{lobbyId}/isCheck")
+    @GetMapping("/lobby/{lobbyId}/isCheck")
     public ResponseEntity<Boolean> isCheck(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
         return ResponseEntity.ok(lobbyService.isCheck(token, lobbyId));
     }
 
-    @GetMapping("/{lobbyId}/gameStatus")
+    @GetMapping("/lobby/{lobbyId}/gameStatus")
     public ResponseEntity<GameStatus> gameStatus(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
         return ResponseEntity.ok(lobbyService.getGameStatus(token, lobbyId));
     }
 
-    @GetMapping("/{lobbyId}/getMovesHistory")
+    @GetMapping("/lobby/{lobbyId}/getMovesHistory")
     public ResponseEntity<List<String>> getMovesHistory(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
         return ResponseEntity.ok(lobbyService.getMovesHistory(token, lobbyId));
+    }
+
+    @GetMapping("/lobby/{lobbyId}")
+    public ResponseEntity<String> getLobbyInfo(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
+        return ResponseEntity.ok(lobbyService.getLobbyInfo(token, lobbyId));
     }
 }
