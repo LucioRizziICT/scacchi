@@ -1,0 +1,37 @@
+body {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    overflow: hidden;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Edge */
+}
+
+canvas {
+    z-index: -1;
+    background-color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#sprites {
+    position: absolute;
+    z-index: -100;
+}
+
+.main {
+    width: 80%;
+    padding: 10px;
+    margin: 30px auto auto;
+    border: 3px solid #aa0404;
+    border-radius: 10px;
+    background: rgba(224, 224, 224, 0.93);
+    text-align: center;
+}
+
+h1 {
+    font-size: 3em;
+}

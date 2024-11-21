@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/style1.css">
+    <title>Scacchi - Home</title>
+</head>
+<body>
+<div id="sprites" style="display: none">
+    <img id="rookSprite" src="img/rook.png" alt="pawn" width="60">
+    <img id="kingSprite" src="img/king.png" alt="pawn" width="60">
+    <img id="queenSprite" src="img/queen.png" alt="pawn" width="60">
+    <img id="bishopSprite" src="img/bishop.png" alt="pawn" width="60">
+    <img id="knightSprite" src="img/knight.png" alt="pawn" width="60">
+</div>
+<canvas id="mainCanvas"></canvas>
+
+<div class="main">
+    <div class="container">
+        <h1>SCACCHI</h1>
+        <hr />
+        <br>
+        <h2>Crea nuova lobby:</h2>
+        <form>
+            <input type="text" name="name" placeholder="Nome lobby">
+            <input id="createLobbyButton" type="button" value="Crea">
+        </form>
+    </div>
+</div>
+
+</body>
+<script src="js/canvas.js"></script>
+</html>

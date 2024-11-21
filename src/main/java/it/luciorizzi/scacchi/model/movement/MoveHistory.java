@@ -1,7 +1,9 @@
 package it.luciorizzi.scacchi.model.movement;
 
 import it.luciorizzi.scacchi.model.piece.Piece;
+import it.luciorizzi.scacchi.model.type.GameStatus;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.List;
 @Getter
 public class MoveHistory {
     private final List<MoveHistoryEntry> history = new ArrayList<>();
+    @Setter
+    private GameStatus outcome = null;
 
     public void add(Move move, Piece movedPiece, ThreatType threatType) {
         history.add(new MoveHistoryEntry(move, movedPiece, threatType));
@@ -30,12 +34,25 @@ public class MoveHistory {
         history.clear();
     }
 
-    public void print() {
+    public List<String> getNotation() {
+        List<String> result = new ArrayList<>(history.size());
+        for (MoveHistoryEntry entry : history) {
+            result.add(entry.getNotation());
+        }
+        return result;
+    }
+
+    public String getNotationString() {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < history.size(); i++) {
             if (i % 2 == 0) {
-                System.out.print("\n" + ((i / 2) + 1) + ". ");
+                sb.append("\n").append((i / 2) + 1).append(". ");
             }
-            System.out.print(history.get(i).getNotation() + " ");
+            sb.append(history.get(i).getNotation()).append(" ");
         }
+        if (outcome != null) {
+            sb.append("\n").append(outcome);
+        }
+        return sb.toString();
     }
 }

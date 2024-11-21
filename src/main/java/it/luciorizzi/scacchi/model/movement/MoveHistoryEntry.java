@@ -5,6 +5,9 @@ import it.luciorizzi.scacchi.model.piece.Piece;
 public record MoveHistoryEntry(Move move, Piece movedPiece, ThreatType threatType) {
     public String getNotation() {
         StringBuilder sb = new StringBuilder();
+        if (move.getMoveType() == MoveType.CASTLING) {
+            return move.getDestination().column() == 2 ? "O-O-O" : "O-O";
+        }
         sb.append(movedPiece.getSymbol() == 'P' ? "" : movedPiece.getSymbol());
         sb.append(move.isCapture() ? "x" : "");
         sb.append((char) (move.getDestination().column()+97));

@@ -2,10 +2,7 @@ package it.luciorizzi.scacchi.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.luciorizzi.scacchi.model.movement.Move;
-import it.luciorizzi.scacchi.model.movement.MoveHistory;
-import it.luciorizzi.scacchi.model.movement.Position;
-import it.luciorizzi.scacchi.model.movement.ThreatType;
+import it.luciorizzi.scacchi.model.movement.*;
 import it.luciorizzi.scacchi.model.piece.*;
 import it.luciorizzi.scacchi.model.type.GameStatus;
 import it.luciorizzi.scacchi.model.type.PieceColor;
@@ -21,6 +18,7 @@ public class GameBoard {
     private PieceColor turn = PieceColor.WHITE;
     private Set<Piece> whitePieces = new HashSet<>();
     private Set<Piece> blackPieces = new HashSet<>();
+    @Getter
     private GameStatus gameStatus = GameStatus.ONGOING;
     private Position whiteKingPosition;
     private Position blackKingPosition;
@@ -113,6 +111,10 @@ public class GameBoard {
         blackKingPosition = new Position(7, 4);
     }
 
+    public MoveSet getPossibleMoves(int row, int column) {
+        return getPiece(new Position(row, column)).getPossibleMoves(this);
+    }
+
     public Piece getPiece(Position position) {
         if (position.row() < 0 || position.row() >= ROWS || position.column() < 0 || position.column() >= COLUMNS) {
             return null;
@@ -135,13 +137,23 @@ public class GameBoard {
         return piece.getColor() != color;
     }
 
-    public boolean movePiece(Position origin, Position destination) {
+    public boolean movePiece(int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
+        return movePiece(new Position(fromRow, fromCol), new Position(toRow, toCol), promotion);
+    }
+
+    public boolean movePiece(Position origin, Position destination, Character promotion) {
         Piece movedPiece = getPiece(origin);
         if (movedPiece instanceof Pawn && (destination.row() == 0 || destination.row() == 7)) {
-            return false;
+            if (promotion == null) {
+                return false;
+            }
+            if (isEnemy(destination, movedPiece.getColor())) {
+                return movePiece(Move.promotionCapture(origin, destination, promotion));
+            }
+            return movePiece(Move.promotionMovement(origin, destination, promotion));
         }
         if (isEnemy(destination, movedPiece.getColor())) {
-            return movePiece(Move.capture(origin, destination)); //TODO: THERE CAN ALSO BE A PROMOTION + CAPTURE
+            return movePiece(Move.capture(origin, destination));
         }
         if (movedPiece instanceof Pawn && Math.abs(destination.column() - origin.column()) == 1) {
             return movePiece(Move.enPassant(origin, destination));
@@ -180,11 +192,17 @@ public class GameBoard {
 
     private void executePostMoveOperations(Move move) {
         handleEnPassantable(move);
-        addMoveToHistory(move);
         saveCurrentState();
+        switchTurn();
+        addMoveToHistory(move);
         gameStatus = checkGameStatus();
+        if (gameStatus != GameStatus.ONGOING) {
+            movesHistory.setOutcome(gameStatus);
+        }
+    }
+
+    private void switchTurn() {
         turn = turn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
-        movesHistory.print();
     }
 
     private void addMoveToHistory(Move move) {
