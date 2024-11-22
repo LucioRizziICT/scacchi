@@ -16,6 +16,41 @@ function createGame() {
     });
 }
 
+function refreshLobbies() {
+    fetch('scacchi/lobby/getLobbies', {
+        method: 'GET'
+    }).then(response => {
+        if (response.ok) {
+            response.json().then(data => {
+                if (!data.lobbies || data.lobbies.length === 0) {
+                    document.getElementById('lobbiesList').innerHTML = '<p>Nessuna lobby trovata</p>';
+                    return;
+                }
+                const lobbiesTableBody = document.querySelector('#lobbiesTable tbody');
+                lobbiesTableBody.innerHTML = ''; // Clear existing rows
+                data.lobbies.forEach(lobby => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${lobby.name}</td>
+                        <td>${lobby.playerOne}</td>
+                        <td>${lobby.playerTwo || 'Waiting...'}</td>
+                        <td><button onclick="joinLobby('${lobby.id}')">${lobby.playerTwo ? "Guarda" : "Entra"}</button></td>
+                    `;
+                    lobbiesTableBody.appendChild(row);
+                });
+            });
+        } else {
+            alert('Errore durante il recupero delle lobby');
+        }
+    });
+}
+
+function joinLobby(lobbyId) {
+    // Implement the logic to join a lobby
+}
+
+document.getElementById('refreshLobbiesButton').addEventListener('click', refreshLobbies);
+
 document.addEventListener('wheel', function(event) {
     if (event.ctrlKey) return;
     const mainDiv = document.getElementById('main');

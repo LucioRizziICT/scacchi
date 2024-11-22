@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class LobbyController {
@@ -24,6 +25,11 @@ public class LobbyController {
     @PostMapping("/lobby/createNewGame")
     public ResponseEntity<String> createNewGame(PieceColor color, String lobbyName, String playerName) {
         return ResponseEntity.ok(lobbyService.createNewGame(color, lobbyName, playerName));
+    }
+
+    @GetMapping("/lobby/getLobbies")
+    public ResponseEntity<List<Map<String, Object>>> getLobbies() {
+        return ResponseEntity.ok(lobbyService.getPublicLobbies());
     }
 
 
@@ -55,8 +61,13 @@ public class LobbyController {
         return ResponseEntity.ok(lobbyService.getMovesHistory(token, lobbyId));
     }
 
+    @GetMapping("/lobby/{lobbyId}/getLobbyInfo")
+    public ResponseEntity<String> getLobbyInfo(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId, String password) {
+        return ResponseEntity.ok(lobbyService.getLobbyInfo(token, lobbyId, password));
+    }
+
     @GetMapping("/lobby/{lobbyId}")
-    public ResponseEntity<String> getLobbyInfo(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
-        return ResponseEntity.ok(lobbyService.getLobbyInfo(token, lobbyId));
+    public String getLobby(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
+        return "lobby.html";
     }
 }

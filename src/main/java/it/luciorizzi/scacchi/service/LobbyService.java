@@ -8,6 +8,7 @@ import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.util.RandomToken;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,5 +94,21 @@ public class LobbyService {
 
     public String getLobbyInfo(String token, String lobbyId, String password) {
         return "susamogus"; //TODO: Implement
+    }
+
+    public List<Map<String, Object>> getPublicLobbies() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        lobbies.forEach((id, lobby) -> {
+            if (lobby.isPrivate()) {
+                return;
+            }
+            Map<String, Object> lobbyInfo = new HashMap<>();
+            lobbyInfo.put("id", id);
+            lobbyInfo.put("name", lobby.getName());
+            lobbyInfo.put("playerOne", lobby.getPlayerOne().getName());
+            lobbyInfo.put("playerTwo", lobby.getPlayerTwo() == null ? null : lobby.getPlayerTwo().getName());
+            result.add(lobbyInfo);
+        });
+        return result;
     }
 }
