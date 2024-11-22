@@ -25,13 +25,62 @@ canvas {
 .main {
     width: 80%;
     padding: 10px;
-    margin: 30px auto auto;
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
     border: 3px solid #aa0404;
     border-radius: 10px;
     background: rgba(224, 224, 224, 0.93);
     text-align: center;
+    transition: margin-top 0.5s ease;
 }
 
 h1 {
     font-size: 3em;
+}
+
+/* Style for buttons */
+button {
+    background-color: #aa0404;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #880303;
+}
+
+/* Style for select elements */
+select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    font-size: 16px;
+    margin: 4px 2px;
+}
+
+/* Style for labels */
+label {
+    font-size: 16px;
+    font-weight: bold;
+    display: block;
+    margin: 10px 0 5px;
+}
+
+/* Style for input elements */
+input[type="text"], input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin: 4px 2px;
 }

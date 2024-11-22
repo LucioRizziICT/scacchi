@@ -15,19 +15,42 @@
 </div>
 <canvas id="mainCanvas"></canvas>
 
-<div class="main">
+<div class="main" id="main">
     <div class="container">
         <h1>SCACCHI</h1>
         <hr />
         <br>
         <h2>Crea nuova lobby:</h2>
         <form>
-            <input type="text" name="name" placeholder="Nome lobby">
-            <input id="createLobbyButton" type="button" value="Crea">
+            <label for="lobbyName">Nome lobby:</label>
+            <input type="text" id="lobbyName" name="lobbyName" placeholder="Lobby di Piero..."> <br> <br>
+            <label for="username">Nome Utente:</label>
+            <input type="text" name="username" id="username" placeholder="PieroEater97..."> <br> <br>
+            <label for="password">Password: (facoltativa) </label>
+            <input type="password" name="password" id="password" placeholder="Password..."> <br> <br>
+            <label for="pieceColor">Giocherai con i pezzi:</label>
+            <select id="pieceColor" name="pieceColor">
+                <option value="white">Bianchi</option>
+                <option value="black">Neri</option>
+                <option value="random">Casuale</option>
+            </select> <br> <br>
+            <label for="lobbyType">Tipo di Lobby:</label>
+            <select id="lobbyType" name="lobbyType">
+                <option value="public">Pubblica</option>
+                <option value="private">Privata</option>
+            </select> <br> <br>
+            <button id="createLobbyButton">Crea Lobby</button>
         </form>
+        <hr>
+        <br>
+        <h2>Unisciti ad una lobby:</h2>
+        <button id="refreshLobbiesButton">Aggiorna</button>
+
+
     </div>
 </div>
 
 </body>
 <script src="js/canvas.js"></script>
+<script src="js/index.js"></script>
 </html>

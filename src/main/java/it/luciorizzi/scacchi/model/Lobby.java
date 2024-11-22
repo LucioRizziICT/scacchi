@@ -13,6 +13,10 @@ public class Lobby {
     private Player playerOne = null;
     @Setter
     private Player playerTwo = null;
+    @Setter
+    private String password = null;
+    @Setter
+    private boolean isPrivate = false;
 
     public Lobby(Player playerOne) {
         this.playerOne = playerOne;
