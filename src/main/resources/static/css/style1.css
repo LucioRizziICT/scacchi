@@ -85,3 +85,34 @@ input[type="text"], input[type="password"] {
     margin: 4px 2px;
 }
 
+/* Style for the lobbies table */
+#lobbiesTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+    border: 2px solid #aa0404;
+}
+
+#lobbiesTable th, #lobbiesTable td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+#lobbiesTable th {
+    background-color: #aa0404;
+    color: white;
+}
+
+#lobbiesTable tr:nth-child(odd) {
+    background-color: #f0d9b5;
+}
+
+#lobbiesTable tr:nth-child(even) {
+    background-color: #b58863;
+}
+
+#openLobby {
+    display: none;
+}

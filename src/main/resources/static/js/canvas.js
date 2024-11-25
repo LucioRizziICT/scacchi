@@ -188,6 +188,7 @@ function animate() {
     }
 
 }
+
 function drawGrid() {
     const gridSize = 60; // Size of each square
     for (let x = 0; x < canvas.width; x += gridSize) {

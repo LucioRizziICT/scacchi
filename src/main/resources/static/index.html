@@ -24,14 +24,14 @@
         <form>
             <label for="lobbyName">Nome lobby:</label>
             <input type="text" id="lobbyName" name="lobbyName" placeholder="Lobby di Piero..."> <br> <br>
-            <label for="username">Nome Utente:</label>
-            <input type="text" name="username" id="username" placeholder="PieroEater97..."> <br> <br>
+            <label for="playerName">Nome Giocatore:</label>
+            <input type="text" name="playerName" id="playerName" placeholder="PieroEater97..."> <br> <br>
             <label for="password">Password: (facoltativa) </label>
             <input type="password" name="password" id="password" placeholder="Password..."> <br> <br>
             <label for="pieceColor">Giocherai con i pezzi:</label>
             <select id="pieceColor" name="pieceColor">
-                <option value="white">Bianchi</option>
-                <option value="black">Neri</option>
+                <option value="WHITE">Bianchi</option>
+                <option value="BLACK">Neri</option>
                 <option value="random">Casuale</option>
             </select> <br> <br>
             <label for="lobbyType">Tipo di Lobby:</label>
@@ -39,10 +39,23 @@
                 <option value="public">Pubblica</option>
                 <option value="private">Privata</option>
             </select> <br> <br>
-            <button id="createLobbyButton">Crea Lobby</button>
+            <button id="createLobbyButton" type="button">Crea Lobby</button>
         </form>
         <hr>
-        <br>
+
+
+        <div id="openLobby">
+            <h2>Partita in corso:</h2>
+            <div id="gameInfo">
+                <p>Nome Lobby: <span id="openLobbyName"></span></p>
+                <p>Avversario: <span id="opponentName"></span></p>
+                <button id="leaveGameButton" disabled>Abbandona Partita</button>
+                <button id="goToLobbyButton">Torna alla Lobby</button>
+            </div>
+            <br>
+            <hr>
+        </div>
+
         <h2>Unisciti ad una lobby:</h2>
         <button id="refreshLobbiesButton">Aggiorna</button>
         <div id="lobbiesList" class="lobbiesList">
@@ -57,6 +70,18 @@
                 </thead>
                 <tbody>
                     <!-- Lobby rows will be inserted here -->
+                <tr>
+                    <td>${lobby.name}</td>
+                    <td>${lobby.playerOne}</td>
+                    <td>${lobby.playerTwo || 'Waiting...'}</td>
+                    <td><button onclick="joinLobby('${lobby.id}')">${lobby.playerTwo ? "Guarda" : "Entra"}</button></td>
+                </tr>
+                <tr>
+                    <td>${lobby.name}</td>
+                    <td>${lobby.playerOne}</td>
+                    <td>${lobby.playerTwo || 'Waiting...'}</td>
+                    <td><button onclick="joinLobby('${lobby.id}')">${lobby.playerTwo ? "Guarda" : "Entra"}</button></td>
+                </tr>
                 </tbody>
             </table>
         </div>
