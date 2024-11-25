@@ -18,13 +18,16 @@ public class LobbyService {
     private final Map<String, Lobby> lobbies = new HashMap<>();
     private final Map<String, Player> tokens = new HashMap<>();
 
-    public String createNewGame(PieceColor playerOneColor, String lobbyName, String playerName) {
+    public Map<String, Object> createNewGame(String lobbyName, String playerName, String password, PieceColor playerOneColor, String lobbyType) {
         String lobbyId = RandomToken.generateToken(12);
         Player playerOne = new Player(playerName, lobbyId, playerOneColor);
-        lobbies.put(lobbyId, new Lobby(playerOne, lobbyName));
+        lobbies.put(lobbyId, new Lobby(lobbyName, playerOne, password, lobbyType.equals("private")));
         String token = RandomToken.generateToken(32);
         tokens.put(token, playerOne);
-        return token;
+        Map<String, Object> result = new HashMap<>();
+        result.put("lobbyId", lobbyId);
+        result.put("playerToken", token);
+        return result;
     }
 
     //TODO: Get lobby by id from user

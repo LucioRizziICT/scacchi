@@ -1,7 +1,5 @@
 package it.luciorizzi.scacchi.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.movement.*;
 import it.luciorizzi.scacchi.model.piece.*;
 import it.luciorizzi.scacchi.model.type.GameStatus;

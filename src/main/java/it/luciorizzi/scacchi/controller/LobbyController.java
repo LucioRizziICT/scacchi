@@ -7,7 +7,10 @@ import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.service.LobbyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +26,8 @@ public class LobbyController {
     }
 
     @PostMapping("/lobby/createNewGame")
-    public ResponseEntity<String> createNewGame(PieceColor color, String lobbyName, String playerName) {
-        return ResponseEntity.ok(lobbyService.createNewGame(color, lobbyName, playerName));
+    public ResponseEntity<Map<String, Object>> createNewGame(String lobbyName, String playerName, String password, PieceColor color, String lobbyType) {
+        return ResponseEntity.ok(lobbyService.createNewGame(lobbyName, playerName, password, color, lobbyType));
     }
 
     @GetMapping("/lobby/getLobbies")
@@ -38,7 +41,7 @@ public class LobbyController {
         return ResponseEntity.ok(lobbyService.getPossibleMoves(token, lobbyId, row, col));
     }
 
-    @GetMapping("/lobby/{lobbyId}/move")
+    @PostMapping("/lobby/{lobbyId}/move")
     public ResponseEntity<Boolean> move(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
         if(lobbyService.move(token, lobbyId, fromRow, fromCol, toRow, toCol, promotion)) {
             return ResponseEntity.ok(true);
@@ -67,7 +70,9 @@ public class LobbyController {
     }
 
     @GetMapping("/lobby/{lobbyId}")
-    public String getLobby(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
-        return "lobby.html";
+    public ModelAndView getLobby(@PathVariable("lobbyId") String lobbyId) {
+        ModelAndView modelAndView = new ModelAndView("lobby");
+        modelAndView.addObject("lobbyId", lobbyId);
+        return modelAndView;
     }
 }

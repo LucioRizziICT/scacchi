@@ -18,14 +18,11 @@ public class Lobby {
     @Setter
     private boolean isPrivate = false;
 
-    public Lobby(Player playerOne) {
+    public Lobby(String name, Player playerOne, String password, boolean isPrivate) {
+        this.name = name == null || name.isEmpty() ? "Lobby di " + playerOne.getName() : name;
         this.playerOne = playerOne;
-        this.name = "Lobby di " + playerOne.getName();
-    }
-
-    public Lobby(Player playerOne, String name) {
-        this.name = name;
-        this.playerOne = playerOne;
+        this.password = password;
+        this.isPrivate = isPrivate;
     }
 
     public boolean isFull() {
