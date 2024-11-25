@@ -1,0 +1,10 @@
+spring:
+    thymeleaf: # Thymeleaf
+        mode: HTML
+        encoding: UTF-8
+        prefix: file:src/main/resources/templates/
+    application:
+        name: scacchi
+server:
+    servlet:
+        context-path: /scacchi
