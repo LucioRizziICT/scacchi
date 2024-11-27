@@ -12,13 +12,37 @@ function createGame() {
     }).then(response => {
         if (response.ok) {
             response.json().then(data => {
-                localStorage.setItem('playerToken', data.playerToken);
+                setCookie('playerToken', data.playerToken, 30);
+
                 window.location.href = 'lobby/'+data.lobbyId;
             });
         } else {
             alert('Errore durante la creazione della partita');
         }
     });
+}
+
+function setCookie(cname, cvalue, exdays) {
+    const d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    let expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
 }
 
 document.getElementById('createLobbyButton').addEventListener('click', createGame);
@@ -71,10 +95,11 @@ document.addEventListener('wheel', function(event) {
 });
 
 function getOpenLobby() {
-    let playerToken = localStorage.getItem('playerToken');
-    if (playerToken) {
-        fetch('lobby/getOpenLobby?playerToken=' + playerToken, {
-            method: 'GET'
+    let playerToken = getCookie('playerToken');
+    if (playerToken !== "") {
+        fetch('lobby/getOpenLobby', {
+            method: 'GET',
+            credentials: 'same-origin',
         }).then(response => {
             if (response.ok) {
                 response.json().then(data => {
@@ -86,7 +111,7 @@ function getOpenLobby() {
                     document.getElementById('openLobby').style.display = "block";
                 });
             } else if (response.status === 404) {
-                localStorage.removeItem('playerToken');
+                setCookie('playerToken', '', -1);
             } else {
                 alert('Errore durante il recupero della lobby aperta');
             }

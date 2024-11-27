@@ -37,12 +37,12 @@ public class LobbyController {
 
 
     @GetMapping("/lobby/{lobbyId}/possibleMoves")
-    public ResponseEntity<MoveSet> possibleMoves(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId, int row, int col) throws JsonProcessingException {
+    public ResponseEntity<MoveSet> possibleMoves(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int row, int col) throws JsonProcessingException {
         return ResponseEntity.ok(lobbyService.getPossibleMoves(token, lobbyId, row, col));
     }
 
     @PostMapping("/lobby/{lobbyId}/move")
-    public ResponseEntity<Boolean> move(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
+    public ResponseEntity<Boolean> move(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
         if(lobbyService.move(token, lobbyId, fromRow, fromCol, toRow, toCol, promotion)) {
             return ResponseEntity.ok(true);
         }
@@ -50,29 +50,27 @@ public class LobbyController {
     }
 
     @GetMapping("/lobby/{lobbyId}/isCheck")
-    public ResponseEntity<Boolean> isCheck(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
+    public ResponseEntity<Boolean> isCheck(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) {
         return ResponseEntity.ok(lobbyService.isCheck(token, lobbyId));
     }
 
     @GetMapping("/lobby/{lobbyId}/gameStatus")
-    public ResponseEntity<GameStatus> gameStatus(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
+    public ResponseEntity<GameStatus> gameStatus(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) {
         return ResponseEntity.ok(lobbyService.getGameStatus(token, lobbyId));
     }
 
     @GetMapping("/lobby/{lobbyId}/getMovesHistory")
-    public ResponseEntity<List<String>> getMovesHistory(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId) {
+    public ResponseEntity<List<String>> getMovesHistory(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) {
         return ResponseEntity.ok(lobbyService.getMovesHistory(token, lobbyId));
     }
 
     @GetMapping("/lobby/{lobbyId}/getLobbyInfo")
-    public ResponseEntity<String> getLobbyInfo(@RequestHeader("Player-Token") String token, @PathVariable("lobbyId") String lobbyId, String password) {
+    public ResponseEntity<String> getLobbyInfo(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, String password) {
         return ResponseEntity.ok(lobbyService.getLobbyInfo(token, lobbyId, password));
     }
 
     @GetMapping("/lobby/{lobbyId}")
-    public ModelAndView getLobby(@PathVariable("lobbyId") String lobbyId) {
-        ModelAndView modelAndView = new ModelAndView("lobby");
-        modelAndView.addObject("lobbyId", lobbyId);
-        return modelAndView;
+    public ModelAndView getLobbyInfo(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) throws JsonProcessingException {
+        return lobbyService.getLobbyView(token, lobbyId);
     }
 }
