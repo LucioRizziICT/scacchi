@@ -31,6 +31,16 @@ public class GameBoard {
         saveCurrentState();
     }
 
+    public char[][] getBoard() {
+        char[][] board = new char[ROWS][COLUMNS];
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                board[i][j] = this.board[i][j].getColorSymbol();
+            }
+        }
+        return board;
+    }
+
     public void reset() {
         turn = PieceColor.WHITE;
         initialize();

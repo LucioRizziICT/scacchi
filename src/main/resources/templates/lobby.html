@@ -3,14 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../board/board.css">
-    <title>Lobby - TODO: METTERE NOME LOBBY</title>
+    <title th:text="'Lobby - ' + ${lobbyName}"></title>
 </head>
 <body>
 
-<h1>Provola</h1>
+<div id="lobbyInfo">
+    <p id="currentPosition" th:text="${gameBoard}"></p>
+    <p id="playerColor" th:text="${playerColor}"></p>
+</div>
 <div id="main">
+    <h1 th:text="${playerToken}"></h1>
     <canvas id="chessboardCanvas"></canvas>
 </div>
+
 </body>
+<script>
+    const retrievedPosition = document.getElementById("currentPosition").innerText;
+    const retrievedPlayerColor = document.getElementById("playerColor").innerText;
+</script>
 <script src="../board/chessboard.js"></script>
 </html>

@@ -7,6 +7,15 @@ canvas.addEventListener('mousemove', function(event) {
     mouseY = event.offsetY;
 });
 
+const PIECES_NAME = {
+    'p': 'pawn',
+    'r': 'rook',
+    'n': 'knight',
+    'b': 'bishop',
+    'q': 'queen',
+    'k': 'king'
+};
+
 const boardSize = 8;
 let canvasSize = Math.min(window.innerWidth, window.innerHeight) - 20;
 canvasSize = canvasSize - (canvasSize % boardSize);
@@ -20,7 +29,7 @@ ctx.strokeStyle = 'rgba(255,95,38,0.8)';
 const whiteCellColor = '#f0d9b5';
 const blackCellColor = '#b58863';
 
-const playerColor = 'w';
+const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
 
 let arrowStart = {};
 let heldPiece = null;
@@ -114,6 +123,8 @@ canvas.addEventListener('mouseup', function(event) {
             } else {
                 if (board.movableSpots[`${row}_${col}`]) {
                     movePiece(selectedPiece, row, col);
+                    selectedPiece = null;
+                    board.movableSpots = {};
                 } else {
                     selectedPiece = null;
                     board.movableSpots = {};
@@ -121,7 +132,14 @@ canvas.addEventListener('mouseup', function(event) {
             }
         } else {
             if (selectedPiece != null) {
-
+                if (board.movableSpots[`${row}_${col}`]) {
+                    movePiece(selectedPiece, row, col);
+                    selectedPiece = null;
+                    board.movableSpots = {};
+                } else {
+                    selectedPiece = null;
+                    board.movableSpots = {};
+                }
             }
         }
 
@@ -144,13 +162,14 @@ canvas.addEventListener('mouseup', function(event) {
 });
 
 function movePiece(piece, row, col) {
-    const url = `${window.location.pathname}/move?fromRow=${piece.row}&fromCol=${piece.col}&toRow=${row}&toCol=${col}`;
+
+    const from = getCorrectedPosition(piece.row, piece.col);
+    const to = getCorrectedPosition(row, col);
+    const url = `${window.location.pathname}/move?fromRow=${from.row}&fromCol=${from.col}&toRow=${to.row}&toCol=${to.col}`;
 
     fetch(url, {
         method: 'POST',
-        headers: {
-            'Player-Token': localStorage.getItem('playerToken')
-        }
+        credentials: 'same-origin',
     }).then(response => {
         if (response.ok) {
             response.json().then(data => {
@@ -159,6 +178,9 @@ function movePiece(piece, row, col) {
                 piece.row = row;
                 piece.col = col;
                 //TODO: AGGIUNGERE ALTRE MOSSE
+
+                board.movableSpots = {};
+                board.drawPieces();
             });
         }
     });
@@ -183,9 +205,7 @@ function getMovableSpots(row, col) {
     const url = `${window.location.pathname}/possibleMoves?row=${correctedPosition.row}&col=${correctedPosition.col}`;
     fetch(url, {
         method: 'GET',
-        headers: {
-            'Player-Token': localStorage.getItem('playerToken')
-        }
+        credentials: 'same-origin',
     }).then(response => {
         if (response.ok) {
             response.json().then(data => {
@@ -208,7 +228,7 @@ function Piece(row, col, color, type) {
     this.type = type;
     this.held = false;
     this.img = new Image();
-    this.img.src = `/scacchi/board/sprites/${this.color}_${this.type}.png`;
+    this.img.src = `/scacchi/board/sprites/${this.color}_${PIECES_NAME[this.type]}.png`;
     this.img.onload = () => {
         this.draw();
     }
@@ -237,7 +257,7 @@ function Chessboard () {
     this.drawPieces = function () {
         drawBackground();
         for (let i = 0; i < boardSize; i++) {
-            for (let j = 0; j < boardSize; j++) {
+            for (let j = boardSize - 1; j >= 0; j--) {
                 if (this.board[i][j] != null) {
                     this.board[i][j].draw();
                 }
@@ -254,21 +274,19 @@ function Chessboard () {
     }
 
     this.initialize = function () {
-        const initialSetup = [
-            ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'],
-            ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
-            [null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
-            ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
-            ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook']
-        ];
+        const initialSetup = JSON.parse(retrievedPosition);
 
         for (let i = 0; i < boardSize; i++) {
             for (let j = 0; j < boardSize; j++) {
-                if (initialSetup[i][j] != null) {
-                    this.board[i][j] = new Piece(i, j, i < 2 ? 'b' : 'w', initialSetup[i][j]);
+                const char = initialSetup[i][j];
+                if (char === ' ') {
+                    const position = getCorrectedPosition(i, j);
+                    this.board[position.row][position.col] = null;
+                } else {
+                    const color = char === char.toUpperCase() ? 'w' : 'b';
+                    const type = char.toLowerCase();
+                    const position = getCorrectedPosition(i, j);
+                    this.board[position.row][position.col] = new Piece(position.row, position.col, color, type);
                 }
             }
         }

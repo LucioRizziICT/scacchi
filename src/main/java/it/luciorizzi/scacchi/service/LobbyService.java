@@ -1,12 +1,16 @@
 package it.luciorizzi.scacchi.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.Lobby;
 import it.luciorizzi.scacchi.model.Player;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.GameStatus;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.util.RandomToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +19,10 @@ import java.util.Map;
 
 @Service
 public class LobbyService {
+
+    @Autowired
+    ObjectMapper objectMapper;
+
     private final Map<String, Lobby> lobbies = new HashMap<>();
     private final Map<String, Player> tokens = new HashMap<>();
 
@@ -48,11 +56,17 @@ public class LobbyService {
 
     public MoveSet getPossibleMoves(String token, String lobbyId, int row, int col) {
         Lobby lobby = getValidLobby(token, lobbyId);
+        if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
+            throw new IllegalArgumentException("Not your turn");
+        }
         return lobby.getGameBoard().getPossibleMoves(row, col);
     }
 
     public boolean move(String token, String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
         Lobby lobby = getValidLobby(token, lobbyId);
+        if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
+            throw new IllegalArgumentException("Not your turn");
+        }
         return lobby.getGameBoard().movePiece(fromRow, fromCol, toRow, toCol, promotion);
     }
 
@@ -113,5 +127,15 @@ public class LobbyService {
             result.add(lobbyInfo);
         });
         return result;
+    }
+
+    public ModelAndView getLobbyView(String token, String lobbyId) throws JsonProcessingException {
+        Lobby lobby = getValidLobby(token, lobbyId);
+        ModelAndView modelAndView = new ModelAndView("lobby");
+        modelAndView.addObject("playerColor", getPlayer(token).getColor());
+        modelAndView.addObject("lobbyName", lobby.getName());
+        modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
+        modelAndView.addObject("playerToken", token);
+        return modelAndView;
     }
 }

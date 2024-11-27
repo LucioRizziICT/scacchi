@@ -10,16 +10,16 @@ public class Lobby {
     @Setter
     private String name;
     @Setter
-    private Player playerOne = null;
+    private Player playerOne;
     @Setter
     private Player playerTwo = null;
     @Setter
-    private String password = null;
+    private String password;
     @Setter
-    private boolean isPrivate = false;
+    private boolean isPrivate;
 
     public Lobby(String name, Player playerOne, String password, boolean isPrivate) {
-        this.name = name == null || name.isEmpty() ? "Lobby di " + playerOne.getName() : name;
+        this.name = ( name == null || name.isEmpty() ) ? "Lobby di " + playerOne.getName() : name;
         this.playerOne = playerOne;
         this.password = password;
         this.isPrivate = isPrivate;
