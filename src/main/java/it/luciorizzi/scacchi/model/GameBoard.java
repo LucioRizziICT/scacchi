@@ -379,6 +379,12 @@ public class GameBoard {
 
     private boolean isCheckInternal(Position kingPosition, PieceColor color) {
         for (Piece piece : getPieces(color.opposite())) {
+            if (piece instanceof King) {
+                if (Math.abs(piece.getPosition().row() - kingPosition.row()) <= 1 && Math.abs(piece.getPosition().column() - kingPosition.column()) <= 1) {
+                    return true;
+                }
+                continue;
+            }
             if (piece.couldReach(this, kingPosition)) {
                 return true;
             }

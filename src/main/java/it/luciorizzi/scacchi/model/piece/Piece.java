@@ -103,8 +103,8 @@ public abstract class Piece {
         return getPossibleMoves(gameBoard).canReach(position);
     }
 
-    public boolean couldReach(GameBoard gameBoard, Position kingPosition) {
-        return getPossibleMovesInternal(gameBoard).canReach(kingPosition);
+    public boolean couldReach(GameBoard gameBoard, Position position) {
+        return getPossibleMovesInternal(gameBoard).canReach(position);
     }
 
     public char getColorSymbol() {

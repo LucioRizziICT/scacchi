@@ -39,7 +39,7 @@ public class King extends Piece {
                 }
             }
         }
-        if (neverMoved) {
+        if (neverMoved && !gameBoard.isCheck()) {
             Position leftRook = new Position(position.row(), 0);
             if (gameBoard.getPiece(leftRook) instanceof Rook && ((Rook) gameBoard.getPiece(leftRook)).hasNeverMoved()) {
                 boolean canCastle = true;
