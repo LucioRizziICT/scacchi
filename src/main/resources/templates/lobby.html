@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../board/board.css">
     <title th:text="'Lobby - ' + ${lobbyName}"></title>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 </head>
 <body>
 
 <div id="lobbyInfo">
     <p id="currentPosition" th:text="${gameBoard}"></p>
     <p id="playerColor" th:text="${playerColor}"></p>
+    <p id="lobbyId" th:text="${lobbyId}"></p>
+    <p id="playerToken" th:text="${playerToken}"></p>
 </div>
 <div id="main">
     <h1 th:text="${playerToken}"></h1>
@@ -20,6 +23,12 @@
 <script>
     const retrievedPosition = document.getElementById("currentPosition").innerText;
     const retrievedPlayerColor = document.getElementById("playerColor").innerText;
+    const retrievedlobbyId = document.getElementById("lobbyId").innerText;
+    const retrievedPlayerToken = document.getElementById("playerToken").innerText;
 </script>
 <script src="../board/chessboard.js"></script>
+<script src="../board/chessboardsocket.js"></script>
+<script>
+    window.onload = stompClient.activate();
+</script>
 </html>

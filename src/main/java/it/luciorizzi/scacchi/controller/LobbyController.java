@@ -64,13 +64,13 @@ public class LobbyController {
         return ResponseEntity.ok(lobbyService.getMovesHistory(token, lobbyId));
     }
 
-    @GetMapping("/lobby/{lobbyId}/getLobbyInfo")
-    public ResponseEntity<String> getLobbyInfo(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, String password) {
-        return ResponseEntity.ok(lobbyService.getLobbyInfo(token, lobbyId, password));
-    }
-
     @GetMapping("/lobby/{lobbyId}")
     public ModelAndView getLobbyInfo(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) throws JsonProcessingException {
         return lobbyService.getLobbyView(token, lobbyId);
+    }
+
+    @PostMapping("/lobby/{lobbyId}/join")
+    public ResponseEntity<String> joinLobby(@PathVariable("lobbyId") String lobbyId, String playerName, String password) {
+        return ResponseEntity.ok(lobbyService.joinLobby(lobbyId, playerName, password));
     }
 }

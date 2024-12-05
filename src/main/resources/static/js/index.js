@@ -113,7 +113,7 @@ function getOpenLobby() {
             } else if (response.status === 404) {
                 setCookie('playerToken', '', -1);
             } else {
-                alert('Errore durante il recupero della lobby aperta');
+                /*alert('Errore durante il recupero della lobby aperta');*/
             }
         });
     }

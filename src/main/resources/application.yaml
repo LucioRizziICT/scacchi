@@ -8,3 +8,4 @@ spring:
 server:
     servlet:
         context-path: /scacchi
+logging.level.org.springframework.web: DEBUG

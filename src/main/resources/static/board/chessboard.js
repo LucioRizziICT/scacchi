@@ -35,6 +35,8 @@ let arrowStart = {};
 let heldPiece = null;
 let selectedPiece = null;
 
+let kingPosition = { row: 0, col: 0 };
+let checked = false;
 function drawArrow(fromy, fromx, toy, tox){
     //variables to be used when creating the arrow
     var headlen = 10;
@@ -165,25 +167,30 @@ function movePiece(piece, row, col) {
 
     const from = getCorrectedPosition(piece.row, piece.col);
     const to = getCorrectedPosition(row, col);
-    const url = `${window.location.pathname}/move?fromRow=${from.row}&fromCol=${from.col}&toRow=${to.row}&toCol=${to.col}`;
 
-    fetch(url, {
-        method: 'POST',
-        credentials: 'same-origin',
-    }).then(response => {
-        if (response.ok) {
-            response.json().then(data => {
-                board.board[row][col] = piece;
-                board.board[piece.row][piece.col] = null;
-                piece.row = row;
-                piece.col = col;
-                //TODO: AGGIUNGERE ALTRE MOSSE
+    sendSocketMove(from.row, from.col, to.row, to.col);
+    board.movableSpots = {};
+    board.drawPieces();
+}
 
-                board.movableSpots = {};
-                board.drawPieces();
-            });
+function applyMove(fromRow, fromCol, toRow, toCol, isCheck) {
+    const from = getCorrectedPosition(fromRow, fromCol);
+    const to = getCorrectedPosition(toRow, toCol);
+
+    board.board[to.row][to.col] = board.board[from.row][from.col];
+    board.board[from.row][from.col] = null;
+    board.board[to.row][to.col].row = to.row;
+    board.board[to.row][to.col].col = to.col;
+    checked = isCheck;
+    if (board.board[to.row][to.col].color === playerColor) {
+        checked = false;
+        if (board.board[to.row][to.col].type === 'k') {
+            kingPosition = {row: to.row, col: to.col};
         }
-    });
+    }
+
+    //TODO: AGGIUNGERE ALTRE MOSSE
+    board.drawPieces();
 }
 
 canvas.addEventListener('contextmenu', function(event) {
@@ -268,7 +275,7 @@ function Chessboard () {
             const [row, col] = spot.split('_');
             ctx.beginPath();
             ctx.arc(col * cellSize + cellSize / 2, row * cellSize + cellSize / 2, cellSize / 6, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(68,68,68,0.5)';
+            ctx.fillStyle = 'rgb(135,135,135)';
             ctx.fill();
         }
     }
@@ -286,6 +293,9 @@ function Chessboard () {
                     const color = char === char.toUpperCase() ? 'w' : 'b';
                     const type = char.toLowerCase();
                     const position = getCorrectedPosition(i, j);
+                    if (type === 'k' && color === playerColor) {
+                        kingPosition = { row: position.row, col: position.col };
+                    }
                     this.board[position.row][position.col] = new Piece(position.row, position.col, color, type);
                 }
             }
@@ -299,6 +309,12 @@ function drawBackground() {
             ctx.fillStyle = (i + j) % 2 === 0 ? whiteCellColor : blackCellColor;
             ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
         }
+    }
+    if (checked) {
+        ctx.beginPath();
+        ctx.arc(kingPosition.col * cellSize + cellSize / 2, kingPosition.row * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(221,1,1,0.73)';
+        ctx.fill();
     }
 }
 

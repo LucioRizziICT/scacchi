@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../css/style1.css">
+    <title th:text="'Join ' + ${lobbyName}"></title>
+</head>
+<body>
+<div id="sprites" style="display: none">
+    <img id="rookSprite" src="../img/rook.png" alt="pawn" width="60">
+    <img id="kingSprite" src="../img/king.png" alt="pawn" width="60">
+    <img id="queenSprite" src="../img/queen.png" alt="pawn" width="60">
+    <img id="bishopSprite" src="../img/bishop.png" alt="pawn" width="60">
+    <img id="knightSprite" src="../img/knight.png" alt="pawn" width="60">
+</div>
+<canvas id="mainCanvas"></canvas>
+
+<div class="main" id="main">
+    <form>
+        <label for="playerName">Nome giocatore:</label>
+        <input type="text" id="playerName" name="playerName">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+        <br>
+        <button type="button" id="joinLobbyButton">Entra</button>
+    </form>
+</div>
+</body>
+<script src="../js/joinLobby.js"></script>
+<script src="../js/canvas.js"></script>
+</html>

@@ -42,10 +42,13 @@ public class LobbyService {
 
     //TODO: Get lobby info by lobby id
 
-    private String joinLobby(String lobbyId, String playerName) {
+    public String joinLobby(String lobbyId, String playerName, String password) {
         Lobby lobby = getLobby(lobbyId);
+        if (lobby.getPassword() != null && !lobby.getPassword().equals(password)) {
+            throw new IllegalArgumentException("Wrong password");
+        }
         if (lobby.isFull()) {
-            return null;
+            throw new IllegalArgumentException("Lobby is full");
         }
         Player playerTwo = new Player(playerName, lobbyId, lobby.getPlayerOne().getColor().opposite());
         lobby.setPlayerTwo(playerTwo);
@@ -109,10 +112,6 @@ public class LobbyService {
         return player;
     }
 
-    public String getLobbyInfo(String token, String lobbyId, String password) {
-        return "susamogus"; //TODO: Implement
-    }
-
     public List<Map<String, Object>> getPublicLobbies() {
         List<Map<String, Object>> result = new ArrayList<>();
         lobbies.forEach((id, lobby) -> {
@@ -130,12 +129,23 @@ public class LobbyService {
     }
 
     public ModelAndView getLobbyView(String token, String lobbyId) throws JsonProcessingException {
-        Lobby lobby = getValidLobby(token, lobbyId);
-        ModelAndView modelAndView = new ModelAndView("lobby");
-        modelAndView.addObject("playerColor", getPlayer(token).getColor());
-        modelAndView.addObject("lobbyName", lobby.getName());
-        modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
-        modelAndView.addObject("playerToken", token);
-        return modelAndView;
+        Lobby lobby = getLobby(lobbyId);
+        Player presentPlayer = tokens.get(token);
+        if ( token != null && presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
+            ModelAndView modelAndView = new ModelAndView("lobby");
+            modelAndView.addObject("playerColor", getPlayer(token).getColor());
+            modelAndView.addObject("lobbyName", lobby.getName());
+            modelAndView.addObject("lobbyId", lobbyId);
+            modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
+            modelAndView.addObject("playerToken", token);
+            return modelAndView;
+        }
+        if (!lobby.isFull()) {
+            ModelAndView modelAndView = new ModelAndView("joinLobby");
+            modelAndView.addObject("lobbyName", lobby.getName());
+            modelAndView.addObject("lobbyId", lobbyId);
+            return modelAndView;
+        }
+        return new ModelAndView("lobbyFull"); //TODO: Implement
     }
 }
