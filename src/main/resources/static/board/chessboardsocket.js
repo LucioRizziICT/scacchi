@@ -7,7 +7,7 @@ stompClient.onConnect = function(frame) {
     stompClient.subscribe('/topic/lobby/' + retrievedlobbyId, function(message) {
         console.log('Received: ' + message.body);
         const data = JSON.parse(message.body);
-        applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.isCheck);
+        applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck);
     });
 };
 
@@ -19,19 +19,19 @@ stompClient.onStompError = function(frame) {
     console.log('Error: ' + frame);
 };
 
-function sendSocketMove(fromRow, fromCol, toRow, toCol) {
+function sendSocketMove(fromRow, fromCol, toRow, toCol, promotion) {
     const messageWrapper = {
         playerToken: retrievedPlayerToken,
         message: {
             fromRow: fromRow,
             fromCol: fromCol,
             toRow: toRow,
-            toCol: toCol
+            toCol: toCol,
+            promotion: promotion || null
         }
     }
     stompClient.publish({
         destination: '/app/lobby/' + retrievedlobbyId + '/move',
         body: JSON.stringify(messageWrapper)
     });
-    console.log("Message sent!");
 }

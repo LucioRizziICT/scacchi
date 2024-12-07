@@ -2,6 +2,16 @@
     border: 4px solid #aa0404;
 }
 
+body {
+    background-color: #d4ab8d;
+    margin: 0;
+}
+
 #lobbyInfo {
     display: none;
+}
+
+#chessboardDiv {
+    height: 70vh;
+    width: 70vw;
 }

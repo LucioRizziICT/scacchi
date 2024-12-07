@@ -17,12 +17,15 @@ const PIECES_NAME = {
 };
 
 const boardSize = 8;
-let canvasSize = Math.min(window.innerWidth, window.innerHeight) - 20;
+
+canvas.height = 100;
+canvas.size = 100;
+let canvasSize = Math.min(canvas.parentElement.clientHeight, canvas.parentElement.clientWidth);
 canvasSize = canvasSize - (canvasSize % boardSize);
 canvas.height = canvasSize;
 canvas.width = canvasSize;
 const ctx = canvas.getContext('2d');
-let cellSize = canvasSize / boardSize;
+const cellSize = canvasSize / boardSize;
 ctx.lineWidth = cellSize / 6;
 ctx.strokeStyle = 'rgba(255,95,38,0.8)';
 
@@ -34,9 +37,10 @@ const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
 let arrowStart = {};
 let heldPiece = null;
 let selectedPiece = null;
-
+let choosingPromotion = false;
 let kingPosition = { row: 0, col: 0 };
 let checked = false;
+
 function drawArrow(fromy, fromx, toy, tox){
     //variables to be used when creating the arrow
     var headlen = 10;
@@ -76,6 +80,9 @@ function drawArrow(fromy, fromx, toy, tox){
 }
 
 canvas.addEventListener('mousedown', function(event) {
+    if (choosingPromotion) {
+
+    }
     if (event.button === 0) {
 
         board.drawPieces();
@@ -109,6 +116,10 @@ canvas.addEventListener('mousedown', function(event) {
 });
 
 canvas.addEventListener('mouseup', function(event) {
+    if (choosingPromotion) {
+        choosingPromotion = false;
+        return;
+    }
     if (event.button === 0) {
         const x = event.offsetX;
         const y = event.offsetY;
@@ -165,31 +176,64 @@ canvas.addEventListener('mouseup', function(event) {
 
 function movePiece(piece, row, col) {
 
+    let promotion = null;
+
+    if (piece.type === 'p' && (row === 0 || row === boardSize - 1)) {
+         promotion = prompt('Promote to: (q, r, n, b)');
+        if (promotion === null) {
+            return;
+        }
+    }
+
     const from = getCorrectedPosition(piece.row, piece.col);
     const to = getCorrectedPosition(row, col);
 
-    sendSocketMove(from.row, from.col, to.row, to.col);
+    sendSocketMove(from.row, from.col, to.row, to.col, promotion);
     board.movableSpots = {};
     board.drawPieces();
 }
 
-function applyMove(fromRow, fromCol, toRow, toCol, isCheck) {
+function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     const from = getCorrectedPosition(fromRow, fromCol);
     const to = getCorrectedPosition(toRow, toCol);
+    const movedPiece = board.board[from.row][from.col];
+    const destinationPiece = board.board[to.row][to.col];
 
     board.board[to.row][to.col] = board.board[from.row][from.col];
     board.board[from.row][from.col] = null;
-    board.board[to.row][to.col].row = to.row;
-    board.board[to.row][to.col].col = to.col;
+    movedPiece.row = to.row;
+    movedPiece.col = to.col;
     checked = isCheck;
-    if (board.board[to.row][to.col].color === playerColor) {
+    if (movedPiece.color === playerColor) {
         checked = false;
-        if (board.board[to.row][to.col].type === 'k') {
+        if (movedPiece.type === 'k') {
             kingPosition = {row: to.row, col: to.col};
         }
     }
 
-    //TODO: AGGIUNGERE ALTRE MOSSE
+    //en passant
+    if (movedPiece.type === 'p' && Math.abs(from.col - to.col) === 1 && destinationPiece == null) {
+        board.board[to.row - (movedPiece.color === playerColor ? 1 : -1)][to.col] = null;
+    }
+
+    //castling
+    if (movedPiece.type === 'k' && Math.abs(from.col - to.col) === 2) {
+        if (movedPiece.col > 4) {
+            board.board[to.row][to.col - 1] = board.board[to.row][7];
+            board.board[to.row][7] = null;
+            board.board[to.row][to.col - 1].col = to.col - 1;
+        } else {
+            board.board[to.row][to.col + 1] = board.board[to.row][0];
+            board.board[to.row][0] = null;
+            board.board[to.row][to.col + 1].col = to.col + 1;
+        }
+    }
+
+    //promotion
+    if (movedPiece.type === 'p' && (to.row === 0 || to.row === boardSize - 1)) {
+        movedPiece.type = promotion;
+    }
+
     board.drawPieces();
 }
 
@@ -275,7 +319,7 @@ function Chessboard () {
             const [row, col] = spot.split('_');
             ctx.beginPath();
             ctx.arc(col * cellSize + cellSize / 2, row * cellSize + cellSize / 2, cellSize / 6, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgb(135,135,135)';
+            ctx.fillStyle = 'rgba(151,151,151,0.7)';
             ctx.fill();
         }
     }

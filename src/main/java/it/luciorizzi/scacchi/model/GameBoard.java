@@ -265,11 +265,11 @@ public class GameBoard {
 
     private void promotePiece(Move move, Piece movedPiece) {
         Piece promotedPiece = switch (move.getPromotion()) {
-            case 'Q' -> new Queen(turn, move.getDestination());
-            case 'R' -> new Rook(turn, move.getDestination());
-            case 'N' -> new Knight(turn, move.getDestination());
-            case 'B' -> new Bishop(turn, move.getDestination());
-            default -> null;
+            case 'q' -> new Queen(turn, move.getDestination());
+            case 'r' -> new Rook(turn, move.getDestination());
+            case 'n' -> new Knight(turn, move.getDestination());
+            case 'b' -> new Bishop(turn, move.getDestination());
+            default -> throw new IllegalArgumentException("Invalid promotion character");
         };
         getPieces(turn).remove(movedPiece);
         getPieces(turn).add(promotedPiece);

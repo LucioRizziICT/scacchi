@@ -7,8 +7,6 @@ import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.service.LobbyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -35,23 +33,9 @@ public class LobbyController {
         return ResponseEntity.ok(lobbyService.getPublicLobbies());
     }
 
-
     @GetMapping("/lobby/{lobbyId}/possibleMoves")
     public ResponseEntity<MoveSet> possibleMoves(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int row, int col) throws JsonProcessingException {
         return ResponseEntity.ok(lobbyService.getPossibleMoves(token, lobbyId, row, col));
-    }
-
-    @PostMapping("/lobby/{lobbyId}/move")
-    public ResponseEntity<Boolean> move(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
-        if(lobbyService.move(token, lobbyId, fromRow, fromCol, toRow, toCol, promotion)) {
-            return ResponseEntity.ok(true);
-        }
-        return ResponseEntity.badRequest().body(false);
-    }
-
-    @GetMapping("/lobby/{lobbyId}/isCheck")
-    public ResponseEntity<Boolean> isCheck(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) {
-        return ResponseEntity.ok(lobbyService.isCheck(token, lobbyId));
     }
 
     @GetMapping("/lobby/{lobbyId}/gameStatus")
