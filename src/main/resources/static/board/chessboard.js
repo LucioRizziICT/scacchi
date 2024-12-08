@@ -13,7 +13,10 @@ const COLORS =  {
     BLACK_CELL: '#b58863',
     ARROW: 'rgba(255,95,38,0.8)',
     CHECK: 'rgba(221,1,1,0.73)',
-    MOVABLE_SPOT: 'rgba(151,151,151,0.7)'
+    MOVABLE_SPOT: 'rgba(189,189,189,0.78)',
+    LAYER: 'rgba(33,33,33,0.56)',
+    PROMOTION_MENU_BG: '#f1e6d4',
+    BLACK: '#000000'
 };
 
 const canvas = document.getElementById('chessboardCanvas');
@@ -43,7 +46,7 @@ canvas.addEventListener('mousemove', function(event) {
 
 canvas.addEventListener('mousedown', function(event) {
     if (choosingPromotion) {
-
+        return;
     }
     if (event.button === 0) {
 
@@ -92,29 +95,21 @@ canvas.addEventListener('mouseup', function(event) {
         if (heldPiece != null) {
             heldPiece.held = false;
             heldPiece = null;
+        }
 
-            if (selectedPiece.row === row && selectedPiece.col === col) {
-
+        if (selectedPiece != null && selectedPiece.row === row && selectedPiece.col === col) {
+            if (board.movableSpots[`${row}_${col}`]) {
+                if (selectedPiece.type === 'p' && row === 0) {
+                    choosingPromotion = true;
+                    drawPromotionMenu(row);
+                    return;
+                }
+                movePiece(selectedPiece, row, col);
+                selectedPiece = null;
+                board.movableSpots = {};
             } else {
-                if (board.movableSpots[`${row}_${col}`]) {
-                    movePiece(selectedPiece, row, col);
-                    selectedPiece = null;
-                    board.movableSpots = {};
-                } else {
-                    selectedPiece = null;
-                    board.movableSpots = {};
-                }
-            }
-        } else {
-            if (selectedPiece != null) {
-                if (board.movableSpots[`${row}_${col}`]) {
-                    movePiece(selectedPiece, row, col);
-                    selectedPiece = null;
-                    board.movableSpots = {};
-                } else {
-                    selectedPiece = null;
-                    board.movableSpots = {};
-                }
+                selectedPiece = null;
+                board.movableSpots = {};
             }
         }
 
@@ -180,16 +175,7 @@ function drawArrow(fromy, fromx, toy, tox){
     ctx.restore();
 }
 
-function movePiece(piece, row, col) {
-
-    let promotion = null;
-
-    if (piece.type === 'p' && (row === 0 || row === BOARD_SIZE - 1)) {
-         promotion = prompt('Promote to: (q, r, n, b)');
-        if (promotion === null) {
-            return;
-        }
-    }
+function movePiece(piece, row, col, promotion) {
 
     const from = getCorrectedPosition(piece.row, piece.col);
     const to = getCorrectedPosition(row, col);
@@ -198,6 +184,8 @@ function movePiece(piece, row, col) {
     board.movableSpots = {};
     board.draw();
 }
+
+
 
 function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     const from = getCorrectedPosition(fromRow, fromCol);
@@ -257,8 +245,6 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
         }
     }
 }
-
-
 
 function getMovableSpots(row, col) {
     const correctedPosition = getCorrectedPosition(row, col);
@@ -388,9 +374,44 @@ function Chessboard () {
 }
 
 const board = new Chessboard();
-
 board.initialize();
 board.draw();
+
+
+function drawPromotionMenu(col) {
+    board.draw();
+    ctx.fillStyle = COLORS.LAYER;
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+    const promotionPieces = ['q', 'r', 'b', 'n'];
+    ctx.fillStyle = COLORS.PROMOTION_MENU_BG;
+    ctx.fillRect( col * cellSize, 0, cellSize, cellSize * (promotionPieces.length + 1) );
+
+    for (let i = 0; i < promotionPieces.length; i++) {
+        const piece = promotionPieces[i];
+        const img = new Image();
+        img.src = `/scacchi/board/sprites/${playerColor}_${PIECES_NAME[piece]}.png`;
+        img.onload = () => {
+            ctx.drawImage(img, col * cellSize, i * cellSize, cellSize, cellSize);
+        }
+    }
+
+    ctx.fillStyle = COLORS.BLACK;
+    drawX(col * cellSize + cellSize / 4, (promotionPieces.length) * cellSize + cellSize / 4, cellSize / 2, cellSize / 2);
+
+    function drawX(x, y, width, height) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + width, y + height);
+        ctx.moveTo(x + width, y);
+        ctx.lineTo(x, y + height);
+        ctx.strokeStyle = COLORS.BLACK;
+        ctx.lineWidth = cellSize / 10;
+        ctx.stroke();
+    }
+}
+
+
 
 function animate() {
     requestAnimationFrame(animate);
@@ -399,10 +420,15 @@ function animate() {
     }
     board.draw();
     drawHeldPiece();
+
+    function drawHeldPiece() {
+        ctx.drawImage(heldPiece.img, mouseX - cellSize / 2, mouseY - cellSize / 2, cellSize, cellSize);
+    }
 }
 
-function drawHeldPiece() {
-    ctx.drawImage(heldPiece.img, mouseX - cellSize / 2, mouseY - cellSize / 2, cellSize, cellSize);
-}
+
 
 animate();
+setTimeout(() => {
+    drawPromotionMenu(2);
+}, 1000);
