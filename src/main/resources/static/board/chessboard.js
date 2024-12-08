@@ -1,12 +1,4 @@
-const canvas = document.getElementById('chessboardCanvas');
-let mouseX = 0;
-let mouseY = 0;
-
-canvas.addEventListener('mousemove', function(event) {
-    mouseX = event.offsetX;
-    mouseY = event.offsetY;
-});
-
+// CONSTANTS
 const PIECES_NAME = {
     'p': 'pawn',
     'r': 'rook',
@@ -15,23 +7,23 @@ const PIECES_NAME = {
     'q': 'queen',
     'k': 'king'
 };
+const BOARD_SIZE = 8;
+const COLORS =  {
+    WHITE_CELL: '#f0d9b5',
+    BLACK_CELL: '#b58863',
+    ARROW: 'rgba(255,95,38,0.8)',
+    CHECK: 'rgba(221,1,1,0.73)',
+    MOVABLE_SPOT: 'rgba(151,151,151,0.7)'
+};
 
-const boardSize = 8;
+const canvas = document.getElementById('chessboardCanvas');
 
-canvas.height = 100;
-canvas.size = 100;
-let canvasSize = Math.min(canvas.parentElement.clientHeight, canvas.parentElement.clientWidth);
-canvasSize = canvasSize - (canvasSize % boardSize);
+const divSpace = Math.min(canvas.parentElement.clientHeight, canvas.parentElement.clientWidth);
+const canvasSize = divSpace - (divSpace % BOARD_SIZE);
 canvas.height = canvasSize;
 canvas.width = canvasSize;
-const ctx = canvas.getContext('2d');
-const cellSize = canvasSize / boardSize;
-ctx.lineWidth = cellSize / 6;
-ctx.strokeStyle = 'rgba(255,95,38,0.8)';
 
-const whiteCellColor = '#f0d9b5';
-const blackCellColor = '#b58863';
-
+const cellSize = canvasSize / BOARD_SIZE;
 const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
 
 let arrowStart = {};
@@ -41,43 +33,13 @@ let choosingPromotion = false;
 let kingPosition = { row: 0, col: 0 };
 let checked = false;
 
-function drawArrow(fromy, fromx, toy, tox){
-    //variables to be used when creating the arrow
-    var headlen = 10;
-    var angle = Math.atan2(toy-fromy,tox-fromx);
+let mouseX = 0;
+let mouseY = 0;
 
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,95,38,0.8)';
-
-    //starting path of the arrow from the start square to the end square
-    //and drawing the stroke
-    ctx.beginPath();
-    ctx.moveTo(fromx, fromy);
-    ctx.lineTo(tox, toy);
-    ctx.lineWidth = cellSize / 6;
-    ctx.stroke();
-
-    //starting a new path from the head of the arrow to one of the sides of
-    //the point
-    ctx.beginPath();
-    ctx.moveTo(tox, toy);
-    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
-        toy-headlen*Math.sin(angle-Math.PI/7));
-
-    //path from the side point of the arrow, to the other side point
-    ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),
-        toy-headlen*Math.sin(angle+Math.PI/7));
-
-    //path from the side point back to the tip of the arrow, and then
-    //again to the opposite side point
-    ctx.lineTo(tox, toy);
-    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
-        toy-headlen*Math.sin(angle-Math.PI/7));
-
-    //draws the paths created above
-    ctx.stroke();
-    ctx.restore();
-}
+canvas.addEventListener('mousemove', function(event) {
+    mouseX = event.offsetX;
+    mouseY = event.offsetY;
+});
 
 canvas.addEventListener('mousedown', function(event) {
     if (choosingPromotion) {
@@ -85,7 +47,7 @@ canvas.addEventListener('mousedown', function(event) {
     }
     if (event.button === 0) {
 
-        board.drawPieces();
+        board.draw();
 
         const x = event.offsetX;
         const y = event.offsetY;
@@ -156,7 +118,7 @@ canvas.addEventListener('mouseup', function(event) {
             }
         }
 
-        board.drawPieces();
+        board.draw();
     }
     if (event.button === 2) {
         const x = event.offsetX;
@@ -174,11 +136,55 @@ canvas.addEventListener('mouseup', function(event) {
     }
 });
 
+canvas.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+});
+
+
+const ctx = canvas.getContext('2d');
+
+function drawArrow(fromy, fromx, toy, tox){
+    const headLength = cellSize / 3;
+    const angle = Math.atan2(toy-fromy,tox-fromx);
+
+    ctx.save();
+    ctx.strokeStyle = COLORS.ARROW;
+    ctx.lineWidth = cellSize / 6;
+
+    //starting path of the arrow from the start square to the end square
+    //and drawing the stroke
+    ctx.beginPath();
+    ctx.moveTo(fromx, fromy);
+    ctx.lineTo(tox, toy);
+    ctx.stroke();
+
+    //starting a new path from the head of the arrow to one of the sides of
+    //the point
+    ctx.beginPath();
+    ctx.moveTo(tox, toy);
+    ctx.lineTo(tox-headLength*Math.cos(angle-Math.PI/7),
+        toy-headLength*Math.sin(angle-Math.PI/7));
+
+    //path from the side point of the arrow, to the other side point
+    ctx.lineTo(tox-headLength*Math.cos(angle+Math.PI/7),
+        toy-headLength*Math.sin(angle+Math.PI/7));
+
+    //path from the side point back to the tip of the arrow, and then
+    //again to the opposite side point
+    ctx.lineTo(tox, toy);
+    ctx.lineTo(tox-headLength*Math.cos(angle-Math.PI/7),
+        toy-headLength*Math.sin(angle-Math.PI/7));
+
+    //draws the paths created above
+    ctx.stroke();
+    ctx.restore();
+}
+
 function movePiece(piece, row, col) {
 
     let promotion = null;
 
-    if (piece.type === 'p' && (row === 0 || row === boardSize - 1)) {
+    if (piece.type === 'p' && (row === 0 || row === BOARD_SIZE - 1)) {
          promotion = prompt('Promote to: (q, r, n, b)');
         if (promotion === null) {
             return;
@@ -190,67 +196,71 @@ function movePiece(piece, row, col) {
 
     sendSocketMove(from.row, from.col, to.row, to.col, promotion);
     board.movableSpots = {};
-    board.drawPieces();
+    board.draw();
 }
 
 function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     const from = getCorrectedPosition(fromRow, fromCol);
     const to = getCorrectedPosition(toRow, toCol);
+
     const movedPiece = board.board[from.row][from.col];
     const destinationPiece = board.board[to.row][to.col];
 
-    board.board[to.row][to.col] = board.board[from.row][from.col];
-    board.board[from.row][from.col] = null;
-    movedPiece.row = to.row;
-    movedPiece.col = to.col;
-    checked = isCheck;
-    if (movedPiece.color === playerColor) {
-        checked = false;
-        if (movedPiece.type === 'k') {
-            kingPosition = {row: to.row, col: to.col};
+    handleMovement();
+    handleCheck();
+    handleEnPassant();
+    handleCastling();
+    handlePromotion();
+
+    board.draw();
+
+    function handleMovement() {
+        board.board[to.row][to.col] = board.board[from.row][from.col];
+        board.board[from.row][from.col] = null;
+        movedPiece.row = to.row;
+        movedPiece.col = to.col;
+    }
+
+    function handleCheck() {
+        checked = isCheck;
+        if (movedPiece.color === playerColor) {
+            checked = false;
+            if (movedPiece.type === 'k') {
+                kingPosition = {row: to.row, col: to.col};
+            }
         }
     }
 
-    //en passant
-    if (movedPiece.type === 'p' && Math.abs(from.col - to.col) === 1 && destinationPiece == null) {
-        board.board[to.row - (movedPiece.color === playerColor ? 1 : -1)][to.col] = null;
-    }
-
-    //castling
-    if (movedPiece.type === 'k' && Math.abs(from.col - to.col) === 2) {
-        if (movedPiece.col > 4) {
-            board.board[to.row][to.col - 1] = board.board[to.row][7];
-            board.board[to.row][7] = null;
-            board.board[to.row][to.col - 1].col = to.col - 1;
-        } else {
-            board.board[to.row][to.col + 1] = board.board[to.row][0];
-            board.board[to.row][0] = null;
-            board.board[to.row][to.col + 1].col = to.col + 1;
+    function handleEnPassant() {
+        if (movedPiece.type === 'p' && Math.abs(from.col - to.col) === 1 && destinationPiece == null) {
+            board.board[to.row + (movedPiece.color === playerColor ? 1 : -1)][to.col] = null;
         }
     }
 
-    //promotion
-    if (movedPiece.type === 'p' && (to.row === 0 || to.row === boardSize - 1)) {
-        movedPiece.type = promotion;
+    function handleCastling() {
+        if (movedPiece.type === 'k' && Math.abs(from.col - to.col) === 2) {
+            if (movedPiece.col > 4) {
+                board.board[to.row][to.col - 1] = board.board[to.row][7];
+                board.board[to.row][7] = null;
+                board.board[to.row][to.col - 1].col = to.col - 1;
+            } else {
+                board.board[to.row][to.col + 1] = board.board[to.row][0];
+                board.board[to.row][0] = null;
+                board.board[to.row][to.col + 1].col = to.col + 1;
+            }
+        }
     }
 
-    board.drawPieces();
-}
-
-canvas.addEventListener('contextmenu', function(event) {
-    event.preventDefault();
-});
-
-function getCorrectedPosition(row, col) {
-    if (playerColor === 'w') {
-        return { row: boardSize - 1 - row, col: col };
-    } else {
-        return { row: row, col: boardSize - 1 - col };
+    function handlePromotion() {
+        if (movedPiece.type === 'p' && (to.row === 0 || to.row === BOARD_SIZE - 1)) {
+            movedPiece.type = promotion;
+        }
     }
 }
+
+
 
 function getMovableSpots(row, col) {
-
     const correctedPosition = getCorrectedPosition(row, col);
 
     const url = `${window.location.pathname}/possibleMoves?row=${correctedPosition.row}&col=${correctedPosition.col}`;
@@ -266,10 +276,18 @@ function getMovableSpots(row, col) {
                     const correctedSpot = getCorrectedPosition(move.destination.row, move.destination.column);
                     board.movableSpots[`${correctedSpot.row}_${correctedSpot.col}`] = move.moveType;
                 });
-                board.drawPieces();
+                board.draw();
             });
         }
     });
+}
+
+function getCorrectedPosition(row, col) {
+    if (playerColor === 'w') {
+        return { row: BOARD_SIZE - 1 - row, col: col };
+    } else {
+        return { row: row, col: BOARD_SIZE - 1 - col };
+    }
 }
 
 function Piece(row, col, color, type) {
@@ -298,28 +316,50 @@ function Piece(row, col, color, type) {
 }
 
 function Chessboard () {
-    this.board = new Array(boardSize);
-    for (let i = 0; i < boardSize; i++) {
-        this.board[i] = new Array(boardSize);
+    this.board = new Array(BOARD_SIZE);
+    for (let i = 0; i < BOARD_SIZE; i++) {
+        this.board[i] = new Array(BOARD_SIZE);
     }
 
     this.movableSpots = {};
 
+    this.draw = function () {
+        this.drawBackground();
+        this.drawPieces();
+        this.drawMovableSpots();
+    }
+
+    this.drawBackground = function () {
+        for (let i = 0; i < BOARD_SIZE; i++) {
+            for (let j = 0; j < BOARD_SIZE; j++) {
+                ctx.fillStyle = (i + j) % 2 === 0 ? COLORS.WHITE_CELL : COLORS.BLACK_CELL;
+                ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+            }
+        }
+        if (checked) {
+            ctx.beginPath();
+            ctx.arc(kingPosition.col * cellSize + cellSize / 2, kingPosition.row * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
+            ctx.fillStyle = COLORS.CHECK;
+            ctx.fill();
+        }
+    }
+
     this.drawPieces = function () {
-        drawBackground();
-        for (let i = 0; i < boardSize; i++) {
-            for (let j = boardSize - 1; j >= 0; j--) {
+        for (let i = 0; i < BOARD_SIZE; i++) {
+            for (let j = BOARD_SIZE - 1; j >= 0; j--) {
                 if (this.board[i][j] != null) {
                     this.board[i][j].draw();
                 }
             }
         }
+    }
 
+    this.drawMovableSpots = function () {
         for (let spot in this.movableSpots) {
             const [row, col] = spot.split('_');
             ctx.beginPath();
             ctx.arc(col * cellSize + cellSize / 2, row * cellSize + cellSize / 2, cellSize / 6, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(151,151,151,0.7)';
+            ctx.fillStyle = COLORS.MOVABLE_SPOT;
             ctx.fill();
         }
     }
@@ -327,8 +367,8 @@ function Chessboard () {
     this.initialize = function () {
         const initialSetup = JSON.parse(retrievedPosition);
 
-        for (let i = 0; i < boardSize; i++) {
-            for (let j = 0; j < boardSize; j++) {
+        for (let i = 0; i < BOARD_SIZE; i++) {
+            for (let j = 0; j < BOARD_SIZE; j++) {
                 const char = initialSetup[i][j];
                 if (char === ' ') {
                     const position = getCorrectedPosition(i, j);
@@ -347,32 +387,22 @@ function Chessboard () {
     }
 }
 
-function drawBackground() {
-    for (let i = 0; i < boardSize; i++) {
-        for (let j = 0; j < boardSize; j++) {
-            ctx.fillStyle = (i + j) % 2 === 0 ? whiteCellColor : blackCellColor;
-            ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-        }
-    }
-    if (checked) {
-        ctx.beginPath();
-        ctx.arc(kingPosition.col * cellSize + cellSize / 2, kingPosition.row * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
-        ctx.fillStyle = 'rgba(221,1,1,0.73)';
-        ctx.fill();
-    }
-}
-
 const board = new Chessboard();
 
 board.initialize();
-board.drawPieces();
+board.draw();
 
 function animate() {
     requestAnimationFrame(animate);
     if(heldPiece == null) {
         return;
     }
-    board.drawPieces();
+    board.draw();
+    drawHeldPiece();
+}
+
+function drawHeldPiece() {
     ctx.drawImage(heldPiece.img, mouseX - cellSize / 2, mouseY - cellSize / 2, cellSize, cellSize);
 }
+
 animate();
