@@ -13,8 +13,9 @@ const COLORS =  {
     WHITE_CELL: '#f0d9b5',
     BLACK_CELL: '#b58863',
     ARROW: 'rgba(255,95,38,0.8)',
+    ARROW2: 'rgba(30,165,228,0.8)',
     CHECK: 'rgba(221,1,1,0.73)',
-    MOVABLE_SPOT: 'rgba(189,189,189,0.78)',
+    MOVABLE_SPOT: 'rgba(217,217,217,0.82)',
     LAYER: 'rgba(33,33,33,0.56)',
     PROMOTION_MENU_BG: '#f1e6d4',
     BLACK: '#000000'
@@ -142,7 +143,7 @@ canvas.addEventListener('mouseup', function(event) {
         if (arrowStart.row === centerRow && arrowStart.col === centerCol) {
             return;
         }
-        drawArrow(arrowStart.row, arrowStart.col, centerRow, centerCol);
+        drawArrow(arrowStart.row, arrowStart.col, centerRow, centerCol, event.ctrlKey ? COLORS.ARROW2 : COLORS.ARROW);
     }
 });
 
@@ -153,12 +154,12 @@ canvas.addEventListener('contextmenu', function(event) {
 
 const ctx = canvas.getContext('2d');
 
-function drawArrow(fromy, fromx, toy, tox){
+function drawArrow(fromy, fromx, toy, tox, color){
     const headLength = cellSize / 3;
     const angle = Math.atan2(toy-fromy,tox-fromx);
 
     ctx.save();
-    ctx.strokeStyle = COLORS.ARROW;
+    ctx.strokeStyle = color;
     ctx.lineWidth = cellSize / 6;
 
     //starting path of the arrow from the start square to the end square
@@ -371,6 +372,9 @@ function Chessboard () {
             ctx.arc(col * cellSize + cellSize / 2, row * cellSize + cellSize / 2, cellSize / 6, 0, 2 * Math.PI);
             ctx.fillStyle = COLORS.MOVABLE_SPOT;
             ctx.fill();
+            ctx.strokeStyle = COLORS.BLACK;
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
     }
 
