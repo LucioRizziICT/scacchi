@@ -7,6 +7,7 @@ const PIECES_NAME = {
     'q': 'queen',
     'k': 'king'
 };
+const PROMOTION_PIECES = ['q', 'r', 'b', 'n'];
 const BOARD_SIZE = 8;
 const COLORS =  {
     WHITE_CELL: '#f0d9b5',
@@ -32,7 +33,7 @@ const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
 let arrowStart = {};
 let heldPiece = null;
 let selectedPiece = null;
-let choosingPromotion = false;
+let choosingPromotionCol = false;
 let kingPosition = { row: 0, col: 0 };
 let checked = false;
 
@@ -45,7 +46,7 @@ canvas.addEventListener('mousemove', function(event) {
 });
 
 canvas.addEventListener('mousedown', function(event) {
-    if (choosingPromotion) {
+    if (choosingPromotionCol !== false) {
         return;
     }
     if (event.button === 0) {
@@ -81,8 +82,21 @@ canvas.addEventListener('mousedown', function(event) {
 });
 
 canvas.addEventListener('mouseup', function(event) {
-    if (choosingPromotion) {
-        choosingPromotion = false;
+    if (choosingPromotionCol !== false) {
+        const x = event.offsetX;
+        const y = event.offsetY;
+
+        const row = Math.floor(y / cellSize);
+        const col = Math.floor(x / cellSize);
+
+        if(col === choosingPromotionCol) {
+            if( row < PROMOTION_PIECES.length ) {
+                movePiece(selectedPiece, 0, choosingPromotionCol, PROMOTION_PIECES[row]);
+            }
+        }
+
+        choosingPromotionCol = false;
+        board.draw();
         return;
     }
     if (event.button === 0) {
@@ -97,13 +111,14 @@ canvas.addEventListener('mouseup', function(event) {
             heldPiece = null;
         }
 
-        if (selectedPiece != null && selectedPiece.row === row && selectedPiece.col === col) {
+        if ( selectedPiece != null && (selectedPiece.row !== row || selectedPiece.col !== col) ) {
             if (board.movableSpots[`${row}_${col}`]) {
                 if (selectedPiece.type === 'p' && row === 0) {
-                    choosingPromotion = true;
-                    drawPromotionMenu(row);
+                    choosingPromotionCol = col;
+                    drawPromotionMenu(col);
                     return;
                 }
+                console.log(selectedPiece);
                 movePiece(selectedPiece, row, col);
                 selectedPiece = null;
                 board.movableSpots = {};
@@ -175,7 +190,7 @@ function drawArrow(fromy, fromx, toy, tox){
     ctx.restore();
 }
 
-function movePiece(piece, row, col, promotion) {
+function movePiece(piece, row, col, promotion = null) {
 
     const from = getCorrectedPosition(piece.row, piece.col);
     const to = getCorrectedPosition(row, col);
@@ -241,7 +256,7 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
 
     function handlePromotion() {
         if (movedPiece.type === 'p' && (to.row === 0 || to.row === BOARD_SIZE - 1)) {
-            movedPiece.type = promotion;
+            movedPiece.changeType(promotion);
         }
     }
 }
@@ -297,6 +312,15 @@ function Piece(row, col, color, type) {
         }
         else {
             ctx.drawImage(this.img, this.col * cellSize, this.row * cellSize, cellSize, cellSize);
+        }
+    }
+
+    this.changeType = function (newType) {
+        this.type = newType;
+        this.img = new Image();
+        this.img.src = `/scacchi/board/sprites/${this.color}_${PIECES_NAME[this.type]}.png`;
+        this.img.onload = () => {
+            this.draw();
         }
     }
 }
@@ -383,12 +407,12 @@ function drawPromotionMenu(col) {
     ctx.fillStyle = COLORS.LAYER;
     ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-    const promotionPieces = ['q', 'r', 'b', 'n'];
-    ctx.fillStyle = COLORS.PROMOTION_MENU_BG;
-    ctx.fillRect( col * cellSize, 0, cellSize, cellSize * (promotionPieces.length + 1) );
 
-    for (let i = 0; i < promotionPieces.length; i++) {
-        const piece = promotionPieces[i];
+    ctx.fillStyle = COLORS.PROMOTION_MENU_BG;
+    ctx.fillRect( col * cellSize, 0, cellSize, cellSize * (PROMOTION_PIECES.length + 1) );
+
+    for (let i = 0; i < PROMOTION_PIECES.length; i++) {
+        const piece = PROMOTION_PIECES[i];
         const img = new Image();
         img.src = `/scacchi/board/sprites/${playerColor}_${PIECES_NAME[piece]}.png`;
         img.onload = () => {
@@ -397,7 +421,7 @@ function drawPromotionMenu(col) {
     }
 
     ctx.fillStyle = COLORS.BLACK;
-    drawX(col * cellSize + cellSize / 4, (promotionPieces.length) * cellSize + cellSize / 4, cellSize / 2, cellSize / 2);
+    drawX(col * cellSize + cellSize / 4, (PROMOTION_PIECES.length) * cellSize + cellSize / 4, cellSize / 2, cellSize / 2);
 
     function drawX(x, y, width, height) {
         ctx.beginPath();
@@ -426,9 +450,4 @@ function animate() {
     }
 }
 
-
-
 animate();
-setTimeout(() => {
-    drawPromotionMenu(2);
-}, 1000);

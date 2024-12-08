@@ -19,7 +19,7 @@ stompClient.onStompError = function(frame) {
     console.log('Error: ' + frame);
 };
 
-function sendSocketMove(fromRow, fromCol, toRow, toCol, promotion) {
+function sendSocketMove(fromRow, fromCol, toRow, toCol, promotion = null) {
     const messageWrapper = {
         playerToken: retrievedPlayerToken,
         message: {
