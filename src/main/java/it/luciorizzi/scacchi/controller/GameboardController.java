@@ -1,7 +1,9 @@
 package it.luciorizzi.scacchi.controller;
 
+import it.luciorizzi.scacchi.model.message.GameoverMessage;
 import it.luciorizzi.scacchi.model.message.MessageWrapper;
 import it.luciorizzi.scacchi.model.message.MoveMessage;
+import it.luciorizzi.scacchi.model.type.GameStatus;
 import it.luciorizzi.scacchi.service.LobbyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -18,12 +20,20 @@ public class GameboardController {
     private LobbyService lobbyService;
 
     @MessageMapping("/lobby/{lobbyId}/move")
-    public void provola(@DestinationVariable String lobbyId, MessageWrapper<MoveMessage> messageWrapper) {
+    public void move(@DestinationVariable String lobbyId, MessageWrapper<MoveMessage> messageWrapper) {
         MoveMessage moveMessage = messageWrapper.message();
         if (lobbyService.move(messageWrapper.playerToken(), lobbyId, moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion())) {
             Boolean isCheck = lobbyService.isCheck(messageWrapper.playerToken(), lobbyId);
             MoveMessage response = new MoveMessage(moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion(), isCheck);
-            simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId, response);
+            socketSendMove(lobbyId, response);
+            GameStatus gameStatus = lobbyService.getGameStatus(messageWrapper.playerToken(), lobbyId);
+            if (gameStatus.isEndStatus()) {
+                simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", new GameoverMessage(gameStatus, "Game ended"));
+            }
         }
+    }
+
+    private void socketSendMove(String lobbyId, MoveMessage response) {
+        simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/move", response);
     }
 }

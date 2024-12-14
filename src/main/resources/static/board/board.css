@@ -1,9 +1,9 @@
 #chessboardCanvas {
-    border: 4px solid #aa0404;
+    border: 4px solid #940404;
 }
 
 body {
-    background-color: #d4ab8d;
+    background-color: #e4bb9c;
     margin: 0;
 }
 
@@ -11,7 +11,33 @@ body {
     display: none;
 }
 
+.flex-container {
+    display: flex;
+    flex-direction: row;
+}
+
 #chessboardDiv {
-    height: 70vh;
-    width: 70vw;
+    width: 100%;
+    height: 90vh;
+    margin: 10px;
+}
+
+#chessboardInfo {
+    width: 100%;
+    height: 90vh;
+    border-left: 2px solid #150707;
+}
+
+@media (max-width: 800px) {
+    #chessboardDiv {
+        height: 50vh;
+    }
+    #chessboardInfo {
+        height: 50vh;
+        border-left: none;
+        border-top: 2px solid #150707;
+    }
+    .flex-container {
+        flex-direction: column;
+    }
 }

@@ -3,11 +3,13 @@ const stompClient = new StompJs.Client({
 });
 
 stompClient.onConnect = function(frame) {
-    console.log('Connected: ' + frame);
-    stompClient.subscribe('/topic/lobby/' + retrievedlobbyId, function(message) {
-        console.log('Received: ' + message.body);
+    stompClient.subscribe('/topic/lobby/' + retrievedlobbyId + '/move', function(message) {
         const data = JSON.parse(message.body);
         applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck);
+    });
+    stompClient.subscribe('/topic/lobby/' + retrievedlobbyId + '/gameover', function(message) {
+        const data = JSON.parse(message.body);
+        applyGameOver(data);
     });
 };
 

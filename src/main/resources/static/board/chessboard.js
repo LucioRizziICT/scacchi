@@ -23,12 +23,17 @@ const COLORS =  {
 
 const canvas = document.getElementById('chessboardCanvas');
 
-const divSpace = Math.min(canvas.parentElement.clientHeight, canvas.parentElement.clientWidth);
-const canvasSize = divSpace - (divSpace % BOARD_SIZE);
-canvas.height = canvasSize;
-canvas.width = canvasSize;
+let cellSize;
+setCanvasSize();
 
-const cellSize = canvasSize / BOARD_SIZE;
+function setCanvasSize() {
+    const divSpace = Math.min(canvas.parentElement.clientHeight - 20, canvas.parentElement.clientWidth - 20); //TODO: 20 is the sum of the margins, make it dynamic
+    const canvasSize = divSpace - (divSpace % BOARD_SIZE);
+    canvas.height = canvasSize;
+    canvas.width = canvasSize;
+    cellSize = canvasSize / BOARD_SIZE;
+}
+
 const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
 
 let arrowStart = {};
@@ -37,6 +42,7 @@ let selectedPiece = null;
 let choosingPromotionCol = false;
 let kingPosition = { row: 0, col: 0 };
 let checked = false;
+let gameover = false;
 
 let mouseX = 0;
 let mouseY = 0;
@@ -47,6 +53,9 @@ canvas.addEventListener('mousemove', function(event) {
 });
 
 canvas.addEventListener('mousedown', function(event) {
+    if (gameover)
+        return;
+
     if (choosingPromotionCol !== false) {
         return;
     }
@@ -83,12 +92,15 @@ canvas.addEventListener('mousedown', function(event) {
 });
 
 canvas.addEventListener('mouseup', function(event) {
-    if (choosingPromotionCol !== false) {
-        const x = event.offsetX;
-        const y = event.offsetY;
+    if (gameover)
+        return;
 
-        const row = Math.floor(y / cellSize);
-        const col = Math.floor(x / cellSize);
+    const x = event.offsetX;
+    const y = event.offsetY;
+
+    const row = Math.floor(y / cellSize);
+    const col = Math.floor(x / cellSize);
+    if (choosingPromotionCol !== false) {
 
         if(col === choosingPromotionCol) {
             if( row < PROMOTION_PIECES.length ) {
@@ -100,13 +112,8 @@ canvas.addEventListener('mouseup', function(event) {
         board.draw();
         return;
     }
+
     if (event.button === 0) {
-        const x = event.offsetX;
-        const y = event.offsetY;
-
-        const row = Math.floor(y / cellSize);
-        const col = Math.floor(x / cellSize);
-
         if (heldPiece != null) {
             heldPiece.held = false;
             heldPiece = null;
@@ -119,7 +126,6 @@ canvas.addEventListener('mouseup', function(event) {
                     drawPromotionMenu(col);
                     return;
                 }
-                console.log(selectedPiece);
                 movePiece(selectedPiece, row, col);
                 selectedPiece = null;
                 board.movableSpots = {};
@@ -130,16 +136,10 @@ canvas.addEventListener('mouseup', function(event) {
         }
 
         board.draw();
-    }
-    if (event.button === 2) {
-        const x = event.offsetX;
-        const y = event.offsetY;
-
-        const row = Math.floor(y / cellSize);
-        const col = Math.floor(x / cellSize);
-
+    } else if (event.button === 2) {
         const centerRow = row * cellSize + cellSize / 2;
         const centerCol = col * cellSize + cellSize / 2;
+
         if (arrowStart.row === centerRow && arrowStart.col === centerCol) {
             return;
         }
@@ -151,9 +151,16 @@ canvas.addEventListener('contextmenu', function(event) {
     event.preventDefault();
 });
 
+window.addEventListener('resize', resizeCanvas, false);
+
+function resizeCanvas() {
+    setCanvasSize();
+    board.draw();
+}
 
 const ctx = canvas.getContext('2d');
 
+//from codepen
 function drawArrow(fromy, fromx, toy, tox, color){
     const headLength = cellSize / 3;
     const angle = Math.atan2(toy-fromy,tox-fromx);
@@ -201,7 +208,12 @@ function movePiece(piece, row, col, promotion = null) {
     board.draw();
 }
 
-
+function applyGameOver(outcome) {
+    switch (outcome) {
+        case 'DRAW':
+        case 'WHITE_WON':
+    }
+}
 
 function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     const from = getCorrectedPosition(fromRow, fromCol);
@@ -272,7 +284,6 @@ function getMovableSpots(row, col) {
     }).then(response => {
         if (response.ok) {
             response.json().then(data => {
-                console.log(data);
                 board.movableSpots = {};
                 data.moves.forEach(move => {
                     const correctedSpot = getCorrectedPosition(move.destination.row, move.destination.column);
@@ -411,7 +422,6 @@ function drawPromotionMenu(col) {
     ctx.fillStyle = COLORS.LAYER;
     ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-
     ctx.fillStyle = COLORS.PROMOTION_MENU_BG;
     ctx.fillRect( col * cellSize, 0, cellSize, cellSize * (PROMOTION_PIECES.length + 1) );
 
@@ -438,8 +448,6 @@ function drawPromotionMenu(col) {
         ctx.stroke();
     }
 }
-
-
 
 function animate() {
     requestAnimationFrame(animate);

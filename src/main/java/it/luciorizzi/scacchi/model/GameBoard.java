@@ -173,6 +173,9 @@ public class GameBoard {
     }
 
     public boolean movePiece(Move move) {
+        if (gameStatus.isEndStatus()) {
+            return false;
+        }
         if (move == null) {
             return false;
         }
@@ -204,7 +207,7 @@ public class GameBoard {
         switchTurn();
         addMoveToHistory(move);
         gameStatus = checkGameStatus();
-        if (gameStatus != GameStatus.ONGOING) {
+        if (gameStatus.isEndStatus()) {
             movesHistory.setOutcome(gameStatus);
         }
     }
