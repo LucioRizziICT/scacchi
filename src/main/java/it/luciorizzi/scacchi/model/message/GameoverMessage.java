@@ -1,6 +1,6 @@
 package it.luciorizzi.scacchi.model.message;
 
-import it.luciorizzi.scacchi.model.type.GameStatus;
+import it.luciorizzi.scacchi.model.type.GameOutcome;
 
-public record GameoverMessage(GameStatus outcome, String cause) {
+public record GameoverMessage(GameOutcome outcome) {
 }

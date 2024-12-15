@@ -3,7 +3,7 @@ package it.luciorizzi.scacchi.controller;
 import it.luciorizzi.scacchi.model.message.GameoverMessage;
 import it.luciorizzi.scacchi.model.message.MessageWrapper;
 import it.luciorizzi.scacchi.model.message.MoveMessage;
-import it.luciorizzi.scacchi.model.type.GameStatus;
+import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.service.LobbyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -26,9 +26,9 @@ public class GameboardController {
             Boolean isCheck = lobbyService.isCheck(messageWrapper.playerToken(), lobbyId);
             MoveMessage response = new MoveMessage(moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion(), isCheck);
             socketSendMove(lobbyId, response);
-            GameStatus gameStatus = lobbyService.getGameStatus(messageWrapper.playerToken(), lobbyId);
-            if (gameStatus.isEndStatus()) {
-                simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", new GameoverMessage(gameStatus, "Game ended"));
+            boolean gameEnd = lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId);
+            if (gameEnd) {
+                simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", new GameoverMessage(lobbyService.getGameOutcome(messageWrapper.playerToken(), lobbyId)));
             }
         }
     }

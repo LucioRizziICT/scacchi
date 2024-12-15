@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.Lobby;
 import it.luciorizzi.scacchi.model.Player;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
-import it.luciorizzi.scacchi.model.type.GameStatus;
+import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.util.RandomToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +78,9 @@ public class LobbyService {
         return lobby.getGameBoard().isCheck();
     }
 
-    public GameStatus getGameStatus(String token, String lobbyId) {
+    public boolean gameEnded(String token, String lobbyId) {
         Lobby lobby = getValidLobby(token, lobbyId);
-        return lobby.getGameBoard().getGameStatus();
+        return ! lobby.getGameBoard().isOngoing();
     }
 
     public List<String> getMovesHistory(String token, String lobbyId) {
@@ -147,5 +147,10 @@ public class LobbyService {
             return modelAndView;
         }
         return new ModelAndView("lobbyFull"); //TODO: Implement
+    }
+
+    public GameOutcome getGameOutcome(String token, String lobbyId) {
+        Lobby lobby = getValidLobby(token, lobbyId);
+        return lobby.getGameBoard().getMovesHistory().getOutcome();
     }
 }

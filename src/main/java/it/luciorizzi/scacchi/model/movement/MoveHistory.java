@@ -1,7 +1,7 @@
 package it.luciorizzi.scacchi.model.movement;
 
 import it.luciorizzi.scacchi.model.piece.Piece;
-import it.luciorizzi.scacchi.model.type.GameStatus;
+import it.luciorizzi.scacchi.model.type.GameOutcome;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class MoveHistory {
     private final List<MoveHistoryEntry> history = new ArrayList<>();
     @Setter
-    private GameStatus outcome = null;
+    private GameOutcome outcome;
 
     public void add(Move move, Piece movedPiece, ThreatType threatType) {
         history.add(new MoveHistoryEntry(move, movedPiece, threatType));

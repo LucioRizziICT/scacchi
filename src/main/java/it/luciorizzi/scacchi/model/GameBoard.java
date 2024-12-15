@@ -2,7 +2,9 @@ package it.luciorizzi.scacchi.model;
 
 import it.luciorizzi.scacchi.model.movement.*;
 import it.luciorizzi.scacchi.model.piece.*;
+import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.GameStatus;
+import it.luciorizzi.scacchi.model.type.GameoverCause;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import lombok.Getter;
 
@@ -17,11 +19,12 @@ public class GameBoard {
     private Set<Piece> whitePieces = new HashSet<>();
     private Set<Piece> blackPieces = new HashSet<>();
     @Getter
-    private GameStatus gameStatus = GameStatus.ONGOING;
+    private boolean ongoing = true;
     private Position whiteKingPosition;
     private Position blackKingPosition;
     private final Map<String, Integer> previousStates = new HashMap<>();
     private Pawn enPassantablePawn = null;
+    private int fiftyMovesCounter = 0;
 
     @Getter
     private final MoveHistory movesHistory = new MoveHistory();
@@ -48,8 +51,9 @@ public class GameBoard {
         previousStates.clear();
         whitePieces.clear();
         blackPieces.clear();
-        gameStatus = GameStatus.ONGOING;
+        ongoing = true;
         movesHistory.clear();
+        fiftyMovesCounter = 0;
     }
 
     private void saveCurrentState() {
@@ -173,7 +177,7 @@ public class GameBoard {
     }
 
     public boolean movePiece(Move move) {
-        if (gameStatus.isEndStatus()) {
+        if (!ongoing) {
             return false;
         }
         if (move == null) {
@@ -202,14 +206,12 @@ public class GameBoard {
     }
 
     private void executePostMoveOperations(Move move) {
+        fiftyMovesCounter++;
         handleEnPassantable(move);
         saveCurrentState();
         switchTurn();
         addMoveToHistory(move);
-        gameStatus = checkGameStatus();
-        if (gameStatus.isEndStatus()) {
-            movesHistory.setOutcome(gameStatus);
-        }
+        checkGameStatus();
     }
 
     private void switchTurn() {
@@ -298,20 +300,49 @@ public class GameBoard {
         }
     }
 
-    public GameStatus checkGameStatus() {
+    public void checkGameStatus() {
+        //Wins
         if (isCheckmate()) {
-            return turn == PieceColor.WHITE ? GameStatus.BLACK_WIN : GameStatus.WHITE_WIN;
-        }
+            ongoing = false;
+            movesHistory.setOutcome( new GameOutcome().withWinner(turn.opposite()).withCause(GameoverCause.CHECKMATE) );
+        } else
         if (hasSurrendered(PieceColor.WHITE)) {
-            return GameStatus.BLACK_WIN;
-        }
+            ongoing = false;
+            movesHistory.setOutcome( new GameOutcome().withWinner(PieceColor.BLACK).withCause(GameoverCause.RESIGNATION) );
+        } else
         if (hasSurrendered(PieceColor.BLACK)) {
-            return GameStatus.WHITE_WIN;
+            ongoing = false;
+            movesHistory.setOutcome( new GameOutcome().withWinner(PieceColor.WHITE).withCause(GameoverCause.RESIGNATION) );
         }
-        if (gameRepeatedThreeTimes() || isMaterialInsufficient() || isStalemate() || isAgreedDraw()) { //TODO if time will be added add draw by time vs insufficient material
-            return GameStatus.DRAW;
+        //TODO: add win by time and by disconnection
+        //Draws
+        else {
+            if(gameRepeatedThreeTimes()) {
+                ongoing = false;
+                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.THREEFOLD_REPETITION) );
+            }
+            if(isFiftyMovesRuleBroken()) {
+                ongoing = false;
+                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.FIFTY_MOVES_RULE) );
+            }
+            if(isStalemate()) {
+                ongoing = false;
+                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.STALEMATE) );
+            }
+            if(isMaterialInsufficient()) {
+                ongoing = false;
+                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.INSUFFICIENT_MATERIAL) );
+            }
+            if(isAgreedDraw()) {
+                ongoing = false;
+                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.AGREED_DRAW) );
+            }
+            //TODO if time will be added add draw by time vs insufficient material
         }
-        return GameStatus.ONGOING;
+    }
+
+    private boolean isFiftyMovesRuleBroken() {
+        return fiftyMovesCounter >= 100; //100 moves = 50 turns
     }
 
     private boolean hasSurrendered(PieceColor pieceColor) {
@@ -426,7 +457,7 @@ public class GameBoard {
         copy.turn = turn;
         copy.whitePieces = new HashSet<>(whitePieces);
         copy.blackPieces = new HashSet<>(blackPieces);
-        copy.gameStatus = gameStatus;
+        copy.ongoing = ongoing;
         copy.whiteKingPosition = whiteKingPosition;
         copy.blackKingPosition = blackKingPosition;
         for (int i = 0; i < ROWS; i++) {

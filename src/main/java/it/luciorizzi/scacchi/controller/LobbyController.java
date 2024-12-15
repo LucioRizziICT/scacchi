@@ -39,8 +39,8 @@ public class LobbyController {
     }
 
     @GetMapping("/lobby/{lobbyId}/gameStatus")
-    public ResponseEntity<GameStatus> gameStatus(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) {
-        return ResponseEntity.ok(lobbyService.getGameStatus(token, lobbyId));
+    public ResponseEntity<Boolean> gameStatus(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) {
+        return ResponseEntity.ok(lobbyService.gameEnded(token, lobbyId));
     }
 
     @GetMapping("/lobby/{lobbyId}/getMovesHistory")
