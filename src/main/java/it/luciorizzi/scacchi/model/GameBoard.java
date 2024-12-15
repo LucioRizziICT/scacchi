@@ -3,14 +3,13 @@ package it.luciorizzi.scacchi.model;
 import it.luciorizzi.scacchi.model.movement.*;
 import it.luciorizzi.scacchi.model.piece.*;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
-import it.luciorizzi.scacchi.model.type.GameStatus;
 import it.luciorizzi.scacchi.model.type.GameoverCause;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import lombok.Getter;
 
 import java.util.*;
 
-public class GameBoard {
+public class GameBoard { //TODO: add thread safety if needed
     public final static int ROWS = 8;
     public final static int COLUMNS = 8;
 
@@ -25,9 +24,10 @@ public class GameBoard {
     private final Map<String, Integer> previousStates = new HashMap<>();
     private Pawn enPassantablePawn = null;
     private int fiftyMovesCounter = 0;
-
     @Getter
     private final MoveHistory movesHistory = new MoveHistory();
+
+    private transient Boolean cachedCheck = null;
 
     public GameBoard() {
         initialize();
@@ -205,7 +205,34 @@ public class GameBoard {
         return false;
     }
 
+    private void applyMove(Move move) {
+        Piece movedPiece = getPiece(move.getOrigin());
+        updateKingPosition(move, movedPiece);
+        if (move.isCapture())
+            getPieces(getPiece(move.getDestination()).getColor()).remove(board[move.getDestination().row()][move.getDestination().column()]);
+        if (move.isEnPassant()) {
+            Position takenPiecePosition = new Position(move.getDestination().row() - turn.getValue(), move.getDestination().column());
+            Piece takenPiece = getPiece(takenPiecePosition);
+            board[takenPiecePosition.row()][takenPiecePosition.column()] = new EmptyPiece(takenPiecePosition);
+            getPieces(turn.opposite()).remove(takenPiece);
+        }
+        if (move.isCastling()) {
+            Position rookOrigin = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 7 : 0);
+            Position rookDestination = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 5 : 3);
+            board[rookDestination.row()][rookDestination.column()] = getPiece(rookOrigin);
+            board[rookOrigin.row()][rookOrigin.column()] = new EmptyPiece(rookOrigin);
+        }
+
+        board[move.getDestination().row()][move.getDestination().column()] = getPiece(move.getOrigin());
+        board[move.getOrigin().row()][move.getOrigin().column()] = new EmptyPiece(move.getOrigin());
+
+        if (move.getPromotion() != null) {
+            promotePiece(move, movedPiece);
+        }
+    }
+
     private void executePostMoveOperations(Move move) {
+        cachedCheck = null;
         fiftyMovesCounter++;
         handleEnPassantable(move);
         saveCurrentState();
@@ -242,32 +269,6 @@ public class GameBoard {
         }
     }
 
-    private void applyMove(Move move) {
-        Piece movedPiece = getPiece(move.getOrigin());
-        updateKingPosition(move, movedPiece);
-        if (move.isCapture())
-            getPieces(getPiece(move.getDestination()).getColor()).remove(board[move.getDestination().row()][move.getDestination().column()]);
-        if (move.isEnPassant()) {
-            Position takenPiecePosition = new Position(move.getDestination().row() - turn.getValue(), move.getDestination().column());
-            Piece takenPiece = getPiece(takenPiecePosition);
-            board[takenPiecePosition.row()][takenPiecePosition.column()] = new EmptyPiece(takenPiecePosition);
-            getPieces(turn.opposite()).remove(takenPiece);
-        }
-        if (move.isCastling()) {
-            Position rookOrigin = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 7 : 0);
-            Position rookDestination = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 5 : 3);
-            board[rookDestination.row()][rookDestination.column()] = getPiece(rookOrigin);
-            board[rookOrigin.row()][rookOrigin.column()] = new EmptyPiece(rookOrigin);
-        }
-
-        board[move.getDestination().row()][move.getDestination().column()] = getPiece(move.getOrigin());
-        board[move.getOrigin().row()][move.getOrigin().column()] = new EmptyPiece(move.getOrigin());
-
-        if (move.getPromotion() != null) {
-            promotePiece(move, movedPiece);
-        }
-    }
-
     private void promotePiece(Move move, Piece movedPiece) {
         Piece promotedPiece = switch (move.getPromotion()) {
             case 'q' -> new Queen(turn, move.getDestination());
@@ -300,7 +301,7 @@ public class GameBoard {
         }
     }
 
-    public void checkGameStatus() {
+    private void checkGameStatus() {
         //Wins
         if (isCheckmate()) {
             ongoing = false;
@@ -395,7 +396,7 @@ public class GameBoard {
         return turn;
     }
 
-    public Position getCurrentPlayerKingPosition() { //TODO: MAKE PRIVATE
+    private Position getCurrentPlayerKingPosition() {
         return turn == PieceColor.WHITE ? whiteKingPosition : blackKingPosition;
     }
 
@@ -408,12 +409,15 @@ public class GameBoard {
     }
 
     public boolean isCheck() {
-        return isCheckInternal(getCurrentPlayerKingPosition(), turn);
+        if (cachedCheck == null) {
+            cachedCheck = isCheckInternal(getCurrentPlayerKingPosition(), turn);
+        }
+        return cachedCheck;
     }
 
     private boolean isCheckInternal(Position kingPosition, PieceColor color) {
         for (Piece piece : getPieces(color.opposite())) {
-            if (piece instanceof King) {
+            if (piece instanceof King) { //using manual king to avoid infinite loop call to isCheck
                 if (Math.abs(piece.getPosition().row() - kingPosition.row()) <= 1 && Math.abs(piece.getPosition().column() - kingPosition.column()) <= 1) {
                     return true;
                 }
@@ -464,6 +468,9 @@ public class GameBoard {
             System.arraycopy(board[i], 0, copy.board[i], 0, COLUMNS);
         }
         copy.applyMove(move);
+        copy.cachedCheck = null;
         return copy.isCheck();
     }
+
+    //TODO validate move method
 }
