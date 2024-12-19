@@ -3,6 +3,7 @@ package it.luciorizzi.scacchi.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.lobby.Lobby;
+import it.luciorizzi.scacchi.model.lobby.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.lobby.LobbyProperties;
 import it.luciorizzi.scacchi.model.lobby.Player;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
@@ -98,7 +99,7 @@ public class LobbyService {
     private Lobby getLobby(String lobbyId) {
         Lobby lobby = lobbies.get(lobbyId);
         if (lobby == null) {
-            throw new RuntimeException("Lobby not found");
+            throw new LobbyNotFoundException("Lobby id: " + lobbyId);
         }
         return lobby;
     }

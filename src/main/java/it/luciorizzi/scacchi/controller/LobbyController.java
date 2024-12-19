@@ -1,6 +1,7 @@
 package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import it.luciorizzi.scacchi.model.lobby.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.service.LobbyService;
@@ -65,5 +66,10 @@ public class LobbyController {
         return modelAndView;
     }
 
-    //TODO errors handling and not found pages
+    //TODO add complete errors handling and not found pages
+
+    @ExceptionHandler(LobbyNotFoundException.class)
+    public ModelAndView handleLobbyNotFound() {
+        return new ModelAndView("lobbyNotFound");
+    }
 }

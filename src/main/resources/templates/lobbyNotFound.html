@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../css/style1.css">
-    <title>Lobby Piena! - Scacchi</title>
+    <title>Lobby non trovata - Scacchi</title>
 </head>
 <body>
 <div id="sprites" style="display: none">
@@ -16,11 +16,10 @@
 <canvas id="mainCanvas"></canvas>
 
 <div class="main" id="main">
-    <h1>Lobby piena!</h1>
-    <h2 th:text="${lobbyName} + ' contiene gi&agrave; il numero massimo di giocatori consentito.'"></h2>
+    <h1>Lobby non trovata</h1>
+    <h2>La lobby non esiste oppure &egrave; stata cancellata</h2>
     <br><br>
     <button type="button" id="backButton">Men&ugrave; principale</button>
-    <button type="button" id="spectateButton" th:if="${lobbyAllowsSpectators}">Entra come spettatore</button>
 </div>
 </body>
 <script src="../js/canvas.js"></script>
