@@ -1,4 +1,4 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.lobby;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

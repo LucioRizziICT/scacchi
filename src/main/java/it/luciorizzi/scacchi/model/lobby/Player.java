@@ -1,4 +1,4 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.lobby;
 
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import lombok.AllArgsConstructor;

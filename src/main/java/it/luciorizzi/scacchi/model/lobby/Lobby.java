@@ -1,5 +1,6 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.lobby;
 
+import it.luciorizzi.scacchi.model.GameBoard;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

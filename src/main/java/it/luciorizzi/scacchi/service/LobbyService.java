@@ -2,9 +2,9 @@ package it.luciorizzi.scacchi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.luciorizzi.scacchi.model.Lobby;
-import it.luciorizzi.scacchi.model.LobbyProperties;
-import it.luciorizzi.scacchi.model.Player;
+import it.luciorizzi.scacchi.model.lobby.Lobby;
+import it.luciorizzi.scacchi.model.lobby.LobbyProperties;
+import it.luciorizzi.scacchi.model.lobby.Player;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.PieceColor;
