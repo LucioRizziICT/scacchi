@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <link rel="stylesheet" href="../css/style1.css">
+    <title>Lobby Piena! - Scacchi</title>
 </head>
 <body>
-TODO: Implement me
+<div id="sprites" style="display: none">
+    <img id="rookSprite" src="../img/rook.png" alt="pawn" width="60">
+    <img id="kingSprite" src="../img/king.png" alt="pawn" width="60">
+    <img id="queenSprite" src="../img/queen.png" alt="pawn" width="60">
+    <img id="bishopSprite" src="../img/bishop.png" alt="pawn" width="60">
+    <img id="knightSprite" src="../img/knight.png" alt="pawn" width="60">
+</div>
+<canvas id="mainCanvas"></canvas>
+
+<div class="main" id="main">
+    <h1>Lobby is Full!</h1>
+    <h2 th:text="${lobbyName} + ' contiene gi&agrave; il numero massimo di giocatori consentito.'"></h2>
+    <br><br>
+    <button type="button" id="backButton">Men&ugrave; principale</button>
+    <button type="button" id="spectateButton" th:if="${lobbyAllowsSpectators}">Entra come spettatore</button>
+</div>
 </body>
+<script src="../js/canvas.js"></script>
+<script src="../js/lobbyFull.js"></script>
 </html>

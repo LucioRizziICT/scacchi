@@ -3,6 +3,7 @@ package it.luciorizzi.scacchi.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.Lobby;
+import it.luciorizzi.scacchi.model.LobbyProperties;
 import it.luciorizzi.scacchi.model.Player;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
@@ -24,23 +25,21 @@ public class LobbyService {
     ObjectMapper objectMapper;
 
     private final Map<String, Lobby> lobbies = new HashMap<>();
-    private final Map<String, Player> tokens = new HashMap<>();
+    private final Map<String, Player> players = new HashMap<>();
 
     public Map<String, Object> createNewGame(String lobbyName, String playerName, String password, PieceColor playerOneColor, String lobbyType) {
         String lobbyId = RandomToken.generateToken(12);
         Player playerOne = new Player(playerName, lobbyId, playerOneColor);
-        lobbies.put(lobbyId, new Lobby(lobbyName, playerOne, password, lobbyType.equals("private")));
+        LobbyProperties properties = LobbyProperties.defaultProperties();
+        properties.setPrivate(lobbyType.equals("private"));
+        lobbies.put( lobbyId, new Lobby(lobbyName, playerOne, password, properties) ); //todo cambiare settings di default
         String token = RandomToken.generateToken(32);
-        tokens.put(token, playerOne);
-        Map<String, Object> result = new HashMap<>();
+        players.put(token, playerOne);
+        Map<String, Object> result = new HashMap<>(); //TODO: Cambiare con DTO quando implementato
         result.put("lobbyId", lobbyId);
         result.put("playerToken", token);
         return result;
     }
-
-    //TODO: Get lobby by id from user
-
-    //TODO: Get lobby info by lobby id
 
     public String joinLobby(String lobbyId, String playerName, String password) {
         Lobby lobby = getLobby(lobbyId);
@@ -53,7 +52,7 @@ public class LobbyService {
         Player playerTwo = new Player(playerName, lobbyId, lobby.getPlayerOne().getColor().opposite());
         lobby.setPlayerTwo(playerTwo);
         String token = RandomToken.generateToken(32);
-        tokens.put(token, playerTwo);
+        players.put(token, playerTwo);
         return token;
     }
 
@@ -105,7 +104,7 @@ public class LobbyService {
     }
 
     public Player getPlayer(String token) {
-        Player player = tokens.get(token);
+        Player player = players.get(token);
         if (player == null) {
             throw new RuntimeException("Player not found");
         }
@@ -115,7 +114,7 @@ public class LobbyService {
     public List<Map<String, Object>> getPublicLobbies() {
         List<Map<String, Object>> result = new ArrayList<>();
         lobbies.forEach((id, lobby) -> {
-            if (lobby.isPrivate()) {
+            if (lobby.getProperties().isPrivate()) {
                 return;
             }
             Map<String, Object> lobbyInfo = new HashMap<>();
@@ -130,7 +129,7 @@ public class LobbyService {
 
     public ModelAndView getLobbyView(String token, String lobbyId) throws JsonProcessingException {
         Lobby lobby = getLobby(lobbyId);
-        Player presentPlayer = tokens.get(token);
+        Player presentPlayer = players.get(token);
         if ( token != null && presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
             ModelAndView modelAndView = new ModelAndView("lobby");
             modelAndView.addObject("playerColor", getPlayer(token).getColor());
@@ -146,6 +145,9 @@ public class LobbyService {
             modelAndView.addObject("lobbyId", lobbyId);
             return modelAndView;
         }
+        ModelAndView modelAndView = new ModelAndView("lobbyFull");
+        modelAndView.addObject("lobbyName", lobby.getName());
+        modelAndView.addObject("lobbyAllowsSpectators", lobby.getProperties().allowsSpectators());
         return new ModelAndView("lobbyFull"); //TODO: Implement
     }
 

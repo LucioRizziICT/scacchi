@@ -2,7 +2,6 @@ package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
-import it.luciorizzi.scacchi.model.type.GameStatus;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.service.LobbyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class LobbyController {
     }
 
     @GetMapping("/lobby/{lobbyId}/possibleMoves")
-    public ResponseEntity<MoveSet> possibleMoves(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int row, int col) throws JsonProcessingException {
+    public ResponseEntity<MoveSet> possibleMoves(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int row, int col) {
         return ResponseEntity.ok(lobbyService.getPossibleMoves(token, lobbyId, row, col));
     }
 
@@ -57,4 +56,14 @@ public class LobbyController {
     public ResponseEntity<String> joinLobby(@PathVariable("lobbyId") String lobbyId, String playerName, String password) {
         return ResponseEntity.ok(lobbyService.joinLobby(lobbyId, playerName, password));
     }
+
+    @GetMapping("/lobby/testLobbyFull")
+    public ModelAndView testLobbyFull() {
+        ModelAndView modelAndView = new ModelAndView("lobbyFull");
+        modelAndView.addObject("lobbyName", "testicolo");
+        modelAndView.addObject("lobbyAllowsSpectators", true);
+        return modelAndView;
+    }
+
+    //TODO errors handling and not found pages
 }

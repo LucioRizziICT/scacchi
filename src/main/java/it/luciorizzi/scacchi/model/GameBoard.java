@@ -18,7 +18,7 @@ public class GameBoard { //TODO: add thread safety if needed
     private Set<Piece> whitePieces = new HashSet<>();
     private Set<Piece> blackPieces = new HashSet<>();
     @Getter
-    private boolean ongoing = true;
+    private boolean isOngoing = true;
     private Position whiteKingPosition;
     private Position blackKingPosition;
     private final Map<String, Integer> previousStates = new HashMap<>();
@@ -51,7 +51,7 @@ public class GameBoard { //TODO: add thread safety if needed
         previousStates.clear();
         whitePieces.clear();
         blackPieces.clear();
-        ongoing = true;
+        isOngoing = true;
         movesHistory.clear();
         fiftyMovesCounter = 0;
     }
@@ -177,7 +177,7 @@ public class GameBoard { //TODO: add thread safety if needed
     }
 
     public boolean movePiece(Move move) {
-        if (!ongoing) {
+        if (!isOngoing) {
             return false;
         }
         if (move == null) {
@@ -242,7 +242,7 @@ public class GameBoard { //TODO: add thread safety if needed
     }
 
     private void switchTurn() {
-        turn = turn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+        turn = turn.opposite();
     }
 
     private void addMoveToHistory(Move move) {
@@ -304,38 +304,38 @@ public class GameBoard { //TODO: add thread safety if needed
     private void checkGameStatus() {
         //Wins
         if (isCheckmate()) {
-            ongoing = false;
+            isOngoing = false;
             movesHistory.setOutcome( new GameOutcome().withWinner(turn.opposite()).withCause(GameoverCause.CHECKMATE) );
         } else
         if (hasSurrendered(PieceColor.WHITE)) {
-            ongoing = false;
+            isOngoing = false;
             movesHistory.setOutcome( new GameOutcome().withWinner(PieceColor.BLACK).withCause(GameoverCause.RESIGNATION) );
         } else
         if (hasSurrendered(PieceColor.BLACK)) {
-            ongoing = false;
+            isOngoing = false;
             movesHistory.setOutcome( new GameOutcome().withWinner(PieceColor.WHITE).withCause(GameoverCause.RESIGNATION) );
         }
         //TODO: add win by time and by disconnection
         //Draws
         else {
             if(gameRepeatedThreeTimes()) {
-                ongoing = false;
+                isOngoing = false;
                 movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.THREEFOLD_REPETITION) );
             }
             if(isFiftyMovesRuleBroken()) {
-                ongoing = false;
+                isOngoing = false;
                 movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.FIFTY_MOVES_RULE) );
             }
             if(isStalemate()) {
-                ongoing = false;
+                isOngoing = false;
                 movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.STALEMATE) );
             }
             if(isMaterialInsufficient()) {
-                ongoing = false;
+                isOngoing = false;
                 movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.INSUFFICIENT_MATERIAL) );
             }
             if(isAgreedDraw()) {
-                ongoing = false;
+                isOngoing = false;
                 movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.AGREED_DRAW) );
             }
             //TODO if time will be added add draw by time vs insufficient material
@@ -461,7 +461,7 @@ public class GameBoard { //TODO: add thread safety if needed
         copy.turn = turn;
         copy.whitePieces = new HashSet<>(whitePieces);
         copy.blackPieces = new HashSet<>(blackPieces);
-        copy.ongoing = ongoing;
+        copy.isOngoing = isOngoing;
         copy.whiteKingPosition = whiteKingPosition;
         copy.blackKingPosition = blackKingPosition;
         for (int i = 0; i < ROWS; i++) {

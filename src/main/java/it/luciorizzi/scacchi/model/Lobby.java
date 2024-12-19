@@ -10,25 +10,22 @@ public class Lobby {
     @Setter
     private String name;
     @Setter
+    private String password;
+    @Setter
     private Player playerOne;
     @Setter
     private Player playerTwo = null;
     @Setter
-    private String password;
-    @Setter
-    private boolean isPrivate;
+    LobbyProperties properties;
 
-    public Lobby(String name, Player playerOne, String password, boolean isPrivate) {
+    public Lobby(String name, Player playerOne, String password, LobbyProperties properties) {
         this.name = ( name == null || name.isEmpty() ) ? "Lobby di " + playerOne.getName() : name;
         this.playerOne = playerOne;
         this.password = password;
-        this.isPrivate = isPrivate;
+        this.properties = properties;
     }
 
     public boolean isFull() {
         return playerOne != null && playerTwo != null;
     }
-
-
-
 }

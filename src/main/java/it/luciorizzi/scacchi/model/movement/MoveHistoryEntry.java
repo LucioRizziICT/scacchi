@@ -13,7 +13,8 @@ public record MoveHistoryEntry(Move move, Piece movedPiece, ThreatType threatTyp
         sb.append((char) (move.getDestination().column()+97));
         sb.append(move.getDestination().row()+1);
         sb.append(move.getPromotion() != null ? "=" + move.getPromotion() : "");
-        sb.append(threatType == null ? "" : threatType == ThreatType.CHECK ? "+" : "#"); //TODO: buggato
+        sb.append(threatType == null ? "" : threatType == ThreatType.CHECK ? "+" : "#");
         return sb.toString();
+        //TODO: does not consider ambiguity
     }
 }
