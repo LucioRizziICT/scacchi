@@ -131,25 +131,38 @@ public class LobbyService {
     public ModelAndView getLobbyView(String token, String lobbyId) throws JsonProcessingException {
         Lobby lobby = getLobby(lobbyId);
         Player presentPlayer = players.get(token);
-        if ( token != null && presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
-            ModelAndView modelAndView = new ModelAndView("lobby");
-            modelAndView.addObject("playerColor", getPlayer(token).getColor());
-            modelAndView.addObject("lobbyName", lobby.getName());
-            modelAndView.addObject("lobbyId", lobbyId);
-            modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
-            modelAndView.addObject("playerToken", token);
-            return modelAndView;
+        
+        if ( presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
+            return getPlayerLobbyView(token, lobbyId, lobby);
         }
         if (!lobby.isFull()) {
-            ModelAndView modelAndView = new ModelAndView("joinLobby");
-            modelAndView.addObject("lobbyName", lobby.getName());
-            modelAndView.addObject("lobbyId", lobbyId);
-            return modelAndView;
+            return getJoinLobbyView(lobbyId, lobby);
         }
+        return getFullLobbyView(lobby);
+    }
+
+    private ModelAndView getFullLobbyView(Lobby lobby) {
         ModelAndView modelAndView = new ModelAndView("lobbyFull");
         modelAndView.addObject("lobbyName", lobby.getName());
         modelAndView.addObject("lobbyAllowsSpectators", lobby.getProperties().allowsSpectators());
-        return new ModelAndView("lobbyFull"); //TODO: Implement
+        return new ModelAndView("lobbyFull");
+    }
+
+    private ModelAndView getJoinLobbyView(String lobbyId, Lobby lobby) {
+        ModelAndView modelAndView = new ModelAndView("joinLobby");
+        modelAndView.addObject("lobbyName", lobby.getName());
+        modelAndView.addObject("lobbyId", lobbyId);
+        return modelAndView;
+    }
+
+    private ModelAndView getPlayerLobbyView(String token, String lobbyId, Lobby lobby) throws JsonProcessingException {
+        ModelAndView modelAndView = new ModelAndView("lobby");
+        modelAndView.addObject("playerColor", getPlayer(token).getColor());
+        modelAndView.addObject("lobbyName", lobby.getName());
+        modelAndView.addObject("lobbyId", lobbyId);
+        modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
+        modelAndView.addObject("playerToken", token);
+        return modelAndView;
     }
 
     public GameOutcome getGameOutcome(String token, String lobbyId) {
