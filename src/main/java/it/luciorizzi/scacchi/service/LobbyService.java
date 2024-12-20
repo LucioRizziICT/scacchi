@@ -2,15 +2,13 @@ package it.luciorizzi.scacchi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.luciorizzi.scacchi.model.lobby.Lobby;
-import it.luciorizzi.scacchi.model.lobby.LobbyNotFoundException;
-import it.luciorizzi.scacchi.model.lobby.LobbyProperties;
-import it.luciorizzi.scacchi.model.lobby.Player;
+import it.luciorizzi.scacchi.model.lobby.*;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.util.RandomToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -68,7 +66,10 @@ public class LobbyService {
     public boolean move(String token, String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
         Lobby lobby = getValidLobby(token, lobbyId);
         if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
-            throw new IllegalArgumentException("Not your turn");
+            throw new LobbyActionException("Not your turn", HttpStatus.FORBIDDEN);
+        }
+        if (!lobby.gameStarted()) {
+            throw new LobbyActionException("Game not started", HttpStatus.FORBIDDEN);
         }
         return lobby.getGameBoard().movePiece(fromRow, fromCol, toRow, toCol, promotion);
     }
@@ -131,7 +132,7 @@ public class LobbyService {
     public ModelAndView getLobbyView(String token, String lobbyId) throws JsonProcessingException {
         Lobby lobby = getLobby(lobbyId);
         Player presentPlayer = players.get(token);
-        
+
         if ( presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
             return getPlayerLobbyView(token, lobbyId, lobby);
         }
@@ -139,20 +140,6 @@ public class LobbyService {
             return getJoinLobbyView(lobbyId, lobby);
         }
         return getFullLobbyView(lobby);
-    }
-
-    private ModelAndView getFullLobbyView(Lobby lobby) {
-        ModelAndView modelAndView = new ModelAndView("lobbyFull");
-        modelAndView.addObject("lobbyName", lobby.getName());
-        modelAndView.addObject("lobbyAllowsSpectators", lobby.getProperties().allowsSpectators());
-        return new ModelAndView("lobbyFull");
-    }
-
-    private ModelAndView getJoinLobbyView(String lobbyId, Lobby lobby) {
-        ModelAndView modelAndView = new ModelAndView("joinLobby");
-        modelAndView.addObject("lobbyName", lobby.getName());
-        modelAndView.addObject("lobbyId", lobbyId);
-        return modelAndView;
     }
 
     private ModelAndView getPlayerLobbyView(String token, String lobbyId, Lobby lobby) throws JsonProcessingException {
@@ -163,6 +150,20 @@ public class LobbyService {
         modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
         modelAndView.addObject("playerToken", token);
         return modelAndView;
+    }
+
+    private ModelAndView getJoinLobbyView(String lobbyId, Lobby lobby) {
+        ModelAndView modelAndView = new ModelAndView("joinLobby");
+        modelAndView.addObject("lobbyName", lobby.getName());
+        modelAndView.addObject("lobbyId", lobbyId);
+        return modelAndView;
+    }
+
+    private ModelAndView getFullLobbyView(Lobby lobby) {
+        ModelAndView modelAndView = new ModelAndView("lobbyFull");
+        modelAndView.addObject("lobbyName", lobby.getName());
+        modelAndView.addObject("lobbyAllowsSpectators", lobby.getProperties().allowsSpectators());
+        return new ModelAndView("lobbyFull");
     }
 
     public GameOutcome getGameOutcome(String token, String lobbyId) {

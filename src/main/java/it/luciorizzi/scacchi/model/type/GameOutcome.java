@@ -11,11 +11,6 @@ public class GameOutcome {
     private GameStatus status;
     private GameoverCause cause;
 
-    public GameOutcome(GameStatus status, GameoverCause cause) {
-        this.status = status;
-        this.cause = cause;
-    }
-
     public GameOutcome withWinner(PieceColor winner) {
         if (winner == PieceColor.WHITE) {
             this.status = GameStatus.WHITE_WIN;

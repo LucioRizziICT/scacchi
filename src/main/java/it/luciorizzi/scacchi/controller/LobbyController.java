@@ -1,11 +1,14 @@
 package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import it.luciorizzi.scacchi.model.lobby.LobbyActionException;
 import it.luciorizzi.scacchi.model.lobby.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.service.LobbyService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -72,4 +75,12 @@ public class LobbyController {
     public ModelAndView handleLobbyNotFound() {
         return new ModelAndView("lobbyNotFound");
     }
+
+    @ExceptionHandler(LobbyActionException.class)
+    public ResponseEntity<String> handleLobbyActionException(HttpServletRequest reqest, Exception exception) {
+        HttpStatus status = ((LobbyActionException) exception).getStatus();
+        return ResponseEntity.status(status).body(exception.getMessage()); //TODO change with DTO, not only string
+    }
 }
+
+//TODO Add Logging

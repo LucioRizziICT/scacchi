@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 public class Player {
     @Setter
-    private String name = "Anonimo";
+    private String name = "Anon";
     private final String gameId;
     private final PieceColor color;
 

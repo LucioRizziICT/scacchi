@@ -29,4 +29,8 @@ public class Lobby {
     public boolean isFull() {
         return playerOne != null && playerTwo != null;
     }
+
+    public boolean gameStarted() {
+        return isFull() && gameBoard.isOngoing();
+    }
 }

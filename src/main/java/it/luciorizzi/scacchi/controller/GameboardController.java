@@ -28,12 +28,17 @@ public class GameboardController {
             socketSendMove(lobbyId, response);
             boolean gameEnd = lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId);
             if (gameEnd) {
-                simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", new GameoverMessage(lobbyService.getGameOutcome(messageWrapper.playerToken(), lobbyId)));
+                GameOutcome gameOutcome = lobbyService.getGameOutcome(messageWrapper.playerToken(), lobbyId);
+                socketSendOutcome(lobbyId, gameOutcome);
             }
         }
     }
 
     private void socketSendMove(String lobbyId, MoveMessage response) {
         simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/move", response);
+    }
+
+    private void socketSendOutcome(String lobbyId, GameOutcome gameOutcome) {
+        simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", gameOutcome);
     }
 }
