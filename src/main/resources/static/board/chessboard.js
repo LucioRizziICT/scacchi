@@ -27,7 +27,7 @@ let cellSize;
 setCanvasSize();
 
 function setCanvasSize() {
-    const divSpace = Math.min(canvas.parentElement.clientHeight - 20, canvas.parentElement.clientWidth - 20); //TODO: 20 is the sum of the margins, make it dynamic
+    const divSpace = Math.min(canvas.parentElement.clientHeight - 12, canvas.parentElement.clientWidth - 12); //TODO: 20 is the sum of the margins, make it dynamic
     const canvasSize = divSpace - (divSpace % BOARD_SIZE);
     canvas.height = canvasSize;
     canvas.width = canvasSize;
