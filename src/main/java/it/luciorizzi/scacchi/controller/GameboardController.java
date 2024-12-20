@@ -36,7 +36,7 @@ public class GameboardController {
             boolean gameEnd = lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId);
             if (gameEnd) {
                 GameOutcome gameOutcome = lobbyService.getGameOutcome(messageWrapper.playerToken(), lobbyId);
-                socketSendOutcome(lobbyId, gameOutcome);
+                socketSendOutcome(lobbyId, new GameoverMessage(gameOutcome));
             }
         }
     }
@@ -45,14 +45,7 @@ public class GameboardController {
         simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/move", response);
     }
 
-    private void socketSendOutcome(String lobbyId, GameOutcome gameOutcome) {
-        simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", gameOutcome);
-    }
-
-
-    @MessageExceptionHandler(LobbyActionException.class) //TODO: Maybe remove, not sure its really useful
-    public ApplicationError handleLobbyActionException(HttpServletRequest reqest, Exception exception) {
-        HttpStatus status = ((LobbyActionException) exception).getStatus();
-        return new ApplicationError(status.getReasonPhrase(), exception.getMessage()); //for now just use http status as cause
+    private void socketSendOutcome(String lobbyId, GameoverMessage message) {
+        simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", message);
     }
 }

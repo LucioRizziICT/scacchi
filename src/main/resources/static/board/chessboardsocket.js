@@ -23,7 +23,7 @@ stompClient.onStompError = function(frame) {
 
 function sendSocketMove(fromRow, fromCol, toRow, toCol, promotion = null) {
     const messageWrapper = {
-        playerToken: retrievedPlayerToken,
+        playerToken: getCookie('playerToken'),
         message: {
             fromRow: fromRow,
             fromCol: fromCol,

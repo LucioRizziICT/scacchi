@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../board/board.css">
-    <title th:text="'Lobby - ' + ${lobbyName}"></title>
+    <title th:text="${lobbyName} + ' - Scacchi'"></title>
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
 </head>
 <body>
@@ -12,20 +12,20 @@
     <p id="currentPosition" th:text="${gameBoard}"></p>
     <p id="playerColor" th:text="${playerColor}"></p>
     <p id="lobbyId" th:text="${lobbyId}"></p>
-    <p id="playerToken" th:text="${playerToken}"></p>
     <p id="player1Name" th:text="${player1Name}"></p>
     <p id="player2Name" th:text="${player2Name}"></p>
     <p id="player1Color" th:text="${player1Color}"></p>
     <p id="player2Color" th:text="${player2Color}"></p>
 </div>
 <div id="main">
-    <h1>Partita in corso</h1>
     <div class="flex-container">
         <div id="chessboardDiv">
             <canvas id="chessboardCanvas"></canvas>
         </div>
         <div id="chessboardInfo">
-
+            <h3 id="lobbyName" th:text="${lobbyName}"></h3>
+            <p th:class="'playerLabel playerLabelColor-' + ${player1Color}">Giocatore 1 <span th:if="${playerNumber == 1}">(Tu)</span>: <span id="player1NameSpan" th:text="${player1Name}"></span></p>
+            <p th:class="'playerLabel playerLabelColor-' + ${player2Color}">Giocatore 2 <span th:if="${playerNumber == 2}">(Tu)</span>: <span id="player2NameSpan" th:text="${player2Name == null ? 'In attesa...' : player2Name}"></span></p>
         </div>
     </div>
 </div>
@@ -35,8 +35,8 @@
     const retrievedPosition = document.getElementById("currentPosition").innerText;
     const retrievedPlayerColor = document.getElementById("playerColor").innerText;
     const retrievedlobbyId = document.getElementById("lobbyId").innerText;
-    const retrievedPlayerToken = document.getElementById("playerToken").innerText;
 </script>
+<script src="../js/common.js"></script>
 <script src="../board/chessboard.js"></script>
 <script src="../board/chessboardsocket.js"></script>
 <script>

@@ -134,7 +134,8 @@ public class LobbyService {
         Player presentPlayer = players.get(token);
 
         if ( presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
-            return getPlayerLobbyView(token, lobbyId, lobby);
+            int playerNumber = lobby.getPlayerOne().equals(presentPlayer) ? 1 : 2;
+            return getPlayerLobbyView(presentPlayer, lobbyId, lobby, playerNumber);
         }
         if (!lobby.isFull()) {
             return getJoinLobbyView(lobbyId, lobby);
@@ -142,13 +143,17 @@ public class LobbyService {
         return getFullLobbyView(lobby);
     }
 
-    private ModelAndView getPlayerLobbyView(String token, String lobbyId, Lobby lobby) throws JsonProcessingException {
+    private ModelAndView getPlayerLobbyView(Player player, String lobbyId, Lobby lobby, int playerNumber) throws JsonProcessingException {
         ModelAndView modelAndView = new ModelAndView("lobby");
-        modelAndView.addObject("playerColor", getPlayer(token).getColor());
+        modelAndView.addObject("playerNumber", playerNumber);
+        modelAndView.addObject("playerColor", player.getColor());
+        modelAndView.addObject("player1Name", lobby.getPlayerOne().getName());
+        modelAndView.addObject("player2Name", lobby.getPlayerTwo() == null ? null : lobby.getPlayerTwo().getName());
+        modelAndView.addObject("player1Color", lobby.getPlayerOne().getColor());
+        modelAndView.addObject("player2Color", lobby.getPlayerOne().getColor().opposite());
         modelAndView.addObject("lobbyName", lobby.getName());
         modelAndView.addObject("lobbyId", lobbyId);
         modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
-        modelAndView.addObject("playerToken", token);
         return modelAndView;
     }
 

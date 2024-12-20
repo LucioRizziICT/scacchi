@@ -75,6 +75,12 @@ public class LobbyController {
     public ModelAndView handleLobbyNotFound() {
         return new ModelAndView("lobbyNotFound");
     }
+
+    @ExceptionHandler(LobbyActionException.class)
+    public ResponseEntity<String> handleLobbyActionException(HttpServletRequest reqest, Exception exception) {
+        HttpStatus status = ((LobbyActionException) exception).getStatus();
+        return ResponseEntity.status(status).body(exception.getMessage()); //TODO change with DTO, not only string
+    }
 }
 
 //TODO Add Logging
