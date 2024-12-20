@@ -3,11 +3,11 @@ const stompClient = new StompJs.Client({
 });
 
 stompClient.onConnect = function(frame) {
-    stompClient.subscribe('/topic/lobby/' + retrievedlobbyId + '/move', function(message) {
+    stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/move', function(message) {
         const data = JSON.parse(message.body);
         applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck);
     });
-    stompClient.subscribe('/topic/lobby/' + retrievedlobbyId + '/gameover', function(message) {
+    stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/gameover', function(message) {
         const data = JSON.parse(message.body);
         applyGameOver(data);
     });
@@ -33,7 +33,7 @@ function sendSocketMove(fromRow, fromCol, toRow, toCol, promotion = null) {
         }
     }
     stompClient.publish({
-        destination: '/app/lobby/' + retrievedlobbyId + '/move',
+        destination: '/app/lobby/' + retrievedLobbyId + '/move',
         body: JSON.stringify(messageWrapper)
     });
 }

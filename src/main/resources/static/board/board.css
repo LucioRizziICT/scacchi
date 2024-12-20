@@ -5,9 +5,13 @@
 body {
     background-color: #e4bb9c;
     margin: 0;
+    font-family: "Rubik", serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
 }
 
-#lobbyInfo {
+#retrievedLobbyInfo {
     display: none;
 }
 
@@ -22,17 +26,20 @@ body {
     margin: 10px;
 }
 
-#chessboardInfo {
+#LobbyInfo {
     width: 100%;
-    height: 90vh;
+    height: 100vh;
     border-left: 2px solid #150707;
+    padding: 10px;
+
+    background-color: #af7d54;
 }
 
 @media (max-width: 800px) {
     #chessboardDiv {
         height: 50vh;
     }
-    #chessboardInfo {
+    #LobbyInfo {
         height: 50vh;
         border-left: none;
         border-top: 2px solid #150707;

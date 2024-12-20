@@ -49,8 +49,8 @@ function refreshLobbies() {
                     row.innerHTML = `
                         <td>${lobby.name}</td>
                         <td>${lobby.playerOne}</td>
-                        <td>${lobby.playerTwo || 'Waiting...'}</td>
-                        <td><button onclick="joinLobby('${lobby.id}')">${lobby.playerTwo ? "Guarda" : "Entra"}</button></td>
+                        <td>${lobby.playerTwo || 'In Attesa...'}</td>
+                        <td><button onclick="joinLobby('${lobby.id}')">${lobby.playerTwo ? "Guarda" : "Entra"}</button></td> //TODO implement joinLobby and spectateLobby
                     `;
                     lobbiesTableBody.appendChild(row);
                 });
