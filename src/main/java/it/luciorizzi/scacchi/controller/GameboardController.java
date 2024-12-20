@@ -1,15 +1,22 @@
 package it.luciorizzi.scacchi.controller;
 
+import it.luciorizzi.scacchi.model.lobby.LobbyActionException;
+import it.luciorizzi.scacchi.model.message.ApplicationError;
 import it.luciorizzi.scacchi.model.message.GameoverMessage;
 import it.luciorizzi.scacchi.model.message.MessageWrapper;
 import it.luciorizzi.scacchi.model.message.MoveMessage;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.service.LobbyService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Controller
 public class GameboardController {
@@ -40,5 +47,12 @@ public class GameboardController {
 
     private void socketSendOutcome(String lobbyId, GameOutcome gameOutcome) {
         simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", gameOutcome);
+    }
+
+
+    @MessageExceptionHandler(LobbyActionException.class) //TODO: Maybe remove, not sure its really useful
+    public ApplicationError handleLobbyActionException(HttpServletRequest reqest, Exception exception) {
+        HttpStatus status = ((LobbyActionException) exception).getStatus();
+        return new ApplicationError(status.getReasonPhrase(), exception.getMessage()); //for now just use http status as cause
     }
 }

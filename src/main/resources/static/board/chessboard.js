@@ -34,6 +34,8 @@ function setCanvasSize() {
     cellSize = canvasSize / BOARD_SIZE;
 }
 
+const ctx = canvas.getContext('2d');
+
 const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
 
 let arrowStart = {};
@@ -158,8 +160,6 @@ function resizeCanvas() {
     board.draw();
 }
 
-const ctx = canvas.getContext('2d');
-
 //from codepen
 function drawArrow(fromy, fromx, toy, tox, color){
     const headLength = cellSize / 3;
@@ -208,7 +208,7 @@ function movePiece(piece, row, col, promotion = null) {
     board.draw();
 }
 
-function applyGameOver(outcome) {
+function applyGameOver(outcome) { //TODO: implement
     switch (outcome) {
         case 'DRAW':
         case 'WHITE_WON':
