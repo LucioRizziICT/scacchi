@@ -22,7 +22,7 @@ body {
 
 #chessboardDiv {
     width: calc(100% - 20px);
-    height: 100vh;
+    height: calc(100vh - 20px);
     margin: 10px;
 }
 
@@ -68,6 +68,33 @@ button:hover {
 }
 .float-right {
     float: right;
+}
+.players {
+    padding: 0;
+}
+
+.playerLabel {
+    border: 2px solid #940404;
+    padding: 5px;
+    font-size: 20px;
+    margin: 0;
+}
+
+.playerLabel2 {
+    border-top: 0;
+}
+
+.playerLabelColor-WHITE {
+    background-color: #f0f0f0;
+    color: #150707;
+}
+
+.playerLabelColor-BLACK {
+    background-color: #838383;
+    color: #150707;
+}
+@media (max-width: 980px) {
+    /*TODO make the menu responsive changing labels to icons*/
 }
 
 @media (max-width: 800px) {
