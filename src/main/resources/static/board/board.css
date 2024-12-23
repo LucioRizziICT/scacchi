@@ -37,7 +37,7 @@ body {
     padding: 10px;
 }
 
-#topnav {
+.topnav {
     background-color: #af7d54;
     padding: 5px;
 }
@@ -92,9 +92,6 @@ button:hover {
 .playerLabelColor-BLACK {
     background-color: #838383;
     color: #150707;
-}
-@media (max-width: 980px) {
-    /*TODO make the menu responsive changing labels to icons*/
 }
 
 @media (max-width: 800px) {

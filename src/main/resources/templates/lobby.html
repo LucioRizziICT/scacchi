@@ -25,12 +25,19 @@
             <canvas id="chessboardCanvas"></canvas>
         </div>
         <div id="lobbyInfo">
-            <div id="topnav">
-                <button type="button" id="buttonLobbyInfo" class="button-active">Partita</button>
-                <button type="button" id="buttonLobbyChat">Chat</button>
-                <button type="button" id="buttonLobbySettings">Impostazioni</button>
+            <div id="topnav-label" class="topnav">
+                <button type="button" onclick="selectLobbyInfoMenu();" class="button-active">Partita</button>
+                <button type="button" onclick="selectLobbyChatMenu();">Chat</button>
+                <button type="button" onclick="selectLobbySettingsMenu();">Impostazioni</button>
 
-                <button type="button" id="buttonMenu" class="float-right" onclick="location.href = '../' ">Men&ugrave; principale</button>
+                <button type="button" class="float-right" onclick="location.href = '../' ">Men&ugrave; principale</button>
+            </div>
+            <div id="topnav-icon" class="topnav">
+                <button type="button" onclick="selectLobbyInfoMenu();" class="button-active">&#9817;</button>
+                <button type="button" onclick="selectLobbyChatMenu();">&#128488;</button>
+                <button type="button" onclick="selectLobbySettingsMenu();">&#9881;</button>
+
+                <button type="button" class="float-right" onclick="location.href = '../' ">&#8962;</button>
             </div>
             <div id="lobbySelectedContent">
                 <h2 id="lobbyName" th:text="${lobbyName}"></h2>
@@ -50,6 +57,7 @@
     const retrievedLobbyId = document.getElementById("lobbyId").innerText;
 </script>
 <script src="../js/common.js"></script>
+<script src="../js/lobby.js"></script>
 <script src="../board/chessboard.js"></script>
 <script src="../board/chessboardsocket.js"></script>
 <script>
