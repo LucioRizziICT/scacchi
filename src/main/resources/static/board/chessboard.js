@@ -209,7 +209,10 @@ function movePiece(piece, row, col, promotion = null) {
     board.draw();
 }
 
-function applyGameOver(outcome) { //TODO: implement
+function applyGameOver(outcome) { //TODO: Cambiare con testo custom, non valore dell'enum (ex. "WHITE_WIN")
+    document.getElementById("gameEndModalStatus").innerText = outcome.status;
+    document.getElementById("gameEndModalCause").innerText = outcome.cause;
+    openGameEndModal();
 }
 
 function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {

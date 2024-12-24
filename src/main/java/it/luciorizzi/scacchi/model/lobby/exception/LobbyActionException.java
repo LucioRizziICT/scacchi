@@ -1,4 +1,4 @@
-package it.luciorizzi.scacchi.model.lobby;
+package it.luciorizzi.scacchi.model.lobby.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

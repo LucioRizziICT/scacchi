@@ -104,7 +104,7 @@ input[type="text"] {
     color: #150707;
 }
 
-#inviteModal {
+.modalLayer {
     display: none;
     position: fixed;
     z-index: 10;
@@ -120,7 +120,7 @@ input[type="text"] {
 
 }
 
-#inviteModalContent {
+.modalContent {
     background-color: #f4f4f4;
     margin: auto;
     padding: 20px;

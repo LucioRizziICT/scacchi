@@ -29,13 +29,25 @@ function writeInviteModalLink() {
     inviteLink.value = window.location.href;
 }
 
-window.onclick = function(event) {
-    checkCloseModal(event);
-}
-
-function checkCloseModal(event) {
+function checkCloseInviteModal(event) {
     if(event.target === inviteModal) {
         closeInviteModal();
+    }
+}
+
+const gameEndModal = document.getElementById("gameEndModal");
+
+function openGameEndModal() {
+    gameEndModal.style.display = "block";
+}
+
+function closeGameEndModal() {
+    gameEndModal.style.display = "none";
+}
+
+function checkCloseGameEndModal(event) {
+    if(event.target === gameEndModal) {
+        closeGameEndModal();
     }
 }
 
@@ -44,4 +56,9 @@ function copyInviteLink() {
     inviteLink.select();
     inviteLink.setSelectionRange(0, 99999);
     document.execCommand("copy");
+}
+
+window.onclick = function(event) {
+    checkCloseInviteModal(event);
+    checkCloseGameEndModal(event)
 }

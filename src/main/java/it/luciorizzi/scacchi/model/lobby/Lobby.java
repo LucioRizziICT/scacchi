@@ -4,6 +4,7 @@ import it.luciorizzi.scacchi.model.GameBoard;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
 @Getter
 @AllArgsConstructor
 public class Lobby {
@@ -31,6 +32,6 @@ public class Lobby {
     }
 
     public boolean gameStarted() {
-        return isFull() && gameBoard.isOngoing();
+        return isFull();
     }
 }

@@ -50,12 +50,25 @@
             </div>
         </div>
     </div>
-    <div id="inviteModal">
-        <div id="inviteModalContent">
+    <div id="inviteModal" class="modalLayer">
+        <div id="inviteModalContent" class="modalContent">
             <span class="close" onclick="closeInviteModal();">&times;</span>
             <h3>Invia il seguente link a chi desideri invitare.</h3>
             <input type="text" id="inviteModalLink" readonly>
             <button type="button" onclick="copyInviteLink();">Copia</button>
+        </div>
+    </div>
+    <div id="gameEndModal" class="modalLayer" th:style="${gameOutcome != null ? 'display: block;' : ''}">
+        <div id="gameEndModalContent" class="modalContent">
+            <span class="close" onclick="closeGameEndModal();">&times;</span>
+
+            <h3 th:id="'gameEndModalStatus'" class="gameEndModalStatus" th:if="${gameOutcome == null ? '' : (#strings.equalsIgnoreCase('WHITE_WIN', gameOutcome.status) ? 'Il bianco vince' : (#strings.equalsIgnoreCase('BLACK_WIN', gameOutcome.status) ? 'Il nero vince' : 'Pareggio' ) ) }">Vittoria del Bianco</h3>
+
+
+            <h4 id="gameEndModalCause" class="gameEndModalCause" th:text="${gameOutcome != null ? gameOutcome.cause : ''}"></h4>
+
+            <button type="button" onclick="closeGameEndModal();">Chiudi</button>
+            <button type="button" onclick="location.href = '../'">Men&ugrave; principale</button>
         </div>
     </div>
 </div>

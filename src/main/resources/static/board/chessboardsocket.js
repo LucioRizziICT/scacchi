@@ -9,6 +9,8 @@ stompClient.onConnect = function(frame) {
             return;
         }
         gamestarted = true;
+        const data = JSON.parse(message.body);
+        document.getElementById("player2NameSpan").innerText = data.player2.name;
         board.draw();
     });
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/move', function(message) {
@@ -17,7 +19,7 @@ stompClient.onConnect = function(frame) {
     });
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/gameover', function(message) {
         const data = JSON.parse(message.body);
-        applyGameOver(data);
+        applyGameOver(data.outcome);
     });
 };
 

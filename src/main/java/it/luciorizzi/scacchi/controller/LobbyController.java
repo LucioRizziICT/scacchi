@@ -1,8 +1,8 @@
 package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import it.luciorizzi.scacchi.model.lobby.LobbyActionException;
-import it.luciorizzi.scacchi.model.lobby.LobbyNotFoundException;
+import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
+import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.service.LobbyService;

@@ -3,8 +3,11 @@ package it.luciorizzi.scacchi.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.lobby.*;
+import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
+import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
+import it.luciorizzi.scacchi.model.type.GameoverCause;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.util.RandomToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +100,7 @@ public class LobbyService {
         return getLobby(lobbyId);
     }
 
-    private Lobby getLobby(String lobbyId) {
+    public Lobby getLobby(String lobbyId) {
         Lobby lobby = lobbies.get(lobbyId);
         if (lobby == null) {
             throw new LobbyNotFoundException("Lobby id: " + lobbyId);

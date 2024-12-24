@@ -1,23 +1,17 @@
 package it.luciorizzi.scacchi.controller;
 
-import it.luciorizzi.scacchi.model.lobby.LobbyActionException;
-import it.luciorizzi.scacchi.model.message.ApplicationError;
 import it.luciorizzi.scacchi.model.message.GameoverMessage;
 import it.luciorizzi.scacchi.model.message.MessageWrapper;
 import it.luciorizzi.scacchi.model.message.MoveMessage;
+import it.luciorizzi.scacchi.model.message.StartMessage;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.service.LobbyService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Optional;
 
@@ -60,7 +54,7 @@ public class GameboardController {
 
     private void sendSocketStart(String lobbyId) {
         if (lobbyService.gameStarted(lobbyId)) {
-            simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/start", Optional.empty());
+            simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/start", new StartMessage(lobbyService.getLobby(lobbyId).getPlayerTwo()));
         }
     }
 }
