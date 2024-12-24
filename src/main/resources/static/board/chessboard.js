@@ -73,6 +73,9 @@ canvas.addEventListener('mousedown', function(event) {
         const col = Math.floor(x / cellSize);
 
         if (board.board[row][col] != null && board.board[row][col].color === playerColor) {
+            if (heldPiece != null) {
+                heldPiece.held = false;
+            }
             heldPiece = board.board[row][col];
             heldPiece.held = true;
             selectedPiece = heldPiece;
