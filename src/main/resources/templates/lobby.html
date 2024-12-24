@@ -45,7 +45,18 @@
                     <p th:class="'playerLabel playerLabelColor-' + ${player1Color}">Giocatore 1 <span th:if="${playerNumber == 1}">(Tu)</span>: <span id="player1NameSpan" th:text="${player1Name}"></span> <span th:text="${#strings.equalsIgnoreCase(player1Color, 'WHITE') ? '&#9812;' : '&#9818;'}"></span></p>
                     <p th:class="'playerLabel playerLabel2 playerLabelColor-' + ${player2Color}">Giocatore 2 <span th:if="${playerNumber == 2}">(Tu)</span>: <span id="player2NameSpan" th:text="${player2Name == null ? 'In attesa...' : player2Name}"></span> <span th:text="${#strings.equalsIgnoreCase(player2Color, 'WHITE') ? '&#9812;' : '&#9818;'}"></span></p>
                 </div>
+                <div id="invitePlayerDiv">
+                    <button type="button" onclick="openInviteModal();">Invita alla lobby</button>
+                </div>
             </div>
+        </div>
+    </div>
+    <div id="inviteModal">
+        <div id="inviteModalContent">
+            <span class="close" onclick="closeInviteModal();">&times;</span>
+            <h3>Invia il seguente link a chi desideri invitare.</h3>
+            <input type="text" id="inviteModalLink" readonly>
+            <button type="button" onclick="copyInviteLink();">Copia</button>
         </div>
     </div>
 </div>
@@ -61,6 +72,9 @@
 <script src="../board/chessboard.js"></script>
 <script src="../board/chessboardsocket.js"></script>
 <script>
-    window.onload = stompClient.activate();
+    window.onload = function () {
+        stompClient.activate();
+        writeInviteModalLink();
+    }
 </script>
 </html>
