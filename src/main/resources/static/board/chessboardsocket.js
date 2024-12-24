@@ -3,6 +3,14 @@ const stompClient = new StompJs.Client({
 });
 
 stompClient.onConnect = function(frame) {
+    stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/start', function (message) {
+        console.log('Game started');
+        if (gamestarted) {
+            return;
+        }
+        gamestarted = true;
+        board.draw();
+    });
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/move', function(message) {
         const data = JSON.parse(message.body);
         applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck);

@@ -18,7 +18,7 @@ public class GameboardWebsocketConfiguration implements WebSocketMessageBrokerCo
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic");
-        config.setApplicationDestinationPrefixes("/app");
+        config.setApplicationDestinationPrefixes("/app", "/topic");
     }
 
     @Override

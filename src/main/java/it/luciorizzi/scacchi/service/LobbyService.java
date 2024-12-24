@@ -177,4 +177,9 @@ public class LobbyService {
         Lobby lobby = getValidLobby(token, lobbyId);
         return lobby.getGameBoard().getMovesHistory().getOutcome();
     }
+
+    public boolean gameStarted(String lobbyId) {
+        Lobby lobby = getLobby(lobbyId);
+        return lobby.gameStarted();
+    }
 }

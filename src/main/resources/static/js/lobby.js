@@ -27,7 +27,6 @@ function closeInviteModal() {
 function writeInviteModalLink() {
     const inviteLink = document.getElementById("inviteModalLink");
     inviteLink.value = window.location.href;
-    console.log(inviteLink.value);
 }
 
 window.onclick = function(event) {

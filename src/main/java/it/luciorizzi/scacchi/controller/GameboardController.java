@@ -15,8 +15,11 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.Optional;
 
 @Controller
 public class GameboardController {
@@ -47,5 +50,17 @@ public class GameboardController {
 
     private void socketSendOutcome(String lobbyId, GameoverMessage message) {
         simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/gameover", message);
+    }
+
+    @SubscribeMapping("/lobby/{lobbyId}/move")
+    public void newClient(@DestinationVariable String lobbyId) {
+        System.out.println("New client connected to lobby " + lobbyId);
+        sendSocketStart(lobbyId);
+    }
+
+    private void sendSocketStart(String lobbyId) {
+        if (lobbyService.gameStarted(lobbyId)) {
+            simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/start", Optional.empty());
+        }
     }
 }
