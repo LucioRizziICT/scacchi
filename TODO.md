@@ -1,6 +1,8 @@
 ## Robba da fare
 
 ### Essenziale
+- [x] sistemare menù lato lobby
+- [ ] refactor canvas animato
 - [ ] Scrivere la documentazione
 - [ ] personalizzazione mosse
 - [ ] impostazioni lobby
@@ -8,7 +10,8 @@
 - [ ] segnare ultima mossa giocata
 - [ ] possibilità di rivedere partite finite senza perdere il token attuale
 - [ ] aggiungere spettatori
-- [ ] aggiungere chat
+- [x] aggiungere chat
+- [ ] migliorare grafica chat
 - [ ] aggiungere suoni
 - [ ] aggingere pezzi catturati
 - [ ] aggiungere possibilità di abbandonare partita
@@ -19,6 +22,7 @@
 - [ ] mostrare scacchi per entrambi giocatori non solo quelli subiti
 - [ ] salvare preferenze utente
 - [x] password se nulla sempre valida
+- [ ] gestione errori e messaggi di errore e pagine di errore
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni

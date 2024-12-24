@@ -21,6 +21,10 @@ stompClient.onConnect = function(frame) {
         const data = JSON.parse(message.body);
         applyGameOver(data.outcome);
     });
+    stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/chat', function(message) {
+        const data = JSON.parse(message.body);
+        appendChatMessage(data);
+    });
 };
 
 stompClient.onWebSocketError = function(error) {
