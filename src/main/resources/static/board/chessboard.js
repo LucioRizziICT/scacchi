@@ -45,6 +45,7 @@ let choosingPromotionCol = false;
 let kingPosition = { row: 0, col: 0 };
 let checked = false;
 let gameover = false;
+let gamestarted = retrievedGameStarted;
 
 let mouseX = 0;
 let mouseY = 0;
@@ -55,7 +56,7 @@ canvas.addEventListener('mousemove', function(event) {
 });
 
 canvas.addEventListener('mousedown', function(event) {
-    if (gameover)
+    if (gameover || !gamestarted)
         return;
 
     if (choosingPromotionCol !== false) {
@@ -94,7 +95,7 @@ canvas.addEventListener('mousedown', function(event) {
 });
 
 canvas.addEventListener('mouseup', function(event) {
-    if (gameover)
+    if (gameover || !gamestarted)
         return;
 
     const x = event.offsetX;
@@ -209,10 +210,6 @@ function movePiece(piece, row, col, promotion = null) {
 }
 
 function applyGameOver(outcome) { //TODO: implement
-    switch (outcome) {
-        case 'DRAW':
-        case 'WHITE_WON':
-    }
 }
 
 function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
@@ -349,6 +346,7 @@ function Chessboard () {
         this.drawBackground();
         this.drawPieces();
         this.drawMovableSpots();
+        this.drawGameNotStarted();
     }
 
     this.drawBackground = function () {
@@ -389,6 +387,18 @@ function Chessboard () {
         }
     }
 
+    this.drawGameNotStarted = function () {
+        const canvasSize = canvas.width;
+        if (!gamestarted) {
+            ctx.fillStyle = COLORS.LAYER;
+            ctx.fillRect(0, 0, canvasSize, canvasSize);
+            ctx.font = "30px Arial";
+            ctx.fillStyle = COLORS.BLACK;
+            ctx.textAlign = "center";
+            ctx.fillText("Waiting for an opponent...", canvasSize / 2, canvasSize / 2);
+        }
+    }
+
     this.initialize = function () {
         const initialSetup = JSON.parse(retrievedPosition);
 
@@ -419,6 +429,7 @@ board.draw();
 
 function drawPromotionMenu(col) {
     board.draw();
+    const canvasSize = canvas.width;
     ctx.fillStyle = COLORS.LAYER;
     ctx.fillRect(0, 0, canvasSize, canvasSize);
 

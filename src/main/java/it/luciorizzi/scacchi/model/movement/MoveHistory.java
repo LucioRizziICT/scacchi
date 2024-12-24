@@ -12,7 +12,7 @@ import java.util.List;
 public class MoveHistory {
     private final List<MoveHistoryEntry> history = new ArrayList<>();
     @Setter
-    private GameOutcome outcome;
+    private GameOutcome outcome = null;
 
     public void add(Move move, Piece movedPiece, ThreatType threatType) {
         history.add(new MoveHistoryEntry(move, movedPiece, threatType));

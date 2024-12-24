@@ -154,6 +154,8 @@ public class LobbyService {
         modelAndView.addObject("lobbyName", lobby.getName());
         modelAndView.addObject("lobbyId", lobbyId);
         modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
+        modelAndView.addObject("gameStarted", lobby.gameStarted());
+        modelAndView.addObject("gameOutcome", lobby.getGameBoard().getMovesHistory().getOutcome());
         return modelAndView;
     }
 
