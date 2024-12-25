@@ -13,8 +13,8 @@ public class LobbyProperties {
     private boolean isPrivate;
     private boolean isRated;
     private boolean isTimed;
-    private int time; // in seconds
-    private int increment; // in seconds
+    private long time; // in seconds
+    private long increment; // in seconds
     private boolean allowsSpectators;
 
     public boolean allowsSpectators() {
