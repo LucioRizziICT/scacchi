@@ -24,6 +24,7 @@ public class GameBoard { //TODO: add thread safety if needed
     private final Map<String, Integer> previousStates = new HashMap<>();
     private Pawn enPassantablePawn = null;
     private int fiftyMovesCounter = 0;
+    private ChessTimer timer;
     @Getter
     private final MoveHistory movesHistory = new MoveHistory();
 
@@ -32,6 +33,12 @@ public class GameBoard { //TODO: add thread safety if needed
     public GameBoard() {
         initialize();
         saveCurrentState();
+    }
+
+    public GameBoard(int timeSeconds, int incrementSeconds) {
+        initialize();
+        saveCurrentState();
+        timer = new ChessTimer(timeSeconds, incrementSeconds);
     }
 
     public char[][] getBoard() {
@@ -239,6 +246,12 @@ public class GameBoard { //TODO: add thread safety if needed
         switchTurn();
         addMoveToHistory(move);
         checkGameStatus();
+        if (isOngoing && timer != null) {
+            timer.switchTurn();
+        }
+        if (!isOngoing && timer != null) {
+            timer.stop();
+        }
     }
 
     private void switchTurn() {
@@ -369,19 +382,19 @@ public class GameBoard { //TODO: add thread safety if needed
     }
 
     private boolean isMaterialInsufficient() {
-        if(whitePieces.size() >= 3 || blackPieces.size() >= 3)
+        return isMaterialInsufficient(PieceColor.WHITE) && isMaterialInsufficient(PieceColor.BLACK);
+    }
+
+    private boolean isMaterialInsufficient(PieceColor color) {
+        Set<Piece> pieces = getPieces(color);
+        if(pieces.size() >= 3)
             return false;
         for (Piece piece : whitePieces) {
             if (!(piece instanceof Bishop || piece instanceof Knight || piece instanceof King)) {
                 return false;
             }
         }
-        for (Piece piece : blackPieces) {
-            if (piece instanceof Bishop || piece instanceof Knight) {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
 
     private boolean gameRepeatedThreeTimes() {
@@ -470,6 +483,14 @@ public class GameBoard { //TODO: add thread safety if needed
         copy.applyMove(move);
         copy.cachedCheck = null;
         return copy.isCheck();
+    }
+
+    public void handleTimeOver(PieceColor color) {
+        isOngoing = false;
+        if (isMaterialInsufficient(color.opposite()))
+            movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.TIME_VS_INSUFFICIENT_MATERIAL) );
+        else
+            movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.TIME_EXPIRED) );
     }
 
     //TODO validate move method
