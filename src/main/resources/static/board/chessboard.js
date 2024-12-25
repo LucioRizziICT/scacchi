@@ -18,7 +18,8 @@ const COLORS =  {
     MOVABLE_SPOT: 'rgba(217,217,217,0.82)',
     LAYER: 'rgba(33,33,33,0.56)',
     PROMOTION_MENU_BG: '#f1e6d4',
-    BLACK: '#000000'
+    BLACK: '#000000',
+    LAST_MOVE: 'rgba(255, 255, 0, 0.5)'
 };
 
 const canvas = document.getElementById('chessboardCanvas');
@@ -46,6 +47,7 @@ let kingPosition = { row: 0, col: 0 };
 let checked = false;
 let gameover = false;
 let gamestarted = retrievedGameStarted;
+let lastMove = null;
 
 let mouseX = 0;
 let mouseY = 0;
@@ -222,6 +224,8 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     const from = getCorrectedPosition(fromRow, fromCol);
     const to = getCorrectedPosition(toRow, toCol);
 
+    lastMove = { from: from, to: to };
+
     const movedPiece = board.board[from.row][from.col];
     const destinationPiece = board.board[to.row][to.col];
 
@@ -350,6 +354,7 @@ function Chessboard () {
 
     this.draw = function () {
         this.drawBackground();
+        this.drawLastMove();
         this.drawPieces();
         this.drawMovableSpots();
         this.drawGameNotStarted();
@@ -404,6 +409,18 @@ function Chessboard () {
             ctx.fillText("Waiting for an opponent...", canvasSize / 2, canvasSize / 2);
         }
     }
+
+    this.drawLastMove = function () {
+        if (lastMove !== null) {
+            const from = lastMove.from;
+            const to = lastMove.to;
+
+            ctx.fillStyle = COLORS.LAST_MOVE;
+            ctx.fillRect(from.col * cellSize, from.row * cellSize, cellSize, cellSize);
+            ctx.fillRect(to.col * cellSize, to.row * cellSize, cellSize, cellSize);
+        }
+    }
+
 
     this.initialize = function () {
         const initialSetup = JSON.parse(retrievedPosition);

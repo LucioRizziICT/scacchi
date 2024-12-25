@@ -4,10 +4,10 @@
 - [x] sistemare menù lato lobby
 - [ ] refactor canvas animato
 - [ ] Scrivere la documentazione
-- [ ] personalizzazione mosse
+- [ ] personalizzazione frecce
 - [ ] impostazioni lobby
 - [ ] timer per partite a tempo
-- [ ] segnare ultima mossa giocata
+- [x] segnare ultima mossa giocata
 - [ ] possibilità di rivedere partite finite senza perdere il token attuale
 - [ ] aggiungere spettatori
 - [x] aggiungere chat
