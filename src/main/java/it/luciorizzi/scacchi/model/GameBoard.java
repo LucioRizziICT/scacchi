@@ -38,7 +38,7 @@ public class GameBoard { //TODO: add thread safety if needed
     public GameBoard(int timeSeconds, int incrementSeconds) {
         initialize();
         saveCurrentState();
-        timer = new ChessTimer(timeSeconds, incrementSeconds);
+        timer = new ChessTimer(timeSeconds, incrementSeconds, this);
     }
 
     public char[][] getBoard() {
@@ -466,10 +466,10 @@ public class GameBoard { //TODO: add thread safety if needed
         if (getPiece(move.getOrigin()).getColor() != turn) {
             return true;
         }
-        return whouldAllowCheck(move);
+        return wouldAllowCheck(move);
     }
 
-    private boolean whouldAllowCheck(Move move) {
+    private boolean wouldAllowCheck(Move move) {
         GameBoard copy = new GameBoard();
         copy.turn = turn;
         copy.whitePieces = new HashSet<>(whitePieces);

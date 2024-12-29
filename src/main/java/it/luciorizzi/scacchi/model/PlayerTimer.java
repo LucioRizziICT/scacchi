@@ -11,6 +11,8 @@ public class PlayerTimer {
     private final long incrementMillis;
     PieceColor color;
 
+    private transient long lastNanoTime;
+
     private final ChessTimer parentTimer;
 
     public PlayerTimer(long timeMillis, long incrementMillis, PieceColor color, ChessTimer parentTimer) {
@@ -20,10 +22,17 @@ public class PlayerTimer {
         this.parentTimer = parentTimer;
     }
 
-    private final Timer timer = new Timer(10, this::updateTimer);
+    private final Timer timer = new Timer(100, this::updateTimer);
 
     private void updateTimer(ActionEvent actionEvent) {
-        timeMillis -= 10;
+        long currentNanoTime = System.nanoTime();
+        long elapsedMillis = (currentNanoTime - lastNanoTime) / 1_000_000;
+        lastNanoTime = currentNanoTime;
+        timeMillis -= elapsedMillis;
+        checkTimerFinished();
+    }
+
+    private void checkTimerFinished() {
         if (timeMillis <= 0) {
             timer.stop();
             parentTimer.notifyTimeOver(color);
@@ -32,10 +41,15 @@ public class PlayerTimer {
 
     public void start() {
         timer.start();
+        lastNanoTime = System.nanoTime();
     }
 
     public void stop() {
         timer.stop();
+        long currentNanoTime = System.nanoTime();
+        long elapsedMillis = (currentNanoTime - lastNanoTime) / 1_000_000;
+        lastNanoTime = currentNanoTime;
+        timeMillis -= elapsedMillis;
         timeMillis += incrementMillis;
     }
 }

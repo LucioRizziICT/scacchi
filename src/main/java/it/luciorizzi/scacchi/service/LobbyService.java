@@ -7,7 +7,6 @@ import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
-import it.luciorizzi.scacchi.model.type.GameoverCause;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.util.RandomToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ public class LobbyService {
     public Map<String, Object> createNewGame(String lobbyName, String playerName, String password, PieceColor playerOneColor, String lobbyType) {
         String lobbyId = RandomToken.generateToken(12);
         Player playerOne = new Player(playerName, lobbyId, playerOneColor);
-        LobbyProperties properties = LobbyProperties.defaultProperties();
+        LobbyProperties properties = LobbyProperties.withDefaultProperties();
         properties.setPrivate(lobbyType.equals("private"));
         lobbies.put( lobbyId, new Lobby(lobbyName, playerOne, password, properties) ); //todo cambiare settings di default
         String token = RandomToken.generateToken(32);
@@ -41,7 +40,7 @@ public class LobbyService {
         result.put("lobbyId", lobbyId);
         result.put("playerToken", token);
         return result;
-    }
+    } //DTO
 
     public String joinLobby(String lobbyId, String playerName, String password) {
         Lobby lobby = getLobby(lobbyId);

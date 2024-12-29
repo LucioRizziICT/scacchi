@@ -1,6 +1,7 @@
 package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import it.luciorizzi.scacchi.model.ChessTimer;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
@@ -68,6 +69,14 @@ public class LobbyController {
         modelAndView.addObject("lobbyAllowsSpectators", true);
         return modelAndView;
     }
+
+    @GetMapping("/lobby/testTimer")
+    public void testTimer() {
+        ChessTimer timer = new ChessTimer(180, 0, null);
+        System.out.println("Starting timer at " + System.nanoTime());
+        timer.switchTurn();
+    }
+
 
     //TODO add complete errors handling and not found pages
 

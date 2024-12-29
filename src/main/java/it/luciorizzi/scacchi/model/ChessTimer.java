@@ -3,19 +3,21 @@ package it.luciorizzi.scacchi.model;
 import it.luciorizzi.scacchi.model.type.PieceColor;
 
 public class ChessTimer {
-    private final PlayerTimer whiteTimer;
-    private final PlayerTimer blackTimer;
-    private PieceColor runningColor = PieceColor.WHITE;
-
     private GameBoard parentBoard;
 
-    public ChessTimer(long timeSeconds, long incrementSeconds) {
-        whiteTimer = new PlayerTimer(timeSeconds*1000, incrementSeconds*1000, PieceColor.WHITE, this);
-        blackTimer = new PlayerTimer(timeSeconds*1000, incrementSeconds*1000, PieceColor.BLACK, this);
+    private PlayerTimer whiteTimer;
+    private PlayerTimer blackTimer;
+
+    private PieceColor runningTimerColor = PieceColor.BLACK;
+
+    public ChessTimer(long time, long increment, GameBoard parentBoard) {
+        whiteTimer = new PlayerTimer(time * 1_000, increment * 1_000, PieceColor.WHITE, this);
+        blackTimer = new PlayerTimer(time * 1_000, increment * 1_000, PieceColor.BLACK, this);
+        this.parentBoard = parentBoard;
     }
 
-    public PlayerTimer getTimer(PieceColor color) {
-        return color == PieceColor.WHITE ? whiteTimer : blackTimer;
+    public PlayerTimer getCurrentTimer() {
+        return runningTimerColor == PieceColor.WHITE ? whiteTimer : blackTimer;
     }
 
     public void stop() {
@@ -24,13 +26,13 @@ public class ChessTimer {
     }
 
     public void switchTurn() {
-        getTimer(runningColor).stop();
-        runningColor = runningColor.opposite();
-        getTimer(runningColor).start();
+        getCurrentTimer().stop();
+        runningTimerColor = runningTimerColor.opposite();
+        getCurrentTimer().start();
     }
 
     public void notifyTimeOver(PieceColor color) {
         parentBoard.handleTimeOver(color);
-        //TODO: Add gameover websocket message
+        //TODO: Add gameover websocket message somewhere, maybe in Gameboard
     }
 }
