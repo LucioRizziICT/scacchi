@@ -17,4 +17,11 @@ public class RandomToken {
         return sb.toString();
     }
 
+    public static String generatePlayerToken() {
+        return generateToken(32);
+    }
+
+    public static String generateLobbyToken() {
+        return generateToken(12);
+    }
 }

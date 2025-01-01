@@ -5,7 +5,7 @@ function createGame() {
     let color = document.getElementById('pieceColor').value;
     color = color === 'random' ? Math.random() > 0.5 ? 'WHITE' : 'BLACK' : color;
     let lobbyType = document.getElementById('lobbyType').value;
-    let url = 'lobby/createNewGame?lobbyName=' + lobbyName + '&playerName=' + playerName + '&password=' + password + '&color=' + color + '&lobbyType=' + lobbyType;
+    let url = 'lobby?lobbyName=' + lobbyName + '&playerName=' + playerName + '&password=' + password + '&color=' + color + '&lobbyType=' + lobbyType;
 
     fetch(url , {
         method: 'POST'

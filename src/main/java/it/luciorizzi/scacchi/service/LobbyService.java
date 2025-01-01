@@ -28,13 +28,13 @@ public class LobbyService {
     private final Map<String, Lobby> lobbies = new HashMap<>();
     private final Map<String, Player> players = new HashMap<>();
 
-    public Map<String, Object> createNewGame(String lobbyName, String playerName, String password, PieceColor playerOneColor, String lobbyType) {
-        String lobbyId = RandomToken.generateToken(12);
+    public Map<String, Object> createLobby(String lobbyName, String playerName, String password, PieceColor playerOneColor, String lobbyType) {
+        String lobbyId = RandomToken.generateLobbyToken();
         Player playerOne = new Player(playerName, lobbyId, playerOneColor);
         LobbyProperties properties = LobbyProperties.withDefaultProperties();
         properties.setPrivate(lobbyType.equals("private"));
         lobbies.put( lobbyId, new Lobby(lobbyName, playerOne, password, properties) ); //todo cambiare settings di default
-        String token = RandomToken.generateToken(32);
+        String token = RandomToken.generatePlayerToken();
         players.put(token, playerOne);
         Map<String, Object> result = new HashMap<>(); //TODO: Cambiare con DTO quando implementato
         result.put("lobbyId", lobbyId);
@@ -52,7 +52,7 @@ public class LobbyService {
         }
         Player playerTwo = new Player(playerName, lobbyId, lobby.getPlayerOne().getColor().opposite());
         lobby.setPlayerTwo(playerTwo);
-        String token = RandomToken.generateToken(32);
+        String token = RandomToken.generatePlayerToken();
         players.put(token, playerTwo);
         return token;
     }

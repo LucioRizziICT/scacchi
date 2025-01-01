@@ -1,0 +1,259 @@
+openapi: 3.0.3
+info:
+  title: Scacchi
+  description: |-
+    ## App scacchi
+    ### TODO description
+  contact:
+    email: lucio.rizzi.it@gmail.com
+  version: 0.0.1
+externalDocs:
+  description: "Full app documentation"
+  url: https://github.com/LucioRizziICT/scacchi/tree/master#readme
+servers:
+  - url: https://localhost:8080/scacchi
+tags:
+  - name: lobby
+    description: Api for creating and managing lobbies
+paths:
+  /lobby:
+    post:
+      tags:
+        - lobby
+      summary: Create a new lobby
+      description: Create a new lobby
+      operationId: createLobby
+      requestBody:
+        description: All the lobby infos
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LobbyDTO'
+        required: true
+      responses:
+        '200':
+          description: Lobby created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LobbyDTO'
+        '400':
+          description: Invalid input
+    get:
+      tags:
+        - lobby
+      summary: Get all public lobbies
+      description: Returns all public (non-private) lobbies that currently exist
+      operationId: getPublicLobbies
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LobbyDTO'
+        '400':
+          description: Invalid input
+  /lobby/{lobbyId}/possibleMoves:
+    get:
+      tags:
+        - lobby
+      summary: Get all possible moves of a piece
+      description: Returns a list of all the moves a piece can make
+      operationId: getPossibleMoves
+      parameters:
+        - name: lobbyId
+          in: path
+          description: ID of the lobby
+          required: true
+          schema:
+            type: string
+            pattern: '[a-zA-Z0-9]{12}'
+        - name: playerToken
+          in: cookie
+          description: Player token
+          required: true
+          schema:
+            type: string
+            pattern: '[a-zA-Z0-9]{32}'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MoveDTO'
+        '400':
+          description: Invalid input
+        '404':
+          description: Lobby not found
+  /lobby/{lobbyId}/gameStatus:
+    get:
+      tags:
+        - lobby
+      summary: Get the current state of the game
+      description: Returns the current state of the game
+      operationId: getGameStatus
+      parameters:
+        - name: lobbyId
+          in: path
+          description: ID of the lobby
+          required: true
+          schema:
+            type: string
+            pattern: '[a-zA-Z0-9]{12}'
+        - name: playerToken
+          in: cookie
+          description: Player token
+          required: true
+          schema:
+            type: string
+            pattern: '[a-zA-Z0-9]{32}'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStatusDTO'
+        '400':
+          description: Invalid input
+        '404':
+          description: Lobby not found
+  /lobby/{lobbyId}/join:
+    post:
+      tags:
+        - lobby
+      summary: Join the selected lobby
+      description: Try to add a player to the lobby
+      operationId: joinLobby
+      parameters:
+        - name: lobbyId
+          in: path
+          description: ID of the lobby
+          required: true
+          schema:
+            type: string
+            pattern: '[a-zA-Z0-9]{12}'
+      requestBody:
+        description: Lobby join request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LobbyJoinRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LobbyDTO'
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Lobby is full
+        '401':
+          description: Wrong Password
+        '404':
+          description: Lobby not found
+components:
+  schemas:
+    LobbyDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: Wv2MznJDJqdn
+        name:
+          type: string
+          example: Lobby di Anon
+        password:
+          type: string
+          example: RndmPsw123
+        playerOne:
+          $ref: '#/components/schemas/PlayerDTO'
+        playerTwo:
+          $ref: '#/components/schemas/PlayerDTO'
+        properties:
+          $ref: '#/components/schemas/LobbyPropertiesDTO'
+    PlayerDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Piero il Divoratore
+        color:
+          type: string
+          enum: ["WHITE", "BLACK"]
+    LobbyPropertiesDTO:
+      type: object
+      properties:
+        isPrivate:
+          type: boolean
+          default: true
+          example: true
+        isRated:
+          type: boolean
+          default: false
+          example: false
+        isTimed:
+          type: boolean
+          default: false
+          example: false
+        allowsSpectators:
+          type: boolean
+          default: true
+          example: true
+        timeSeconds:
+          type: integer
+          example: 1800
+        incrementSeconds:
+          type: integer
+          example: 5
+    MoveDTO:
+      type: object
+      properties:
+        origin:
+          $ref : '#/components/schemas/PositionDTO'
+        destination:
+          $ref : '#/components/schemas/PositionDTO'
+        moveType:
+          type: string
+          enum: ["MOVEMENT", "CAPTURE", "CASTLING", "EN_PASSANT"]
+        promotion:
+          type: string
+          enum: ["q", "r", "n", "b"]
+      required: [origin, destination]
+    PositionDTO:
+      type: object
+      properties:
+        row:
+          type: integer
+          example: 0
+          minimum: 0
+          maximum: 7
+        col:
+          type: integer
+          example: 0
+          minimum: 0
+          maximum: 7
+    GameStatusDTO:
+      type: string
+      enum: ["NOT_STARTED", "ONGOING", "ENDED"]
+    LobbyJoinRequestDTO:
+      type: object
+      properties:
+        playerName:
+          type: string
+          example: Simone
+        password:
+          type: string
+          example: RndmPsw123

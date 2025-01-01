@@ -27,18 +27,18 @@ public class LobbyController {
         this.lobbyService = lobbyService;
     }
 
-    @PostMapping("/lobby/createNewGame")
-    public ResponseEntity<Map<String, Object>> createNewGame(String lobbyName, String playerName, String password, PieceColor color, String lobbyType) {
-        return ResponseEntity.ok(lobbyService.createNewGame(lobbyName, playerName, password, color, lobbyType));
+    @PostMapping("/lobby")
+    public ResponseEntity<Map<String, Object>> createLobby(String lobbyName, String playerName, String password, PieceColor color, String lobbyType) {
+        return ResponseEntity.ok(lobbyService.createLobby(lobbyName, playerName, password, color, lobbyType));
     }
 
-    @GetMapping("/lobby/getLobbies")
+    @GetMapping("/lobby")
     public ResponseEntity<List<Map<String, Object>>> getLobbies() {
         return ResponseEntity.ok(lobbyService.getPublicLobbies());
     }
 
     @GetMapping("/lobby/{lobbyId}/possibleMoves")
-    public ResponseEntity<MoveSet> possibleMoves(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int row, int col) {
+    public ResponseEntity<MoveSet> getPossibleMoves(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, int row, int col) {
         return ResponseEntity.ok(lobbyService.getPossibleMoves(token, lobbyId, row, col));
     }
 
@@ -53,7 +53,7 @@ public class LobbyController {
     }
 
     @GetMapping("/lobby/{lobbyId}")
-    public ModelAndView getLobbyInfo(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) throws JsonProcessingException {
+    public ModelAndView getLobbyView(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) throws JsonProcessingException {
         return lobbyService.getLobbyView(token, lobbyId);
     }
 
