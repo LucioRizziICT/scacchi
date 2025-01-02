@@ -25,7 +25,7 @@
 - [ ] gestione errori e messaggi di errore e pagine di errore
 - [ ] togliere le ambiguità nelle mosse
 - [ ] terminare partita se uno dei due giocatori si disconnette
-- [ ] aggiungere definizioni openapi e DTO autogenerati
+- [x] aggiungere definizioni openapi e DTO autogenerati
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni
