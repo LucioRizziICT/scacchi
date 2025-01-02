@@ -6,8 +6,13 @@ import it.luciorizzi.scacchi.model.lobby.*;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
+import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.PieceColor;
+import it.luciorizzi.scacchi.openapi.model.LobbyDTO;
+import it.luciorizzi.scacchi.openapi.model.LobbyJoinRequestDTO;
+import it.luciorizzi.scacchi.openapi.model.PlayerDTO;
+import it.luciorizzi.scacchi.util.ApiDTOConverter;
 import it.luciorizzi.scacchi.util.RandomToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,41 +33,63 @@ public class LobbyService {
     private final Map<String, Lobby> lobbies = new HashMap<>();
     private final Map<String, Player> players = new HashMap<>();
 
-    public Map<String, Object> createLobby(String lobbyName, String playerName, String password, PieceColor playerOneColor, String lobbyType) {
+    public LobbyDTO createLobby(LobbyDTO lobbyDTO) {
         String lobbyId = RandomToken.generateLobbyToken();
-        Player playerOne = new Player(playerName, lobbyId, playerOneColor);
-        LobbyProperties properties = LobbyProperties.withDefaultProperties();
-        properties.setPrivate(lobbyType.equals("private"));
-        lobbies.put( lobbyId, new Lobby(lobbyName, playerOne, password, properties) ); //todo cambiare settings di default
+
+        Player playerOne = new Player(lobbyDTO.getPlayerOne().getName(), lobbyId, PieceColor.WHITE);
+
+        LobbyProperties createdProperties = LobbyProperties.withDefaultProperties(); //TODO: Cambiare con DTO quando lobby prop verranno implementate
+        createdProperties.setPrivate(lobbyDTO.getProperties().getIsPrivate());
+
+        Lobby createdLobby = new Lobby(lobbyDTO.getName(), playerOne, lobbyDTO.getPassword(), createdProperties);
+        lobbies.put( lobbyId, createdLobby ); //todo cambiare settings di default
+
         String token = RandomToken.generatePlayerToken();
         players.put(token, playerOne);
-        Map<String, Object> result = new HashMap<>(); //TODO: Cambiare con DTO quando implementato
-        result.put("lobbyId", lobbyId);
-        result.put("playerToken", token);
-        return result;
-    } //DTO
 
-    public String joinLobby(String lobbyId, String playerName, String password) {
+        return new LobbyDTO()
+                .id(lobbyId)
+                .name(createdLobby.getName())
+                .playerOne(new PlayerDTO()
+                        .token(token)
+                        .name(playerOne.getName())
+                        .color( ApiDTOConverter.toColorEnum(playerOne.getColor()) )
+                )
+                .playerTwo(null)
+                .properties( ApiDTOConverter.toLobbyPropertiesDTO(createdProperties) );
+    }
+
+    public LobbyDTO joinLobby(String lobbyId, LobbyJoinRequestDTO joinRequest) {
         Lobby lobby = getLobby(lobbyId);
-        if (lobby.getPassword() != null && !lobby.getPassword().equals(password)) {
+        if (lobby.getPassword() != null && !lobby.getPassword().equals(joinRequest.getPassword())) {
             throw new IllegalArgumentException("Wrong password");
         }
         if (lobby.isFull()) {
             throw new IllegalArgumentException("Lobby is full");
         }
-        Player playerTwo = new Player(playerName, lobbyId, lobby.getPlayerOne().getColor().opposite());
+
+        Player playerTwo = new Player(joinRequest.getPlayerName(), lobbyId, lobby.getPlayerOne().getColor().opposite());
         lobby.setPlayerTwo(playerTwo);
+
         String token = RandomToken.generatePlayerToken();
         players.put(token, playerTwo);
-        return token;
+
+        return new LobbyDTO()
+                .id(lobbyId)
+                .name( lobby.getName() )
+                .playerOne( ApiDTOConverter.toPlayerDTO(lobby.getPlayerOne()) )
+                .playerTwo( ApiDTOConverter.toPlayerDTO(playerTwo)
+                        .token(token)
+                )
+                .properties( ApiDTOConverter.toLobbyPropertiesDTO(lobby.getProperties()) );
     }
 
-    public MoveSet getPossibleMoves(String token, String lobbyId, int row, int col) {
+    public MoveSet getPossibleMoves(String token, String lobbyId, Position position) {
         Lobby lobby = getValidLobby(token, lobbyId);
         if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
             throw new IllegalArgumentException("Not your turn");
         }
-        return lobby.getGameBoard().getPossibleMoves(row, col);
+        return lobby.getGameBoard().getPossibleMoves(position);
     }
 
     public boolean move(String token, String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
@@ -115,18 +142,21 @@ public class LobbyService {
         return player;
     }
 
-    public List<Map<String, Object>> getPublicLobbies() {
-        List<Map<String, Object>> result = new ArrayList<>();
-        lobbies.forEach((id, lobby) -> {
+    public List<LobbyDTO> getPublicLobbies() {
+        List<LobbyDTO> result = new ArrayList<>();
+        lobbies.forEach( (id, lobby) -> {
             if (lobby.getProperties().isPrivate()) {
                 return;
             }
-            Map<String, Object> lobbyInfo = new HashMap<>();
-            lobbyInfo.put("id", id);
-            lobbyInfo.put("name", lobby.getName());
-            lobbyInfo.put("playerOne", lobby.getPlayerOne().getName());
-            lobbyInfo.put("playerTwo", lobby.getPlayerTwo() == null ? null : lobby.getPlayerTwo().getName());
-            result.add(lobbyInfo);
+
+            LobbyDTO lobbyDTO = new LobbyDTO()
+                    .id(id)
+                    .name(lobby.getName())
+                    .playerOne( ApiDTOConverter.toPlayerDTO(lobby.getPlayerOne()) )
+                    .playerTwo( ApiDTOConverter.toPlayerDTO(lobby.getPlayerTwo()) )
+                    .properties( ApiDTOConverter.toLobbyPropertiesDTO(lobby.getProperties()) );
+
+            result.add(lobbyDTO);
         });
         return result;
     }

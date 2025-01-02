@@ -23,6 +23,13 @@ paths:
       summary: Create a new lobby
       description: Create a new lobby
       operationId: createLobby
+      parameters:
+        - name: playerOneColor
+          in: query
+          description: Color of the first player
+          required: true
+          schema:
+            $ref: '#/components/schemas/ColorEnum'
       requestBody:
         description: All the lobby infos
         content:
@@ -78,6 +85,12 @@ paths:
           schema:
             type: string
             pattern: '[a-zA-Z0-9]{32}'
+        - name: position
+          in: query
+          description: Position of the piece
+          required: true
+          schema:
+              $ref: '#/components/schemas/PositionDTO'
       responses:
         '200':
           description: successful operation
@@ -187,12 +200,14 @@ components:
     PlayerDTO:
       type: object
       properties:
+        token:
+          type: string
+          pattern: '[a-zA-Z0-9]{32}'
         name:
           type: string
           example: Piero il Divoratore
         color:
-          type: string
-          enum: ["WHITE", "BLACK"]
+          $ref: '#/components/schemas/ColorEnum'
     LobbyPropertiesDTO:
       type: object
       properties:
@@ -257,3 +272,6 @@ components:
         password:
           type: string
           example: RndmPsw123
+    ColorEnum:
+      type: string
+      enum: ["WHITE", "BLACK"]

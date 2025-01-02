@@ -21,7 +21,7 @@ public class Lobby {
     LobbyProperties properties;
 
     public Lobby(String name, Player playerOne, String password, LobbyProperties properties) {
-        this.name = ( name == null || name.isEmpty() ) ? "Lobby di " + playerOne.getName() : name;
+        this.name = ( name == null || name.isBlank() ) ? "Lobby di " + playerOne.getName() : name;
         this.playerOne = playerOne;
         this.password = password.isEmpty() ? null : password;
         this.properties = properties;

@@ -1,17 +1,22 @@
 package it.luciorizzi.scacchi.model.lobby;
 
 import it.luciorizzi.scacchi.model.type.PieceColor;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@AllArgsConstructor
 @Getter
 public class Player {
+    public static final String DEFAULT_NAME = "Anon";
     @Setter
-    private String name = "Anon";
+    private String name;
     private final String gameId;
     private final PieceColor color;
+
+    public Player(String name, String gameId, PieceColor color) {
+        this.name = ( name == null || name.isBlank() ) ? DEFAULT_NAME : name;
+        this.gameId = gameId;
+        this.color = color;
+    }
 
     public Player(String gameId, PieceColor color) {
         this.gameId = gameId;

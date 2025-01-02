@@ -130,8 +130,8 @@ public class GameBoard { //TODO: add thread safety if needed
         blackKingPosition = new Position(7, 4);
     }
 
-    public MoveSet getPossibleMoves(int row, int column) {
-        return getPiece(new Position(row, column)).getPossibleMoves(this);
+    public MoveSet getPossibleMoves(Position position) {
+        return getPiece(position).getPossibleMoves(this);
     }
 
     public Piece getPiece(Position position) {

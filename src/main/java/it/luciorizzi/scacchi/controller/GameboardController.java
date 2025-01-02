@@ -30,8 +30,7 @@ public class GameboardController {
             Boolean isCheck = lobbyService.isCheck(messageWrapper.playerToken(), lobbyId);
             MoveMessage response = new MoveMessage(moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion(), isCheck);
             socketSendMove(lobbyId, response);
-            boolean gameEnd = lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId);
-            if (gameEnd) {
+            if ( lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId) ) {
                 GameOutcome gameOutcome = lobbyService.getGameOutcome(messageWrapper.playerToken(), lobbyId);
                 socketSendOutcome(lobbyId, new GameoverMessage(gameOutcome));
             }
