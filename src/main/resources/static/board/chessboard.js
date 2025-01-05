@@ -43,8 +43,14 @@ let arrowStart = {};
 let heldPiece = null;
 let selectedPiece = null;
 let choosingPromotionCol = false;
-let kingPosition = { row: 0, col: 0 };
-let checked = false;
+let kingPositions = {
+    'w': { row: 0, col: 4 },
+    'b': { row: 7, col: 4 }
+};
+let isChecked = {
+    'w': false,
+    'b': false
+}
 let gameover = false;
 let gamestarted = retrievedGameStarted;
 let lastMove = null;
@@ -228,16 +234,10 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
 
     lastMove = { from: from, to: to };
 
-
     const movedPiece = board.board[from.row][from.col];
     const destinationPiece = board.board[to.row][to.col];
 
-    if (destinationPiece) {
-        playCaptureSound();
-    } else {
-        playMoveSound();
-    }
-
+    handleSound();
     handleMovement();
     handleCheck();
     handleEnPassant();
@@ -245,6 +245,17 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     handlePromotion();
 
     board.draw();
+
+    function handleSound() {
+        if (isCheck) {
+            playCheckSound();
+        }
+        else if (destinationPiece) {
+            playCaptureSound();
+        } else {
+            playMoveSound();
+        }
+    }
 
     function handleMovement() {
         board.board[to.row][to.col] = board.board[from.row][from.col];
@@ -254,12 +265,14 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     }
 
     function handleCheck() {
-        checked = isCheck;
-        if (movedPiece.color === playerColor) {
-            checked = false;
-            if (movedPiece.type === 'k') {
-                kingPosition = {row: to.row, col: to.col};
-            }
+        const movedColor = movedPiece.color;
+        const otherColor = movedColor === 'w' ? 'b' : 'w';
+
+        isChecked[movedColor] = false;
+        isChecked[otherColor] = isCheck;
+
+        if (movedPiece.type === 'k') {
+            kingPositions[movedColor] = {row: to.row, col: to.col};
         }
     }
 
@@ -376,11 +389,13 @@ function Chessboard () {
                 ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
-        if (checked) {
-            ctx.beginPath();
-            ctx.arc(kingPosition.col * cellSize + cellSize / 2, kingPosition.row * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
-            ctx.fillStyle = COLORS.CHECK;
-            ctx.fill();
+        for(const color of ['w', 'b']) {
+            if (isChecked[color]) {
+                ctx.beginPath();
+                ctx.arc(kingPositions[color].col * cellSize + cellSize / 2, kingPositions[color].row * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
+                ctx.fillStyle = COLORS.CHECK;
+                ctx.fill();
+            }
         }
     }
 
@@ -444,8 +459,8 @@ function Chessboard () {
                     const color = char === char.toUpperCase() ? 'w' : 'b';
                     const type = char.toLowerCase();
                     const position = getCorrectedPosition(i, j);
-                    if (type === 'k' && color === playerColor) {
-                        kingPosition = { row: position.row, col: position.col };
+                    if (type === 'k') {
+                        kingPositions[color] = { row: position.row, col: position.col };
                     }
                     this.board[position.row][position.col] = new Piece(position.row, position.col, color, type);
                 }
