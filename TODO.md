@@ -12,20 +12,21 @@
 - [ ] aggiungere spettatori
 - [x] aggiungere chat
 - [ ] migliorare grafica chat
-- [ ] aggiungere suoni
+- [x] aggiungere suoni
 - [ ] aggingere pezzi catturati
 - [ ] aggiungere possibilità di abbandonare partita
 - [ ] aggiungere possibilità di chiedere pareggio
 - [ ] fixare lobby attuale nel menù
 - [ ] rifare grafica form creazione lobby
 - [ ] altri colori frecce
-- [ ] mostrare scacchi per entrambi giocatori non solo quelli subiti
+- [x] mostrare scacchi per entrambi giocatori non solo quelli subiti
 - [ ] salvare preferenze utente
 - [x] password se nulla sempre valida
 - [ ] gestione errori e messaggi di errore e pagine di errore
 - [ ] togliere le ambiguità nelle mosse
 - [ ] terminare partita se uno dei due giocatori si disconnette
 - [x] aggiungere definizioni openapi e DTO autogenerati
+- [ ] aggiungere possibilità di chiedere la rivincita
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni
