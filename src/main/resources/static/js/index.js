@@ -3,18 +3,32 @@ function createGame() {
     let playerName = encodeURIComponent(document.getElementById('playerName').value);
     let password = encodeURIComponent(document.getElementById('password').value);
     let color = document.getElementById('pieceColor').value;
-    color = color === 'random' ? Math.random() > 0.5 ? 'WHITE' : 'BLACK' : color;
+    color = color === 'random' ? (Math.random() > 0.5 ? 'WHITE' : 'BLACK') : color;
     let lobbyType = document.getElementById('lobbyType').value;
-    let url = 'lobby?lobbyName=' + lobbyName + '&playerName=' + playerName + '&password=' + password + '&color=' + color + '&lobbyType=' + lobbyType;
+    const url = 'lobby?playerOneColor=' + color;
+    const body = {
+        name: lobbyName,
+        playerOne: {
+            name: playerName
+        },
+        password: password,
+        properties: {
+            isPrivate: lobbyType === 'private'
+        }
+    }
 
     fetch(url , {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
     }).then(response => {
         if (response.ok) {
             response.json().then(data => {
-                setCookie('playerToken', data.playerToken, 30);
+                setCookie('playerToken', data.playerOne.token, 30);
 
-                window.location.href = 'lobby/'+data.lobbyId;
+                window.location.href = 'lobby/'+data.id;
             });
         } else {
             alert('Errore durante la creazione della partita');

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.luciorizzi.scacchi.model.ChessTimer;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
-import it.luciorizzi.scacchi.model.movement.MoveSet;
-import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.openapi.api.LobbyApiDelegate;
 import it.luciorizzi.scacchi.openapi.model.*;
 import it.luciorizzi.scacchi.service.LobbyService;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class LobbyController implements LobbyApiDelegate {
@@ -31,7 +28,8 @@ public class LobbyController implements LobbyApiDelegate {
     }
 
     public ResponseEntity<LobbyDTO> createLobby(ColorEnum playerOneColor, LobbyDTO lobbyDTO) {
-        return ResponseEntity.ok( lobbyService.createLobby(lobbyDTO) );
+        System.out.println("Creating lobby with player one color " + playerOneColor);
+        return ResponseEntity.ok( lobbyService.createLobby(lobbyDTO, playerOneColor) );
     }
 
     public ResponseEntity<List<LobbyDTO>> getPublicLobbies() {

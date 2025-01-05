@@ -31,11 +31,14 @@ public class ApiDTOConverter {
     }
 
     public static MoveDTO toMoveDTO(Move move) {
-        return new MoveDTO()
+        MoveDTO result = new MoveDTO()
                 .origin(toPositionDTO(move.getOrigin()))
                 .destination(toPositionDTO(move.getDestination()))
-                .moveType(MoveTypeEnum.valueOf(move.getMoveType().name()))
-                .promotion(PromotionEnum.fromValue(String.valueOf(move.getPromotion())));
+                .moveType(MoveTypeEnum.valueOf(move.getMoveType().name()));
+        if (move.getPromotion() != null) {
+            result.promotion(PromotionEnum.fromValue(String.valueOf(move.getPromotion())));
+        }
+        return result;
     }
 
     public static List<MoveDTO> toListOfMoves(MoveSet possibleMoves) {
@@ -67,5 +70,9 @@ public class ApiDTOConverter {
                 .token(null)
                 .name( player.getName() )
                 .color( toColorEnum(player.getColor()) );
+    }
+
+    public static PieceColor toPieceColor(ColorEnum playerOneColor) {
+        return PieceColor.valueOf(playerOneColor.name());
     }
 }

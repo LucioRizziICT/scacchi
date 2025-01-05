@@ -11,11 +11,28 @@ externalDocs:
   description: "Full app documentation"
   url: https://github.com/LucioRizziICT/scacchi/tree/master#readme
 servers:
-  - url: https://localhost:8080/scacchi
+  - url: http://localhost:8080
 tags:
+  - name: health
+    description: Check the health of the server
   - name: lobby
     description: Api for creating and managing lobbies
 paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Check the health of the server
+      description: Returns a simple message to check if the server is up
+      operationId: healthCheck
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Server is up
   /lobby:
     post:
       tags:

@@ -5,13 +5,22 @@ function joinLobby() {
     const playerName = document.getElementById('playerName').value;
     const password = document.getElementById('password').value;
 
-    const url = `${window.location.pathname}/join?playerName=${playerName}&password=${password}`;
+    const body = {
+        playerName: playerName,
+        password: password
+    }
+
+    const url = `${window.location.pathname}/join`;
     fetch(url, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
     }).then(response => {
         if (response.ok) {
-            response.text().then(playerToken => {
-                setCookie('playerToken', playerToken, 30);
+            response.json().then(lobby => {
+                setCookie('playerToken', lobby.playerTwo.token, 30);
                 window.location.reload();
             });
         } else {

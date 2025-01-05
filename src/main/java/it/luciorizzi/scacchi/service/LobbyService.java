@@ -9,6 +9,7 @@ import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.PieceColor;
+import it.luciorizzi.scacchi.openapi.model.ColorEnum;
 import it.luciorizzi.scacchi.openapi.model.LobbyDTO;
 import it.luciorizzi.scacchi.openapi.model.LobbyJoinRequestDTO;
 import it.luciorizzi.scacchi.openapi.model.PlayerDTO;
@@ -33,10 +34,10 @@ public class LobbyService {
     private final Map<String, Lobby> lobbies = new HashMap<>();
     private final Map<String, Player> players = new HashMap<>();
 
-    public LobbyDTO createLobby(LobbyDTO lobbyDTO) {
+    public LobbyDTO createLobby(LobbyDTO lobbyDTO, ColorEnum playerOneColor) {
         String lobbyId = RandomToken.generateLobbyToken();
 
-        Player playerOne = new Player(lobbyDTO.getPlayerOne().getName(), lobbyId, PieceColor.WHITE);
+        Player playerOne = new Player(lobbyDTO.getPlayerOne().getName(), lobbyId, ApiDTOConverter.toPieceColor(playerOneColor));
 
         LobbyProperties createdProperties = LobbyProperties.withDefaultProperties(); //TODO: Cambiare con DTO quando lobby prop verranno implementate
         createdProperties.setPrivate(lobbyDTO.getProperties().getIsPrivate());

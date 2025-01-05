@@ -217,7 +217,9 @@ function movePiece(piece, row, col, promotion = null) {
 function applyGameOver(outcome) { //TODO: Cambiare con testo custom, non valore dell'enum (ex. "WHITE_WIN")
     document.getElementById("gameEndModalStatus").innerText = outcome.status;
     document.getElementById("gameEndModalCause").innerText = outcome.cause;
+
     openGameEndModal();
+    playGameOverSound();
 }
 
 function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
@@ -226,8 +228,15 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
 
     lastMove = { from: from, to: to };
 
+
     const movedPiece = board.board[from.row][from.col];
     const destinationPiece = board.board[to.row][to.col];
+
+    if (destinationPiece) {
+        playCaptureSound();
+    } else {
+        playMoveSound();
+    }
 
     handleMovement();
     handleCheck();
@@ -292,8 +301,8 @@ function getMovableSpots(row, col) {
         if (response.ok) {
             response.json().then(data => {
                 board.movableSpots = {};
-                data.moves.forEach(move => {
-                    const correctedSpot = getCorrectedPosition(move.destination.row, move.destination.column);
+                data.forEach(move => {
+                    const correctedSpot = getCorrectedPosition(move.destination.row, move.destination.col);
                     board.movableSpots[`${correctedSpot.row}_${correctedSpot.col}`] = move.moveType;
                 });
                 board.draw();
