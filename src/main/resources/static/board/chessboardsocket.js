@@ -32,7 +32,7 @@ stompClient.onConnect = function(frame) {
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/notification', function(message) {
         const data = JSON.parse(message.body);
         console.log(data);
-        showNotification(data);
+        showNotification(data); //TODO dont show self sent notifications and only if it makes sense (ex. dont show accept draw if game is over)
     });
 };
 

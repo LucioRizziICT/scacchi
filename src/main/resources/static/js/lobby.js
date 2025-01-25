@@ -228,6 +228,7 @@ function showNotification(data) {
             case "DRAW_REQUEST":
                 document.getElementById("notification-footer").innerHTML = '<button onclick="acceptDraw()">Accetta</button><button onclick="declineDraw()">Rifiuta</button>';
                 break;
+                //TODO: Add more cases for different types of notifications
         }
     }
 }

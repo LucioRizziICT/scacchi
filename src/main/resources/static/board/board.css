@@ -162,6 +162,7 @@ input[type="text"] {
 }
 
 .notification-content {
+    z-index: 5;
     display: none;
     position: fixed;
     bottom: 0;
@@ -197,4 +198,19 @@ input[type="text"] {
     font-size: 25px;
     font-weight: bold;
     cursor: pointer;
+}
+
+.feedback-popup {
+    display: none;
+    position: fixed;
+    z-index: 15;
+    padding: 5px 30px;
+    top: 30px;
+    font-size: 24px;
+    background-color: #e4bb9c;
+    border: 3px solid #aa0404;
+    animation: fadeIn 0.5s ease-in-out;
+    text-align: center;
+    left: 50%;
+    transform: translate(-50%, 0);
 }
