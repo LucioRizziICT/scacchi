@@ -13,14 +13,17 @@ stompClient.onConnect = function(frame) {
         document.getElementById("player2NameSpan").innerText = data.player2.name;
         board.draw();
     });
+
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/move', function(message) {
         const data = JSON.parse(message.body);
         applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck);
     });
+
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/gameover', function(message) {
         const data = JSON.parse(message.body);
         applyGameOver(data.outcome);
     });
+
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/chat', function(message) {
         const data = JSON.parse(message.body);
         appendChatMessage(data);

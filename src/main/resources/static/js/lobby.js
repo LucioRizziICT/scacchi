@@ -79,6 +79,8 @@ const menuContents = {
 }
 
 function selectLobbyGameMenu() {
+    resetResignButton();
+
     menuButtons.game.classList.add("button-active")
     menuButtons.chat.classList.remove("button-active")
     menuButtons.settings.classList.remove("button-active")
@@ -127,8 +129,7 @@ function sendMessage() {
     const messageWrapper = {
         playerToken: getCookie('playerToken'),
         message: {
-            message: message,
-            timestamp: new Date().getTime()
+            message: message
         }
     };
     stompClient.publish({
@@ -144,4 +145,41 @@ function appendChatMessage(data) {
     message.innerText = data.playerName + ': ' + data.message;
     chatMessages.appendChild(message);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function askForDraw() {
+
+}
+
+function acceptDraw() {
+
+}
+
+function declineDraw() {
+
+}
+
+function resetResignButton() {
+    document.getElementById("endGameResignButton").innerText = "Arrenditi";
+    document.getElementById("endGameResignButton").onclick = resign;
+}
+
+function resign() {
+    document.getElementById("endGameResignButton").innerText = "Confermare?";
+    document.getElementById("endGameResignButton").onclick = confirmResign;
+}
+
+function confirmResign() {
+    sendSocketResign();
+}
+
+function sendSocketResign() {
+    const messageWrapper = {
+        playerToken: getCookie('playerToken'),
+    };
+
+    stompClient.publish({
+        destination: '/app/lobby/' + retrievedLobbyId + '/resign',
+        body: JSON.stringify(messageWrapper)
+    });
 }

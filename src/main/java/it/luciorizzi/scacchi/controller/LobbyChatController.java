@@ -10,6 +10,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDateTime;
+
 @Controller
 public class LobbyChatController {
 
@@ -24,7 +26,7 @@ public class LobbyChatController {
         if (lobbyId.equals(player.getGameId())) {
             String messageContent = messageWrapper.message().message();
             if (messageContent != null && !messageContent.isBlank() && messageContent.length() <= 255) {
-                ChatMessage chatMessage = new ChatMessage(player.getName(), messageContent, messageWrapper.message().timestamp());
+                ChatMessage chatMessage = new ChatMessage(player.getName(), messageContent, LocalDateTime.now());
                 socketSendChat(lobbyId, chatMessage);
             }
         }

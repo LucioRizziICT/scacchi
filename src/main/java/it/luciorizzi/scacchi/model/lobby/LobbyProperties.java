@@ -13,8 +13,8 @@ public class LobbyProperties {
     private boolean isPrivate;
     private boolean isRated;
     private boolean isTimed;
-    private long timeSeconds; // in seconds
-    private long incrementSeconds; // in seconds
+    private long timeSeconds;
+    private long incrementSeconds;
     private boolean allowsSpectators;
 
     public boolean allowsSpectators() {
@@ -24,5 +24,4 @@ public class LobbyProperties {
     public static LobbyProperties withDefaultProperties() {
         return new LobbyProperties(false, false, false, 0, 0, true);
     }
-
 }

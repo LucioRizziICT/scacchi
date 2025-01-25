@@ -5,10 +5,6 @@ const SOUNDS = {
     gameover: new Audio('/scacchi/audio/game_over.mp3')
 }
 
-function playSound(sound) {
-    sound.play();
-}
-
 function playMoveSound() {
     playSound(SOUNDS.move);
 }
@@ -23,4 +19,8 @@ function playCheckSound() {
 
 function playGameOverSound() {
     playSound(SOUNDS.gameover);
+}
+
+function playSound(sound) {
+    sound.play();
 }

@@ -167,7 +167,7 @@ public class LobbyService {
         Player presentPlayer = players.get(token);
 
         if ( presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
-            int playerNumber = lobby.getPlayerOne().equals(presentPlayer) ? 1 : 2;
+            int playerNumber = lobby.getPlayerOne().equals(presentPlayer) ? 1 : 2; // TODO: fix equals not implemented
             return getPlayerLobbyView(presentPlayer, lobbyId, lobby, playerNumber);
         }
         if (!lobby.isFull()) {
@@ -214,5 +214,14 @@ public class LobbyService {
     public boolean gameStarted(String lobbyId) {
         Lobby lobby = getLobby(lobbyId);
         return lobby.gameStarted();
+    }
+
+    public void resign(String token, String lobbyId) {
+        Player player = getPlayer(token);
+        if (!lobbyId.equals(player.getGameId())) {
+            throw new IllegalArgumentException("Player not in lobby");
+        }
+
+        getLobby(lobbyId).getGameBoard().resign(player.getColor());
     }
 }

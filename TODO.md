@@ -6,6 +6,7 @@
 - [ ] Scrivere la documentazione
 - [ ] personalizzazione frecce
 - [ ] impostazioni lobby
+- [ ] mostrare cronologia mosse giocare
 - [ ] timer per partite a tempo
 - [x] segnare ultima mossa giocata
 - [ ] possibilità di rivedere partite finite senza perdere il token attuale
@@ -14,7 +15,7 @@
 - [ ] migliorare grafica chat
 - [x] aggiungere suoni
 - [ ] aggingere pezzi catturati
-- [ ] aggiungere possibilità di abbandonare partita
+- [x] aggiungere possibilità di arrendersi
 - [ ] aggiungere possibilità di chiedere pareggio
 - [ ] fixare lobby attuale nel menù
 - [ ] rifare grafica form creazione lobby
@@ -27,6 +28,7 @@
 - [ ] terminare partita se uno dei due giocatori si disconnette
 - [x] aggiungere definizioni openapi e DTO autogenerati
 - [ ] aggiungere possibilità di chiedere la rivincita
+- [ ] refactor LobbyService
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni

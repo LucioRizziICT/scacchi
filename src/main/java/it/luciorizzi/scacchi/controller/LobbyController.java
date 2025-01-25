@@ -53,6 +53,7 @@ public class LobbyController implements LobbyApiDelegate {
         }
     }
 
+    //TODO add openapi definition
     @GetMapping("/lobby/{lobbyId}/getMovesHistory")
     public ResponseEntity<List<String>> getMovesHistory(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) { //TODO aggiungere alla definizione openapi
         return ResponseEntity.ok(lobbyService.getMovesHistory(token, lobbyId));

@@ -131,6 +131,9 @@ public class GameBoard { //TODO: add thread safety if needed
     }
 
     public MoveSet getPossibleMoves(Position position) {
+        if (!isOngoing) {
+            return new MoveSet();
+        }
         return getPiece(position).getPossibleMoves(this);
     }
 
@@ -319,16 +322,7 @@ public class GameBoard { //TODO: add thread safety if needed
         if (isCheckmate()) {
             isOngoing = false;
             movesHistory.setOutcome( new GameOutcome().withWinner(turn.opposite()).withCause(GameoverCause.CHECKMATE) );
-        } else
-        if (hasSurrendered(PieceColor.WHITE)) {
-            isOngoing = false;
-            movesHistory.setOutcome( new GameOutcome().withWinner(PieceColor.BLACK).withCause(GameoverCause.RESIGNATION) );
-        } else
-        if (hasSurrendered(PieceColor.BLACK)) {
-            isOngoing = false;
-            movesHistory.setOutcome( new GameOutcome().withWinner(PieceColor.WHITE).withCause(GameoverCause.RESIGNATION) );
         }
-        //TODO: add win by time and by disconnection
         //Draws
         else {
             if(gameRepeatedThreeTimes()) {
@@ -359,6 +353,7 @@ public class GameBoard { //TODO: add thread safety if needed
         return fiftyMovesCounter >= 100; //100 moves = 50 turns
     }
 
+    @Deprecated(forRemoval = true)
     private boolean hasSurrendered(PieceColor pieceColor) {
         //Only cowards flee from the battlefield
         return false;
@@ -491,6 +486,13 @@ public class GameBoard { //TODO: add thread safety if needed
             movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.TIME_VS_INSUFFICIENT_MATERIAL) );
         else
             movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.TIME_EXPIRED) );
+    }
+
+    public void resign(PieceColor color) {
+        if (!isOngoing())
+            return;
+        isOngoing = false;
+        movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.RESIGNATION) );
     }
 
     //TODO validate move method
