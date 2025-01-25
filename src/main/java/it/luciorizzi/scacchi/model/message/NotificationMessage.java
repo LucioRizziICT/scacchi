@@ -2,7 +2,7 @@ package it.luciorizzi.scacchi.model.message;
 
 import lombok.Getter;
 
-public record NotificationMessage(NotificationMessage.Type type, String Title, String Message) {
+public record NotificationMessage(NotificationMessage.Type type, String title, String message) {
 
     public static NotificationMessage defaultDrawRequest() {
         return new NotificationMessage(NotificationMessage.Type.DRAW_REQUEST, "Richiesta di patta", "Il tuo avversario ha richiesto una patta");

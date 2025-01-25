@@ -211,3 +211,27 @@ function sendSocketResign() {
         body: JSON.stringify(messageWrapper)
     });
 }
+
+function showNotification(data) {
+    document.getElementById("notification-header").innerText = data.title;
+    document.getElementById("notification-body").innerText = data.message;
+
+    switchNotificationType(data.type);
+
+    document.getElementById("notification-content").style.display = "block";
+    setTimeout(() => {
+        closeNotification();
+    }, 5000);
+
+    function switchNotificationType(type) {
+        switch (type) {
+            case "DRAW_REQUEST":
+                document.getElementById("notification-footer").innerHTML = '<button onclick="acceptDraw()">Accetta</button><button onclick="declineDraw()">Rifiuta</button>';
+                break;
+        }
+    }
+}
+
+function closeNotification() {
+    document.getElementById("notification-content").style.display = "none";
+}

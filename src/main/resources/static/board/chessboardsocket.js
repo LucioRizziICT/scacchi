@@ -32,7 +32,7 @@ stompClient.onConnect = function(frame) {
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/notification', function(message) {
         const data = JSON.parse(message.body);
         console.log(data);
-        //TODO implement
+        showNotification(data);
     });
 };
 

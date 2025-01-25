@@ -32,7 +32,7 @@
 - [ ] refactor LobbyService
 - [ ] evidenziare celle singole
 - [ ] aggiungere popup di feedback
-- [ ] aggiungere notifiche
+- [x] aggiungere notifiche
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni

@@ -94,15 +94,16 @@
         </div>
     </div>
     <div class="notification-content" id="notification-content">
-        <div class="notification-header">
+        <div class="notification-close">
+            <div onclick="closeNotification();">X</div>
+        </div>
+        <div class="notification-header" id="notification-header">
             Richiesta di patta
         </div>
-        <div class="notification-body">
-            <p id="notification-message">Il tuo avversario ha richiesto una patta. Accetti?</p>
+        <div class="notification-body" id="notification-body">
+
         </div>
-        <div class="notification-footer">
-            <button type="button" onclick="acceptDraw();">Accetta</button>
-            <button type="button" onclick="declineDraw();">Rifiuta</button>
+        <div class="notification-footer" id="notification-footer">
         </div>
     </div>
 </div>
