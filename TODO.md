@@ -2,6 +2,7 @@
 
 ### Essenziale
 - [x] sistemare menù lato lobby
+- [ ] aggiungere logging decente
 - [ ] refactor canvas animato
 - [ ] Scrivere la documentazione
 - [ ] personalizzazione frecce

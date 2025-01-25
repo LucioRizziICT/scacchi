@@ -160,3 +160,33 @@ input[type="text"] {
         flex-direction: column;
     }
 }
+
+.notification-content {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    border: 3px solid #aa0404;
+    background-color: #f0d9b5;
+    width: 400px;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s
+}
+
+.notification-header {
+    font-size: 25px;
+    font-weight: bold;
+    padding: 2px 10px;
+    background-color: #e4bb9c;
+    border-bottom: 1px solid #000000;
+}
+
+.notification-body {
+    padding: 2px 10px;
+}
+
+.notification-footer {
+    padding: 2px 10px;
+}
