@@ -1,10 +1,7 @@
 package it.luciorizzi.scacchi.controller;
 
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
-import it.luciorizzi.scacchi.model.message.GameoverMessage;
-import it.luciorizzi.scacchi.model.message.MessageWrapper;
-import it.luciorizzi.scacchi.model.message.MoveMessage;
-import it.luciorizzi.scacchi.model.message.StartMessage;
+import it.luciorizzi.scacchi.model.message.*;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.service.LobbyService;
 import org.slf4j.Logger;
@@ -49,6 +46,27 @@ public class GameboardController {
     public void resign(@DestinationVariable String lobbyId, MessageWrapper<Void> messageWrapper) {
         lobbyService.resign(messageWrapper.playerToken(), lobbyId);
         checkGameEnded(messageWrapper.playerToken(), lobbyId);
+    }
+
+    @MessageMapping("/lobby/{lobbyId}/draw")
+    public void requestDraw(@DestinationVariable String lobbyId, MessageWrapper<DrawMessage> messageWrapper) {
+        boolean accept = messageWrapper.message().accept();
+        if (accept) {
+            lobbyService.requestDraw(messageWrapper.playerToken(), lobbyId);
+            checkGameEnded(messageWrapper.playerToken(), lobbyId);
+            if (!lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId)) {
+                socketSendNotification(lobbyId, NotificationMessage.defaultDrawRequest());
+            } else {
+                socketSendNotification(lobbyId, NotificationMessage.defaultDrawAccepted());
+            }
+        } else {
+            lobbyService.denyDraw(messageWrapper.playerToken(), lobbyId);
+            socketSendNotification(lobbyId, NotificationMessage.defaultDrawDenied());
+        }
+    }
+
+    private void socketSendNotification(String lobbyId, NotificationMessage message) {
+        simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/notification", message);
     }
 
     private void checkGameEnded(String playerToken, String lobbyId) {

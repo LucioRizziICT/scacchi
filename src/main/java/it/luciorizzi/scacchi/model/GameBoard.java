@@ -24,6 +24,7 @@ public class GameBoard { //TODO: add thread safety if needed
     private final Map<String, Integer> previousStates = new HashMap<>();
     private Pawn enPassantablePawn = null;
     private int fiftyMovesCounter = 0;
+    private DrawState drawState = new DrawState();
     private ChessTimer timer;
     @Getter
     private final MoveHistory movesHistory = new MoveHistory();
@@ -54,6 +55,7 @@ public class GameBoard { //TODO: add thread safety if needed
     public void reset() {
         turn = PieceColor.WHITE;
         initialize();
+        drawState = new DrawState();
         saveCurrentState();
         previousStates.clear();
         whitePieces.clear();
@@ -493,6 +495,22 @@ public class GameBoard { //TODO: add thread safety if needed
             return;
         isOngoing = false;
         movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.RESIGNATION) );
+    }
+
+    public void requestDraw(PieceColor color) {
+        if (!isOngoing())
+            return;
+        drawState.setDraw(color);
+        if (drawState.isDrawAccepted()) {
+            isOngoing = false;
+            movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.AGREED_DRAW) );
+        }
+    }
+
+    public void denyDraw() {
+        if (!isOngoing())
+            return;
+        drawState.deny();
     }
 
     //TODO validate move method

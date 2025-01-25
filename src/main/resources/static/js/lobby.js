@@ -148,15 +148,43 @@ function appendChatMessage(data) {
 }
 
 function askForDraw() {
+    sendDrawRequest();
+}
 
+function sendDrawRequest() {
+    const messageWrapper = {
+        playerToken: getCookie('playerToken'),
+        message: {
+            accept: true
+        }
+    };
+
+    stompClient.publish({
+        destination: '/app/lobby/' + retrievedLobbyId + '/draw',
+        body: JSON.stringify(messageWrapper)
+    });
 }
 
 function acceptDraw() {
-
+    sendDrawRequest();
 }
 
 function declineDraw() {
+    sendDrawDeny()
+}
 
+function sendDrawDeny() {
+    const messageWrapper = {
+        playerToken: getCookie('playerToken'),
+        message: {
+            accept: false
+        }
+    };
+
+    stompClient.publish({
+        destination: '/app/lobby/' + retrievedLobbyId + '/draw',
+        body: JSON.stringify(messageWrapper)
+    });
 }
 
 function resetResignButton() {
@@ -175,7 +203,7 @@ function confirmResign() {
 
 function sendSocketResign() {
     const messageWrapper = {
-        playerToken: getCookie('playerToken'),
+        playerToken: getCookie('playerToken')
     };
 
     stompClient.publish({

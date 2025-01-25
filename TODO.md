@@ -16,7 +16,7 @@
 - [x] aggiungere suoni
 - [ ] aggingere pezzi catturati
 - [x] aggiungere possibilità di arrendersi
-- [ ] aggiungere possibilità di chiedere pareggio
+- [x] aggiungere possibilità di chiedere una patta
 - [ ] fixare lobby attuale nel menù
 - [ ] rifare grafica form creazione lobby
 - [ ] altri colori frecce
@@ -29,6 +29,9 @@
 - [x] aggiungere definizioni openapi e DTO autogenerati
 - [ ] aggiungere possibilità di chiedere la rivincita
 - [ ] refactor LobbyService
+- [ ] evidenziare celle singole
+- [ ] aggiungere popup di feedback
+- [ ] aggiungere notifiche
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni

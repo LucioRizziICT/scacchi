@@ -224,4 +224,18 @@ public class LobbyService {
 
         getLobby(lobbyId).getGameBoard().resign(player.getColor());
     }
+
+    public void requestDraw(String token, String lobbyId) {
+        Player player = getPlayer(token);
+        if (!lobbyId.equals(player.getGameId())) {
+            throw new IllegalArgumentException("Player not in lobby");
+        }
+
+        getLobby(lobbyId).getGameBoard().requestDraw(player.getColor());
+    }
+
+    public void denyDraw(String token, String lobbyId) {
+        Lobby lobby = getValidLobby(token, lobbyId);
+        lobby.getGameBoard().denyDraw();
+    }
 }

@@ -28,6 +28,12 @@ stompClient.onConnect = function(frame) {
         const data = JSON.parse(message.body);
         appendChatMessage(data);
     });
+
+    stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/notification', function(message) {
+        const data = JSON.parse(message.body);
+        console.log(data);
+        //TODO implement
+    });
 };
 
 stompClient.onWebSocketError = function(error) {
