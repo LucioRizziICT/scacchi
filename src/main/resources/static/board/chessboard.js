@@ -12,9 +12,11 @@ const BOARD_SIZE = 8;
 const COLORS =  {
     WHITE_CELL: '#f0d9b5',
     BLACK_CELL: '#b58863',
+    HIGHLIGHTED_WHITE_CELL: '#e46060',
+    HIGHLIGHTED_BLACK_CELL: '#b83939',
     ARROW: 'rgba(255,95,38,0.8)',
     ARROW2: 'rgba(30,165,228,0.8)',
-    CHECK: 'rgba(221,1,1,0.73)',
+    CHECK: 'rgba(211,0,0,0.77)',
     MOVABLE_SPOT: 'rgba(217,217,217,0.82)',
     LAYER: 'rgba(33,33,33,0.56)',
     PROMOTION_MENU_BG: '#f1e6d4',
@@ -39,6 +41,7 @@ const ctx = canvas.getContext('2d');
 
 const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
 
+let highlightedCells = {};
 let arrowStart = {};
 let heldPiece = null;
 let selectedPiece = null;
@@ -114,6 +117,7 @@ canvas.addEventListener('mouseup', function(event) {
 
     const row = Math.floor(y / cellSize);
     const col = Math.floor(x / cellSize);
+
     if (choosingPromotionCol !== false) {
 
         if(col === choosingPromotionCol) {
@@ -155,6 +159,7 @@ canvas.addEventListener('mouseup', function(event) {
         const centerCol = col * cellSize + cellSize / 2;
 
         if (arrowStart.row === centerRow && arrowStart.col === centerCol) {
+            highlightCell(row, col);
             return;
         }
         drawArrow(arrowStart.row, arrowStart.col, centerRow, centerCol, event.ctrlKey ? COLORS.ARROW2 : COLORS.ARROW);
@@ -208,6 +213,38 @@ function drawArrow(fromy, fromx, toy, tox, color){
     //draws the paths created above
     ctx.stroke();
     ctx.restore();
+}
+
+function highlightCell(row, col) {
+    const key = `${row}_${col}`;
+    if (highlightedCells[key]) {
+        delete highlightedCells[key];
+    } else {
+        highlightedCells[key] = true;
+    }
+    drawSingleCell(row, col);
+
+    function drawSingleCell(row, col) {
+        console.log(row, col);
+        if(row % 2 === col % 2) {
+            if (highlightedCells[key]) {
+                ctx.fillStyle = COLORS.HIGHLIGHTED_WHITE_CELL;
+            } else {
+                ctx.fillStyle = COLORS.WHITE_CELL;
+            }
+        } else {
+            if (highlightedCells[key]) {
+                ctx.fillStyle = COLORS.HIGHLIGHTED_BLACK_CELL;
+            } else {
+                ctx.fillStyle = COLORS.BLACK_CELL;
+            }
+        }
+        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        if(board.board[row][col] != null) {
+            board.board[row][col].draw();
+        }
+        board.drawMovableSpots();
+    }
 }
 
 function movePiece(piece, row, col, promotion = null) {
@@ -380,6 +417,7 @@ function Chessboard () {
     this.movableSpots = {};
 
     this.draw = function () {
+        highlightedCells = {};
         this.drawBackground();
         this.drawLastMove();
         this.drawPieces();
@@ -444,9 +482,12 @@ function Chessboard () {
             const from = lastMove.from;
             const to = lastMove.to;
 
+
             ctx.fillStyle = COLORS.LAST_MOVE;
-            ctx.fillRect(from.col * cellSize, from.row * cellSize, cellSize, cellSize);
-            ctx.fillRect(to.col * cellSize, to.row * cellSize, cellSize, cellSize);
+            if (!highlightedCells[`${from.row}_${from.col}`])
+                ctx.fillRect(from.col * cellSize, from.row * cellSize, cellSize, cellSize);
+            if (!highlightedCells[`${to.row}_${to.col}`])
+                ctx.fillRect(to.col * cellSize, to.row * cellSize, cellSize, cellSize);
         }
     }
 

@@ -30,9 +30,10 @@
 - [x] aggiungere definizioni openapi e DTO autogenerati
 - [ ] aggiungere possibilità di chiedere la rivincita
 - [ ] refactor LobbyService
-- [ ] evidenziare celle singole
+- [x] evidenziare celle singole // un po' buggato
 - [x] aggiungere popup di feedback
-- [x] aggiungere notifiche
+- [x] aggiungere notifiche // un po' buggate
+- [ ] mettere canvas a più layer
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni
