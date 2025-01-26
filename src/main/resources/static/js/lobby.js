@@ -56,6 +56,7 @@ function copyInviteLink() {
     inviteLink.select();
     inviteLink.setSelectionRange(0, 99999);
     document.execCommand("copy");
+    showFeedbackPopup("Link copiato!");
 }
 
 window.onclick = function(event) {
@@ -163,14 +164,17 @@ function sendDrawRequest() {
         destination: '/app/lobby/' + retrievedLobbyId + '/draw',
         body: JSON.stringify(messageWrapper)
     });
+    showFeedbackPopup("Richiesta inviata");
 }
 
 function acceptDraw() {
     sendDrawRequest();
+    showFeedbackPopup("Patta accettata");
 }
 
 function declineDraw() {
     sendDrawDeny()
+    showFeedbackPopup("Patta Rifiutata");
 }
 
 function sendDrawDeny() {
@@ -220,7 +224,7 @@ function showNotification(data) {
 
     document.getElementById("notification-content").style.display = "block";
     setTimeout(() => {
-        closeNotification();
+        closeNotification(); //TODO: buggato se si sovrappongono più notifiche non si resetta il timer
     }, 5000);
 
     function switchNotificationType(type) {
@@ -235,4 +239,21 @@ function showNotification(data) {
 
 function closeNotification() {
     document.getElementById("notification-content").style.display = "none";
+}
+
+function showFeedbackPopup(text) {
+    document.getElementById("feedback-popup").innerText = text;
+    document.getElementById("feedback-popup").style.display = "block";
+    setTimeout(() => {
+        closeFeedbackPopup();
+    }, 1000);
+}
+
+function closeFeedbackPopup() {
+    const feedbackPopup = document.getElementById("feedback-popup");
+    feedbackPopup.style.animation = "fadeOut 0.5s ease-in-out";
+    setTimeout(() => {
+        feedbackPopup.style.display = "none";
+        feedbackPopup.style.animation = "fadeIn 0.5s ease-in-out"; // Reset animation
+    }, 500);
 }

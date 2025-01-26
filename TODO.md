@@ -31,7 +31,7 @@
 - [ ] aggiungere possibilità di chiedere la rivincita
 - [ ] refactor LobbyService
 - [ ] evidenziare celle singole
-- [ ] aggiungere popup di feedback
+- [x] aggiungere popup di feedback
 - [x] aggiungere notifiche
 
 ### Lungo termine ipotetico
