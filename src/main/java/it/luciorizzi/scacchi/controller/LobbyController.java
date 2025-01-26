@@ -9,6 +9,8 @@ import it.luciorizzi.scacchi.openapi.model.*;
 import it.luciorizzi.scacchi.service.LobbyService;
 import it.luciorizzi.scacchi.util.ApiDTOConverter;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,8 @@ public class LobbyController implements LobbyApiDelegate {
     public LobbyController(LobbyService lobbyService) {
         this.lobbyService = lobbyService;
     }
+
+    Logger logger = LoggerFactory.getLogger(LobbyController.class);
 
     public ResponseEntity<LobbyDTO> createLobby(ColorEnum playerOneColor, LobbyDTO lobbyDTO) {
         System.out.println("Creating lobby with player one color " + playerOneColor);
@@ -53,6 +57,10 @@ public class LobbyController implements LobbyApiDelegate {
         }
     }
 
+    public ResponseEntity<LobbyDTO> joinLobby(String lobbyId, LobbyJoinRequestDTO lobbyJoinRequestDTO) {
+        return ResponseEntity.ok( lobbyService.joinLobby(lobbyId, lobbyJoinRequestDTO) );
+    }
+
     //TODO add openapi definition
     @GetMapping("/lobby/{lobbyId}/getMovesHistory")
     public ResponseEntity<List<String>> getMovesHistory(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) { //TODO aggiungere alla definizione openapi
@@ -62,11 +70,6 @@ public class LobbyController implements LobbyApiDelegate {
     @GetMapping("/lobby/{lobbyId}")
     public ModelAndView getLobbyView(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) throws JsonProcessingException {
         return lobbyService.getLobbyView(token, lobbyId);
-    }
-
-
-    public ResponseEntity<LobbyDTO> joinLobby(String lobbyId, LobbyJoinRequestDTO lobbyJoinRequestDTO) {
-        return ResponseEntity.ok( lobbyService.joinLobby(lobbyId, lobbyJoinRequestDTO) );
     }
 
     @GetMapping("/lobby/testLobbyFull")
@@ -84,19 +87,7 @@ public class LobbyController implements LobbyApiDelegate {
         timer.switchTurn();
     }
 
-
     //TODO add complete errors handling and not found pages
-
-    @ExceptionHandler(LobbyNotFoundException.class)
-    public ModelAndView handleLobbyNotFound() {
-        return new ModelAndView("lobbyNotFound");
-    }
-
-    @ExceptionHandler(LobbyActionException.class)
-    public ResponseEntity<String> handleLobbyActionException(HttpServletRequest reqest, Exception exception) {
-        HttpStatus status = ((LobbyActionException) exception).getStatus();
-        return ResponseEntity.status(status).body(exception.getMessage()); //TODO change with DTO, not only string
-    }
 }
 
 //TODO Add Logging

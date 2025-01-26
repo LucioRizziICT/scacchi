@@ -2,30 +2,32 @@ package it.luciorizzi.scacchi.model.message;
 
 import lombok.Getter;
 
-public record NotificationMessage(NotificationMessage.Type type, String title, String message) {
+import java.util.UUID;
 
-    public static NotificationMessage defaultDrawRequest() {
-        return new NotificationMessage(NotificationMessage.Type.DRAW_REQUEST, "Richiesta di patta", "Il tuo avversario ha richiesto una patta");
+public record NotificationMessage(UUID playerId, NotificationMessage.Type type, String title, String message) {
+
+    public static NotificationMessage defaultDrawRequest(UUID playerId) {
+        return new NotificationMessage(playerId, NotificationMessage.Type.DRAW_REQUEST, "Richiesta di patta", "Il tuo avversario ha richiesto una patta");
     }
 
-    public static NotificationMessage defaultDrawAccepted() {
-        return new NotificationMessage(NotificationMessage.Type.DRAW_ACCEPTED, "Patta accettata", "Il tuo avversario ha accettato la tua richiesta di patta");
+    public static NotificationMessage defaultDrawAccepted(UUID playerId) {
+        return new NotificationMessage(playerId, NotificationMessage.Type.DRAW_ACCEPTED, "Patta accettata", "Il tuo avversario ha accettato la tua richiesta di patta");
     }
 
-    public static NotificationMessage defaultDrawDenied() {
-        return new NotificationMessage(NotificationMessage.Type.DRAW_DENIED, "Patta rifiutata", "Il tuo avversario ha rifiutato la tua richiesta di patta");
+    public static NotificationMessage defaultDrawDenied(UUID playerId) {
+        return new NotificationMessage(playerId, NotificationMessage.Type.DRAW_DENIED, "Patta rifiutata", "Il tuo avversario ha rifiutato la tua richiesta di patta");
     }
 
-    public static NotificationMessage defaultRematchRequest() {
-        return new NotificationMessage(NotificationMessage.Type.REMATCH_REQUEST, "Richiesta di rivincita", "Il tuo avversario ha richiesto una rivincita");
+    public static NotificationMessage defaultRematchRequest(UUID playerId) {
+        return new NotificationMessage(playerId, NotificationMessage.Type.REMATCH_REQUEST, "Richiesta di rivincita", "Il tuo avversario ha richiesto una rivincita");
     }
 
-    public static NotificationMessage defaultRematchAccepted() {
-        return new NotificationMessage(NotificationMessage.Type.REMATCH_ACCEPTED, "Rivincita accettata", "Il tuo avversario ha accettato la tua richiesta di rivincita");
+    public static NotificationMessage defaultRematchAccepted(UUID playerId) {
+        return new NotificationMessage(playerId, NotificationMessage.Type.REMATCH_ACCEPTED, "Rivincita accettata", "Il tuo avversario ha accettato la tua richiesta di rivincita");
     }
 
-    public static NotificationMessage defaultRematchDenied() {
-        return new NotificationMessage(NotificationMessage.Type.REMATCH_DENIED, "Rivincita rifiutata", "Il tuo avversario ha rifiutato la tua richiesta di rivincita");
+    public static NotificationMessage defaultRematchDenied(UUID playerId) {
+        return new NotificationMessage(playerId, NotificationMessage.Type.REMATCH_DENIED, "Rivincita rifiutata", "Il tuo avversario ha rifiutato la tua richiesta di rivincita");
     }
 
     @Getter

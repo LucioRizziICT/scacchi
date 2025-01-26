@@ -26,7 +26,7 @@ public class LobbyChatController {
         if (lobbyId.equals(player.getGameId())) {
             String messageContent = messageWrapper.message().message();
             if (messageContent != null && !messageContent.isBlank() && messageContent.length() <= 255) {
-                ChatMessage chatMessage = new ChatMessage(player.getName(), messageContent, LocalDateTime.now());
+                ChatMessage chatMessage = new ChatMessage(player.getId(), player.getName(), messageContent, LocalDateTime.now());
                 socketSendChat(lobbyId, chatMessage);
             }
         }

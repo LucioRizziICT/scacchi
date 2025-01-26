@@ -17,6 +17,7 @@
     <p id="playerColor" th:text="${playerColor}"></p>
     <p id="lobbyId" th:text="${lobbyId}"></p>
     <p id="gameStarted" th:if="${gameStarted}"></p>
+    <p id="playerId" th:text="${playerId}"></p>
 </div>
 <div id="main">
     <div class="flex-container">
@@ -117,6 +118,7 @@
     const retrievedPlayerColor = document.getElementById("playerColor").innerText;
     const retrievedLobbyId = document.getElementById("lobbyId").innerText;
     const retrievedGameStarted = !!document.getElementById("gameStarted");
+    const retrievedPlayerId = document.getElementById("playerId").innerText;
 </script>
 <script src="../js/common.js"></script>
 <script src="../js/lobby.js"></script>

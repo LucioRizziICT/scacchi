@@ -4,9 +4,12 @@ import it.luciorizzi.scacchi.model.type.PieceColor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 public class Player {
     public static final String DEFAULT_NAME = "Anon";
+    private final UUID id = UUID.randomUUID();
     @Setter
     private String name;
     private final String gameId;
@@ -25,5 +28,17 @@ public class Player {
 
     private PieceColor getRandomColor() {
         return Math.random() < 0.5 ? PieceColor.WHITE : PieceColor.BLACK;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Player player = (Player) obj;
+        return this.id.equals(player.id);
     }
 }

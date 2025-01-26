@@ -88,7 +88,7 @@ public class LobbyService {
     public MoveSet getPossibleMoves(String token, String lobbyId, Position position) {
         Lobby lobby = getValidLobby(token, lobbyId);
         if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
-            throw new IllegalArgumentException("Not your turn");
+            throw new LobbyActionException("Not your turn");
         }
         return lobby.getGameBoard().getPossibleMoves(position);
     }
@@ -96,10 +96,10 @@ public class LobbyService {
     public boolean move(String token, String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
         Lobby lobby = getValidLobby(token, lobbyId);
         if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
-            throw new LobbyActionException("Not your turn", HttpStatus.FORBIDDEN);
+            throw new LobbyActionException("Not your turn");
         }
         if (!lobby.gameStarted()) {
-            throw new LobbyActionException("Game not started", HttpStatus.FORBIDDEN);
+            throw new LobbyActionException("Game not started");
         }
         return lobby.getGameBoard().movePiece(fromRow, fromCol, toRow, toCol, promotion);
     }
@@ -178,6 +178,7 @@ public class LobbyService {
 
     private ModelAndView getPlayerLobbyView(Player player, String lobbyId, Lobby lobby, int playerNumber) throws JsonProcessingException {
         ModelAndView modelAndView = new ModelAndView("lobby");
+        modelAndView.addObject("playerId", player.getId());
         modelAndView.addObject("playerNumber", playerNumber);
         modelAndView.addObject("playerColor", player.getColor());
         modelAndView.addObject("player1Name", lobby.getPlayerOne().getName());

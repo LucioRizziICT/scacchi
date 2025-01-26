@@ -1,5 +1,6 @@
 package it.luciorizzi.scacchi.controller;
 
+import it.luciorizzi.scacchi.model.lobby.Player;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.message.*;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
@@ -51,17 +52,18 @@ public class GameboardController {
     @MessageMapping("/lobby/{lobbyId}/draw")
     public void requestDraw(@DestinationVariable String lobbyId, MessageWrapper<DrawMessage> messageWrapper) {
         boolean accept = messageWrapper.message().accept();
+        Player player = lobbyService.getPlayer(messageWrapper.playerToken());
         if (accept) {
             lobbyService.requestDraw(messageWrapper.playerToken(), lobbyId);
             checkGameEnded(messageWrapper.playerToken(), lobbyId);
             if (!lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId)) {
-                socketSendNotification(lobbyId, NotificationMessage.defaultDrawRequest());
+                socketSendNotification(lobbyId, NotificationMessage.defaultDrawRequest(player.getId()));
             } else {
-                socketSendNotification(lobbyId, NotificationMessage.defaultDrawAccepted());
+                socketSendNotification(lobbyId, NotificationMessage.defaultDrawAccepted(player.getId()));
             }
         } else {
             lobbyService.denyDraw(messageWrapper.playerToken(), lobbyId);
-            socketSendNotification(lobbyId, NotificationMessage.defaultDrawDenied());
+            socketSendNotification(lobbyId, NotificationMessage.defaultDrawDenied(player.getId()));
         }
     }
 
@@ -75,7 +77,6 @@ public class GameboardController {
             socketSendOutcome(lobbyId, new GameoverMessage(gameOutcome));
         }
     }
-
 
     private void sendSocketStart(String lobbyId) {
         if (lobbyService.gameStarted(lobbyId)) {

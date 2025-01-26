@@ -143,7 +143,7 @@ function appendChatMessage(data) {
     const chatMessages = document.getElementById("chatMessages");
     const message = document.createElement("div");
     message.classList.add("chatMessage");
-    message.innerText = data.playerName + ': ' + data.message;
+    message.innerText = data.playerName + ( data.playerId === retrievedPlayerId ? '(Tu)' : '' ) + ': ' + data.message;
     chatMessages.appendChild(message);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -168,12 +168,14 @@ function sendDrawRequest() {
 }
 
 function acceptDraw() {
+    closeNotification();
     sendDrawRequest();
     showFeedbackPopup("Patta accettata");
 }
 
 function declineDraw() {
-    sendDrawDeny()
+    closeNotification();
+    sendDrawDeny();
     showFeedbackPopup("Patta Rifiutata");
 }
 
@@ -232,6 +234,8 @@ function showNotification(data) {
             case "DRAW_REQUEST":
                 document.getElementById("notification-footer").innerHTML = '<button onclick="acceptDraw()">Accetta</button><button onclick="declineDraw()">Rifiuta</button>';
                 break;
+            default:
+                document.getElementById("notification-footer").innerHTML = '<button onclick="closeNotification()">Ok</button>';
                 //TODO: Add more cases for different types of notifications
         }
     }
