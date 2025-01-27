@@ -28,7 +28,7 @@
 - [x] togliere le ambiguità nelle mosse
 - [ ] terminare partita se uno dei due giocatori si disconnette
 - [x] aggiungere definizioni openapi e DTO autogenerati
-- [ ] aggiungere possibilità di chiedere la rivincita
+- [x] aggiungere possibilità di chiedere la rivincita
 - [ ] refactor LobbyService
 - [x] evidenziare celle singole // un po' buggato
 - [x] aggiungere popup di feedback

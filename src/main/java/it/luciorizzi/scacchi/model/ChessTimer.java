@@ -35,4 +35,8 @@ public class ChessTimer {
         parentBoard.handleTimeOver(color);
         //TODO: Add gameover websocket message somewhere, maybe in Gameboard
     }
+
+    public void reset() {
+        //TODO implement
+    }
 }

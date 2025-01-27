@@ -13,7 +13,8 @@ public class Player {
     @Setter
     private String name;
     private final String gameId;
-    private final PieceColor color;
+    @Setter
+    private PieceColor color;
 
     public Player(String name, String gameId, PieceColor color) {
         this.name = ( name == null || name.isBlank() ) ? DEFAULT_NAME : name;

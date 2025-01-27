@@ -74,9 +74,14 @@ public class GameboardController {
         Player player = lobbyService.getPlayer(playerToken);
         if (lobbyService.requestRematch(playerToken, lobbyId)) {
             socketSendNotification(lobbyId, NotificationMessage.defaultRematchAccepted(player.getId()));
+            sendSocketRematch(lobbyId);
         } else {
             socketSendNotification(lobbyId, NotificationMessage.defaultRematchRequest(player.getId()));
         }
+    }
+
+    private void sendSocketRematch(String lobbyId) {
+        simpMessagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/rematch", "");
     }
 
     private void socketSendNotification(String lobbyId, NotificationMessage message) {

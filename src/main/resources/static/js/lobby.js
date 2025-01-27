@@ -51,6 +51,11 @@ function checkCloseGameEndModal(event) {
     }
 }
 
+function showPostGameDiv() {
+    document.getElementById("endGameDiv").style.display = "none";
+    document.getElementById("postGameDiv").style.display = "block";
+}
+
 function copyInviteLink() {
     const inviteLink = document.getElementById("inviteModalLink");
     inviteLink.select();

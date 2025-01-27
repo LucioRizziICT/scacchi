@@ -44,6 +44,13 @@ public class Lobby {
      */
     public boolean requestRematch(PieceColor color) {
         rematchAgreement.agree(color);
-        return rematchAgreement.isAccepted();
+        if (rematchAgreement.isAccepted()) {
+            rematchAgreement = new Agreement();
+            playerOne.setColor(playerOne.getColor().opposite());
+            playerTwo.setColor(playerTwo.getColor().opposite());
+            gameBoard.reset();
+            return true;
+        }
+        return false;
     }
 }

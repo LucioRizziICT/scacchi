@@ -28,6 +28,7 @@ public class MoveHistory {
 
     public void clear() {
         history.clear();
+        outcome = null;
     }
 
     public List<String> getNotation() {

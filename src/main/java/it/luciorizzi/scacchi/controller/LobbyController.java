@@ -32,7 +32,7 @@ public class LobbyController implements LobbyApiDelegate {
     Logger logger = LoggerFactory.getLogger(LobbyController.class);
 
     public ResponseEntity<LobbyDTO> createLobby(ColorEnum playerOneColor, LobbyDTO lobbyDTO) {
-        System.out.println("Creating lobby with player one color " + playerOneColor);
+        logger.debug("Creating new lobby");
         return ResponseEntity.ok( lobbyService.createLobby(lobbyDTO, playerOneColor) );
     }
 
@@ -83,7 +83,6 @@ public class LobbyController implements LobbyApiDelegate {
     @GetMapping("/lobby/testTimer")
     public void testTimer() {
         ChessTimer timer = new ChessTimer(180, 0, null);
-        System.out.println("Starting timer at " + System.nanoTime());
         timer.switchTurn();
     }
 

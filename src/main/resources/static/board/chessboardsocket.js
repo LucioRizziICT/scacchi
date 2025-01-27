@@ -39,9 +39,7 @@ stompClient.onConnect = function(frame) {
     });
 
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/rematch', function(message) {
-        const data = JSON.parse(message.body);
-        console.log(data);
-        //TODO implement rematch (reset board, score, etc)
+        window.location.reload();
     });
 };
 

@@ -30,14 +30,14 @@
                 <button type="button" id="lobbyInfoChatButton-label" onclick="selectLobbyChatMenu();">Chat</button>
                 <button type="button" id="lobbyInfoSettingsButton-label" onclick="selectLobbySettingsMenu();">Impostazioni</button>
 
-                <button type="button" class="float-right" onclick="location.href = '../' ">Men&ugrave; principale</button>
+                <button type="button" class="float-right" onclick="window.location.href = '../' ">Men&ugrave; principale</button>
             </div>
             <div id="topnav-icon" class="topnav">
                 <button type="button" id="lobbyInfoGameButton-icon" onclick="selectLobbyGameMenu();" class="button-active">&#9817;</button>
                 <button type="button" id="lobbyInfoChatButton-icon" onclick="selectLobbyChatMenu();">&#128488;</button>
                 <button type="button" id="lobbyInfoSettingsButton-icon" onclick="selectLobbySettingsMenu();">&#9881;</button>
 
-                <button type="button" class="float-right" onclick="location.href = '../' ">&#8962;</button>
+                <button type="button" class="float-right" onclick="window.location.href = '../' ">&#8962;</button>
             </div>
             <div id="lobbySelectedContent" style="display: block;">
                 <div id="lobbyInfoContentGame">
@@ -56,7 +56,7 @@
                     </div>
                     <div id="postGameDiv" style="display: none;">
                         <button type="button" id="postGameRematchButton" onclick="askForRematch();">Sfida di nuovo</button>
-                        <button type="button" id="postGameExitButton" onclick="exit();">Esci</button>
+                        <button type="button" id="postGameExitButton" onclick="window.location.href = '../' ">Esci</button>
                     </div>
                     <hr>
                     <div id="movesHistory">
@@ -97,7 +97,7 @@
             <h4 id="gameEndModalCause" class="gameEndModalCause" th:text="${gameOutcome != null ? gameOutcome.cause : ''}"></h4>
 
             <button type="button" onclick="closeGameEndModal();">Chiudi</button>
-            <button type="button" onclick="location.href = '../'">Men&ugrave; principale</button>
+            <button type="button" onclick="window.location.href = '../'">Men&ugrave; principale</button>
         </div>
     </div>
     <div class="notification-content" id="notification-content">

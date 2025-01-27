@@ -25,7 +25,7 @@ public class GameBoard { //TODO: add thread safety if needed
     private Pawn enPassantablePawn = null;
     private int fiftyMovesCounter = 0;
     private Agreement drawAgreement = new Agreement();
-    private ChessTimer timer;
+    private ChessTimer timer = null;
     @Getter
     private final MoveHistory movesHistory = new MoveHistory();
 
@@ -54,15 +54,17 @@ public class GameBoard { //TODO: add thread safety if needed
 
     public void reset() {
         turn = PieceColor.WHITE;
-        initialize();
-        drawAgreement = new Agreement();
-        saveCurrentState();
         previousStates.clear();
         whitePieces.clear();
         blackPieces.clear();
-        isOngoing = true;
         movesHistory.clear();
+        drawAgreement = new Agreement();
+        isOngoing = true;
         fiftyMovesCounter = 0;
+        if (timer != null)
+            timer.reset();
+        initialize();
+        saveCurrentState();
     }
 
     private void saveCurrentState() {
@@ -342,6 +344,7 @@ public class GameBoard { //TODO: add thread safety if needed
         }
     }
 
+    @Deprecated(forRemoval = true)
     public void print() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {

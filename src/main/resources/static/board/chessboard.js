@@ -268,6 +268,7 @@ function applyGameOver(outcome) { //TODO: Cambiare con testo custom, non valore 
 
     openGameEndModal();
     playGameOverSound();
+    showPostGameDiv();
 }
 
 function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
