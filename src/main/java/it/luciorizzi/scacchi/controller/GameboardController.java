@@ -52,18 +52,30 @@ public class GameboardController {
     @MessageMapping("/lobby/{lobbyId}/draw")
     public void requestDraw(@DestinationVariable String lobbyId, MessageWrapper<DrawMessage> messageWrapper) {
         boolean accept = messageWrapper.message().accept();
-        Player player = lobbyService.getPlayer(messageWrapper.playerToken());
+        String playerToken = messageWrapper.playerToken();
+        Player player = lobbyService.getPlayer(playerToken);
         if (accept) {
-            lobbyService.requestDraw(messageWrapper.playerToken(), lobbyId);
-            checkGameEnded(messageWrapper.playerToken(), lobbyId);
-            if (!lobbyService.gameEnded(messageWrapper.playerToken(), lobbyId)) {
-                socketSendNotification(lobbyId, NotificationMessage.defaultDrawRequest(player.getId()));
-            } else {
+            if (lobbyService.requestDraw(playerToken, lobbyId)) {
                 socketSendNotification(lobbyId, NotificationMessage.defaultDrawAccepted(player.getId()));
+                GameOutcome gameOutcome = lobbyService.getGameOutcome(playerToken, lobbyId);
+                socketSendOutcome(lobbyId, new GameoverMessage(gameOutcome));
+            } else {
+                socketSendNotification(lobbyId, NotificationMessage.defaultDrawRequest(player.getId()));
             }
         } else {
             lobbyService.denyDraw(messageWrapper.playerToken(), lobbyId);
             socketSendNotification(lobbyId, NotificationMessage.defaultDrawDenied(player.getId()));
+        }
+    }
+
+    @MessageMapping("/lobby/{lobbyId}/rematch")
+    public void requestRematch(@DestinationVariable String lobbyId, MessageWrapper<Void> messageWrapper) {
+        String playerToken = messageWrapper.playerToken();
+        Player player = lobbyService.getPlayer(playerToken);
+        if (lobbyService.requestRematch(playerToken, lobbyId)) {
+            socketSendNotification(lobbyId, NotificationMessage.defaultRematchAccepted(player.getId()));
+        } else {
+            socketSendNotification(lobbyId, NotificationMessage.defaultRematchRequest(player.getId()));
         }
     }
 

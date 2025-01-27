@@ -54,6 +54,10 @@
                         <button type="button" id="endGameAskDrawButton" onclick="askForDraw();">Richiedi patta</button>
                         <button type="button" id="endGameResignButton" onclick="resign();">Arrenditi</button>
                     </div>
+                    <div id="postGameDiv" style="display: none;">
+                        <button type="button" id="postGameRematchButton" onclick="askForRematch();">Sfida di nuovo</button>
+                        <button type="button" id="postGameExitButton" onclick="exit();">Esci</button>
+                    </div>
                     <hr>
                     <div id="movesHistory">
                         <h3>Mosse</h3>
@@ -121,6 +125,7 @@
     const retrievedLobbyId = document.getElementById("lobbyId").innerText;
     const retrievedGameStarted = !!document.getElementById("gameStarted");
     const retrievedPlayerId = document.getElementById("playerId").innerText;
+    const retrievedGameover = document.getElementById("gameEndModal").style.display === "block";
 </script>
 <script src="../js/common.js"></script>
 <script src="../js/lobby.js"></script>

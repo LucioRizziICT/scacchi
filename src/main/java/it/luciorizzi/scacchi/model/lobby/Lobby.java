@@ -1,6 +1,8 @@
 package it.luciorizzi.scacchi.model.lobby;
 
+import it.luciorizzi.scacchi.model.Agreement;
 import it.luciorizzi.scacchi.model.GameBoard;
+import it.luciorizzi.scacchi.model.type.PieceColor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +21,7 @@ public class Lobby {
     private Player playerTwo = null;
     @Setter
     LobbyProperties properties;
+    private Agreement rematchAgreement = new Agreement();
 
     public Lobby(String name, Player playerOne, String password, LobbyProperties properties) {
         this.name = ( name == null || name.isBlank() ) ? "Lobby di " + playerOne.getName() : name;
@@ -33,5 +36,14 @@ public class Lobby {
 
     public boolean gameStarted() {
         return isFull();
+    }
+
+    /**
+     * @param color the color of the player requesting the rematch
+     * @return true if the rematch is accepted with this call
+     */
+    public boolean requestRematch(PieceColor color) {
+        rematchAgreement.agree(color);
+        return rematchAgreement.isAccepted();
     }
 }

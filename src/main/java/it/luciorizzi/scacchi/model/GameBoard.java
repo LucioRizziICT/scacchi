@@ -24,7 +24,7 @@ public class GameBoard { //TODO: add thread safety if needed
     private final Map<String, Integer> previousStates = new HashMap<>();
     private Pawn enPassantablePawn = null;
     private int fiftyMovesCounter = 0;
-    private DrawState drawState = new DrawState();
+    private Agreement drawAgreement = new Agreement();
     private ChessTimer timer;
     @Getter
     private final MoveHistory movesHistory = new MoveHistory();
@@ -55,7 +55,7 @@ public class GameBoard { //TODO: add thread safety if needed
     public void reset() {
         turn = PieceColor.WHITE;
         initialize();
-        drawState = new DrawState();
+        drawAgreement = new Agreement();
         saveCurrentState();
         previousStates.clear();
         whitePieces.clear();
@@ -529,20 +529,26 @@ public class GameBoard { //TODO: add thread safety if needed
         movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.RESIGNATION) );
     }
 
-    public void requestDraw(PieceColor color) {
+    /**
+     * @param color the color of the player requesting the draw
+     * @return true if the draw is accepted with this call
+     */
+    public boolean requestDraw(PieceColor color) {
         if (!isOngoing())
-            return;
-        drawState.setDraw(color);
-        if (drawState.isDrawAccepted()) {
+            return false;
+        drawAgreement.agree(color);
+        if (drawAgreement.isAccepted()) {
             isOngoing = false;
             movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.AGREED_DRAW) );
+            return true;
         }
+        return false;
     }
 
     public void denyDraw() {
         if (!isOngoing())
             return;
-        drawState.deny();
+        drawAgreement.deny();
     }
 
     //TODO validate move method

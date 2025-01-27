@@ -218,6 +218,36 @@ function sendSocketResign() {
     });
 }
 
+function askForRematch() {
+    sendRematchRequest();
+}
+
+function sendRematchRequest() {
+    const messageWrapper = {
+        playerToken: getCookie('playerToken'),
+        message: {
+            accept: true
+        }
+    };
+
+    stompClient.publish({
+        destination: '/app/lobby/' + retrievedLobbyId + '/rematch',
+        body: JSON.stringify(messageWrapper)
+    });
+    showFeedbackPopup("Richiesta inviata");
+}
+
+function acceptRematch() {
+    closeNotification();
+    sendRematchRequest();
+    showFeedbackPopup("Richiesta accettata");
+}
+
+function declineRematch() {
+    closeNotification();
+    showFeedbackPopup("Richiesta rifiutata");
+}
+
 function showNotification(data) {
     document.getElementById("notification-header").innerText = data.title;
     document.getElementById("notification-body").innerText = data.message;
@@ -233,6 +263,9 @@ function showNotification(data) {
         switch (type) {
             case "DRAW_REQUEST":
                 document.getElementById("notification-footer").innerHTML = '<button onclick="acceptDraw()">Accetta</button><button onclick="declineDraw()">Rifiuta</button>';
+                break;
+            case "REMATCH_REQUEST":
+                document.getElementById("notification-footer").innerHTML = '<button onclick="acceptRematch()">Accetta</button><button onclick="declineRematch()">Rifiuta</button>';
                 break;
             default:
                 document.getElementById("notification-footer").innerHTML = '<button onclick="closeNotification()">Ok</button>';

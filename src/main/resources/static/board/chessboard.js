@@ -54,7 +54,7 @@ let isChecked = {
     'w': false,
     'b': false
 }
-let gameover = false;
+let gameover = retrievedGameover;
 let gamestarted = retrievedGameStarted;
 let lastMove = null;
 
