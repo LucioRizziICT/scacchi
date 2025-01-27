@@ -17,6 +17,7 @@ stompClient.onConnect = function(frame) {
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/move', function(message) {
         const data = JSON.parse(message.body);
         applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck);
+        updateMovesHistory();
     });
 
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/gameover', function(message) {

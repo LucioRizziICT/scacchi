@@ -7,7 +7,7 @@
 - [ ] Scrivere la documentazione
 - [ ] personalizzazione frecce
 - [ ] impostazioni lobby
-- [ ] mostrare cronologia mosse giocare
+- [x] mostrare cronologia mosse giocare
 - [ ] timer per partite a tempo
 - [x] segnare ultima mossa giocata
 - [ ] possibilità di rivedere partite finite senza perdere il token attuale
@@ -25,14 +25,14 @@
 - [ ] salvare preferenze utente
 - [x] password se nulla sempre valida
 - [ ] gestione errori e messaggi di errore e pagine di errore
-- [ ] togliere le ambiguità nelle mosse
+- [x] togliere le ambiguità nelle mosse
 - [ ] terminare partita se uno dei due giocatori si disconnette
 - [x] aggiungere definizioni openapi e DTO autogenerati
 - [ ] aggiungere possibilità di chiedere la rivincita
 - [ ] refactor LobbyService
 - [x] evidenziare celle singole // un po' buggato
 - [x] aggiungere popup di feedback
-- [x] aggiungere notifiche // un po' buggate
+- [x] aggiungere notifiche
 - [ ] mettere canvas a più layer
 
 ### Lungo termine ipotetico

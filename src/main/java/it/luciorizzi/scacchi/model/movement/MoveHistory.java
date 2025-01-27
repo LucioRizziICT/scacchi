@@ -14,20 +14,16 @@ public class MoveHistory {
     @Setter
     private GameOutcome outcome = null;
 
-    public void add(Move move, Piece movedPiece, ThreatType threatType) {
-        history.add(new MoveHistoryEntry(move, movedPiece, threatType));
+    public void add(Move move, Piece movedPiece, boolean disambiguationColumn, boolean disambiguationRow) {
+        history.add(new MoveHistoryEntry(move, movedPiece, null, disambiguationColumn, disambiguationRow));
     }
 
-    public void add(Move move, Piece movedPiece) {
-        history.add(new MoveHistoryEntry(move, movedPiece, null));
+    public void addCheck(Move move, Piece movedPiece, boolean disambiguationColumn, boolean disambiguationRow) {
+        history.add(new MoveHistoryEntry(move, movedPiece, ThreatType.CHECK, disambiguationColumn, disambiguationRow));
     }
 
-    public void addCheck(Move move, Piece movedPiece) {
-        history.add(new MoveHistoryEntry(move, movedPiece, ThreatType.CHECK));
-    }
-
-    public void addCheckmate(Move move, Piece movedPiece) {
-        history.add(new MoveHistoryEntry(move, movedPiece, ThreatType.CHECKMATE));
+    public void addCheckmate(Move move, Piece movedPiece, boolean disambiguationColumn, boolean disambiguationRow) {
+        history.add(new MoveHistoryEntry(move, movedPiece, ThreatType.CHECKMATE, disambiguationColumn, disambiguationRow));
     }
 
     public void clear() {

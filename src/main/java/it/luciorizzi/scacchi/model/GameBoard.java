@@ -264,15 +264,47 @@ public class GameBoard { //TODO: add thread safety if needed
     }
 
     private void addMoveToHistory(Move move) {
+
+
         Piece movedPiece = getPiece(move.getDestination());
+        Class<? extends Piece> movedPieceOriginalClass = move.getPromotion() != null ? Pawn.class : movedPiece.getClass();
+
+        boolean disambiguationColumn = false;
+        boolean disambiguationRow = false;
+
+        if ( !(movedPiece instanceof King) ) { //TODO extraxt or refactor
+            if (move.getMoveType() == MoveType.CAPTURE) {
+                board[move.getDestination().row()][move.getDestination().column()] = new Queen(turn, move.getDestination());
+            } else {
+                board[move.getDestination().row()][move.getDestination().column()] = new EmptyPiece(move.getDestination());
+            }
+
+
+            for (Piece piece : getPieces(turn.opposite())) {
+                if (movedPieceOriginalClass.equals(piece.getClass())) {
+                    if (piece.couldReach(this, move.getDestination())) {
+                        if (move.getOrigin().column() != piece.getPosition().column()) {
+                            disambiguationColumn = true;
+                        } else {
+                            disambiguationRow = true;
+                        }
+                    }
+                }
+            }
+
+            board[move.getDestination().row()][move.getDestination().column()] = movedPiece;
+        }
+
+
+
         if (isCheck()) {
             if (isCheckmate()) {
-                movesHistory.addCheckmate(move, movedPiece);
+                movesHistory.addCheckmate(move, movedPiece, disambiguationColumn, disambiguationRow);
             } else {
-                movesHistory.addCheck(move, movedPiece);
+                movesHistory.addCheck(move, movedPiece, disambiguationColumn, disambiguationRow);
             }
         } else {
-            movesHistory.add(move, movedPiece);
+            movesHistory.add(move, movedPiece, disambiguationColumn, disambiguationRow);
         }
     }
 

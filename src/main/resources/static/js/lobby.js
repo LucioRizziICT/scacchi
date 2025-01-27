@@ -261,3 +261,22 @@ function closeFeedbackPopup() {
         feedbackPopup.style.animation = "fadeIn 0.5s ease-in-out"; // Reset animation
     }, 500);
 }
+
+function updateMovesHistory() {
+    const url = `${window.location.pathname}/movesHistory`;
+
+    fetch(url,{
+        method: 'GET',
+        credentials: 'same-origin',
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        const movesHistory = document.getElementById("movesHistorySpace");
+        let moves = '';
+        for(let i=0; i<data.length; i+=2) {
+            moves += (i/2 + 1) + '. ' + data[i] + ' ' + data[i+1] + '<br>';
+        }
+        movesHistory.innerHTML = moves;
+    });
+}
