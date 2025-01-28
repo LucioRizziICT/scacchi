@@ -8,7 +8,6 @@ import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
-import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.openapi.model.ColorEnum;
 import it.luciorizzi.scacchi.openapi.model.LobbyDTO;
 import it.luciorizzi.scacchi.openapi.model.LobbyJoinRequestDTO;
@@ -16,14 +15,13 @@ import it.luciorizzi.scacchi.openapi.model.PlayerDTO;
 import it.luciorizzi.scacchi.util.ApiDTOConverter;
 import it.luciorizzi.scacchi.util.RandomToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class LobbyService {
@@ -31,8 +29,8 @@ public class LobbyService {
     @Autowired
     ObjectMapper objectMapper;
 
-    private final Map<String, Lobby> lobbies = new HashMap<>();
-    private final Map<String, Player> players = new HashMap<>();
+    private final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
+    private final Map<String, Player> players = new ConcurrentHashMap<>();
 
     public LobbyDTO createLobby(LobbyDTO lobbyDTO, ColorEnum playerOneColor) {
         String lobbyId = RandomToken.generateLobbyToken();

@@ -35,6 +35,7 @@
 - [x] aggiungere popup di feedback
 - [x] aggiungere notifiche
 - [ ] mettere canvas a più layer
+- [ ] gestire concorrenza
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni

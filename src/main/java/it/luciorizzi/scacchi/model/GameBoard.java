@@ -275,6 +275,7 @@ public class GameBoard { //TODO: add thread safety if needed
         boolean disambiguationRow = false;
 
         if ( !(movedPiece instanceof King) ) { //TODO extraxt or refactor
+            //TODO make thread safe (is now probably super unsafe)
             if (move.getMoveType() == MoveType.CAPTURE) {
                 board[move.getDestination().row()][move.getDestination().column()] = new Queen(turn, move.getDestination());
             } else {
