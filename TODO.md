@@ -20,7 +20,8 @@
 - [x] aggiungere possibilità di chiedere una patta
 - [ ] fixare lobby attuale nel menù
 - [ ] rifare grafica form creazione lobby
-- [ ] altri colori frecce
+- [x] altri colori frecce
+- [ ] altri colori evidenziazione celle
 - [x] mostrare scacchi per entrambi giocatori non solo quelli subiti
 - [ ] salvare preferenze utente
 - [x] password se nulla sempre valida

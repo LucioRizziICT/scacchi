@@ -16,6 +16,8 @@ const COLORS =  {
     HIGHLIGHTED_BLACK_CELL: '#b83939',
     ARROW: 'rgba(255,95,38,0.8)',
     ARROW2: 'rgba(30,165,228,0.8)',
+    ARROW3: 'rgba(30,228,37,0.8)',
+    ARROW4: 'rgba(126,30,228,0.8)',
     CHECK: 'rgba(211,0,0,0.77)',
     MOVABLE_SPOT: 'rgba(217,217,217,0.82)',
     LAYER: 'rgba(33,33,33,0.56)',
@@ -162,7 +164,19 @@ canvas.addEventListener('mouseup', function(event) {
             highlightCell(row, col);
             return;
         }
-        drawArrow(arrowStart.row, arrowStart.col, centerRow, centerCol, event.ctrlKey ? COLORS.ARROW2 : COLORS.ARROW);
+        drawArrow(arrowStart.row, arrowStart.col, centerRow, centerCol, getArrowColor());
+        function getArrowColor() {
+            if (event.ctrlKey) {
+                if (event.shiftKey) {
+                    return COLORS.ARROW4;
+                }
+                return COLORS.ARROW2;
+            }
+            if (event.shiftKey) {
+                return COLORS.ARROW3;
+            }
+            return COLORS.ARROW;
+        }
     }
 });
 
