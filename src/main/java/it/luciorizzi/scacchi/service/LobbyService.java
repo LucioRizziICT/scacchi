@@ -19,9 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class LobbyService {
@@ -29,8 +29,8 @@ public class LobbyService {
     @Autowired
     ObjectMapper objectMapper;
 
-    private final Map<String, Lobby> lobbies = new ConcurrentHashMap<>();
-    private final Map<String, Player> players = new ConcurrentHashMap<>();
+    private final Map<String, Lobby> lobbies = new HashMap<>();
+    private final Map<String, Player> players = new HashMap<>();
 
     public LobbyDTO createLobby(LobbyDTO lobbyDTO, ColorEnum playerOneColor) {
         String lobbyId = RandomToken.generateLobbyToken();
