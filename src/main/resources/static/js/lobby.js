@@ -309,11 +309,10 @@ function updateMovesHistory() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data);
         const movesHistory = document.getElementById("movesHistorySpace");
         let moves = '';
         for(let i=0; i<data.length; i+=2) {
-            moves += (i/2 + 1) + '. ' + data[i] + ' ' + data[i+1] + '<br>';
+            moves += (i/2 + 1) + '. ' + data[i] + ' ' + (data[i+1] ? data[i+1] : '') + '<br>';
         }
         movesHistory.innerHTML = moves;
     });

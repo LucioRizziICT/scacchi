@@ -21,7 +21,7 @@
 - [ ] fixare lobby attuale nel menù
 - [ ] rifare grafica form creazione lobby
 - [x] altri colori frecce
-- [ ] altri colori evidenziazione celle
+- [x] altri colori evidenziazione celle
 - [x] mostrare scacchi per entrambi giocatori non solo quelli subiti
 - [ ] salvare preferenze utente
 - [x] password se nulla sempre valida
@@ -34,7 +34,7 @@
 - [x] evidenziare celle singole // un po' buggato
 - [x] aggiungere popup di feedback
 - [x] aggiungere notifiche
-- [ ] mettere canvas a più layer
+- [x] mettere canvas a più layer
 - [ ] gestire concorrenza
 
 ### Lungo termine ipotetico

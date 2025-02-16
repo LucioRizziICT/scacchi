@@ -1,5 +1,5 @@
 // CONSTANTS
-const PIECES_NAME = {
+const PIECES_NAMES = {
     'p': 'pawn',
     'r': 'rook',
     'n': 'knight',
@@ -12,9 +12,11 @@ const BOARD_SIZE = 8;
 const COLORS =  {
     WHITE_CELL: '#f0d9b5',
     BLACK_CELL: '#b58863',
-    HIGHLIGHTED_WHITE_CELL: '#e46060',
-    HIGHLIGHTED_BLACK_CELL: '#b83939',
-    ARROW: 'rgba(255,95,38,0.8)',
+    HIGHLIGHTED_CELL1: 'rgba(188,48,48,0.64)',
+    HIGHLIGHTED_CELL2: 'rgba(30,165,228,0.8)',
+    HIGHLIGHTED_CELL3: 'rgba(30,228,37,0.8)',
+    HIGHLIGHTED_CELL4: 'rgba(126,30,228,0.8)',
+    ARROW1: 'rgba(255,95,38,0.8)',
     ARROW2: 'rgba(30,165,228,0.8)',
     ARROW3: 'rgba(30,228,37,0.8)',
     ARROW4: 'rgba(126,30,228,0.8)',
@@ -26,7 +28,31 @@ const COLORS =  {
     LAST_MOVE: 'rgba(255, 255, 0, 0.5)'
 };
 
+const preferences = {
+    drawLastMove : true
+}
+
 const canvas = document.getElementById('chessboardCanvas');
+
+const canvasLayers = {
+    background: document.createElement('canvas'),
+    highlights: document.createElement('canvas'),
+    pieces: document.createElement('canvas'),
+    arrows: document.createElement('canvas'),
+    movableSpots: document.createElement('canvas'),
+    promotionMenu: document.createElement('canvas'),
+    overall: document.createElement('canvas')
+}
+
+const ctxLayers = {
+    background: canvasLayers.background.getContext('2d'),
+    highlights: canvasLayers.highlights.getContext('2d'),
+    pieces: canvasLayers.pieces.getContext('2d'),
+    arrows: canvasLayers.arrows.getContext('2d'),
+    movableSpots: canvasLayers.movableSpots.getContext('2d'),
+    promotionMenu: canvasLayers.promotionMenu.getContext('2d'),
+    overall: canvasLayers.overall.getContext('2d')
+}
 
 let cellSize;
 setCanvasSize();
@@ -36,13 +62,19 @@ function setCanvasSize() {
     const canvasSize = divSpace - (divSpace % BOARD_SIZE);
     canvas.height = canvasSize;
     canvas.width = canvasSize;
+
+    for (const layer in canvasLayers) {
+        canvasLayers[layer].height = canvasSize;
+        canvasLayers[layer].width = canvasSize;
+    }
+
     cellSize = canvasSize / BOARD_SIZE;
 }
 
-const ctx = canvas.getContext('2d');
+const chessboardCtx = canvas.getContext('2d');
 
 const playerColor = retrievedPlayerColor === "WHITE" ? 'w' : 'b';
-
+let movableSpots = {};
 let highlightedCells = {};
 let arrowStart = {};
 let heldPiece = null;
@@ -77,7 +109,10 @@ canvas.addEventListener('mousedown', function(event) {
     }
     if (event.button === 0) {
 
-        board.draw();
+        clearCtx(ctxLayers.arrows);
+        clearCtx(ctxLayers.promotionMenu);
+        clearCtx(ctxLayers.movableSpots);
+        clearCtx(ctxLayers.highlights);
 
         const x = event.offsetX;
         const y = event.offsetY;
@@ -129,7 +164,7 @@ canvas.addEventListener('mouseup', function(event) {
         }
 
         choosingPromotionCol = false;
-        board.draw();
+        renderChessboard();
         return;
     }
 
@@ -140,31 +175,46 @@ canvas.addEventListener('mouseup', function(event) {
         }
 
         if ( selectedPiece != null && (selectedPiece.row !== row || selectedPiece.col !== col) ) {
-            if (board.movableSpots[`${row}_${col}`]) {
+            if (movableSpots[`${row}_${col}`]) {
                 if (selectedPiece.type === 'p' && row === 0) {
                     choosingPromotionCol = col;
-                    drawPromotionMenu(col);
+                    drawPromotionMenu(ctxLayers.promotionMenu, choosingPromotionCol);
+                    renderChessboard();
                     return;
                 }
                 movePiece(selectedPiece, row, col);
                 selectedPiece = null;
-                board.movableSpots = {};
+                movableSpots = {};
             } else {
                 selectedPiece = null;
-                board.movableSpots = {};
+                movableSpots = {};
             }
         }
 
-        board.draw();
+        renderChessboard();
     } else if (event.button === 2) {
         const centerRow = row * cellSize + cellSize / 2;
         const centerCol = col * cellSize + cellSize / 2;
 
         if (arrowStart.row === centerRow && arrowStart.col === centerCol) {
-            highlightCell(row, col);
-            return;
+            highlightCell(ctxLayers.highlights, row, col, getHighlightColor());
+        } else {
+            drawArrow(ctxLayers.arrows, arrowStart.row, arrowStart.col, centerRow, centerCol, getArrowColor());
         }
-        drawArrow(arrowStart.row, arrowStart.col, centerRow, centerCol, getArrowColor());
+
+        function getHighlightColor() {
+            if (event.ctrlKey) {
+                if (event.shiftKey) {
+                    return COLORS.HIGHLIGHTED_CELL4;
+                }
+                return COLORS.HIGHLIGHTED_CELL2;
+            }
+            if (event.shiftKey) {
+                return COLORS.HIGHLIGHTED_CELL3;
+            }
+            return COLORS.HIGHLIGHTED_CELL1;
+        }
+
         function getArrowColor() {
             if (event.ctrlKey) {
                 if (event.shiftKey) {
@@ -175,8 +225,9 @@ canvas.addEventListener('mouseup', function(event) {
             if (event.shiftKey) {
                 return COLORS.ARROW3;
             }
-            return COLORS.ARROW;
+            return COLORS.ARROW1;
         }
+        renderChessboard();
     }
 });
 
@@ -188,15 +239,15 @@ window.addEventListener('resize', resizeCanvas, false);
 
 function resizeCanvas() {
     setCanvasSize();
-    board.draw();
+    drawGameNotStarted(ctxLayers.overall);
+    renderChessboard();
 }
 
 //from codepen
-function drawArrow(fromy, fromx, toy, tox, color){
+function drawArrow(ctx, fromy, fromx, toy, tox, color){
     const headLength = cellSize / 3;
     const angle = Math.atan2(toy-fromy,tox-fromx);
 
-    ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = cellSize / 6;
 
@@ -226,38 +277,23 @@ function drawArrow(fromy, fromx, toy, tox, color){
 
     //draws the paths created above
     ctx.stroke();
-    ctx.restore();
 }
 
-function highlightCell(row, col) {
+function highlightCell(ctx, row, col, color) {
     const key = `${row}_${col}`;
-    if (highlightedCells[key]) {
+    if (highlightedCells[key] === color) {
         delete highlightedCells[key];
     } else {
-        highlightedCells[key] = true;
+        highlightedCells[key] = color;
     }
-    drawSingleCell(row, col);
+    drawSingleCell();
 
-    function drawSingleCell(row, col) {
-        console.log(row, col);
-        if(row % 2 === col % 2) {
-            if (highlightedCells[key]) {
-                ctx.fillStyle = COLORS.HIGHLIGHTED_WHITE_CELL;
-            } else {
-                ctx.fillStyle = COLORS.WHITE_CELL;
-            }
-        } else {
-            if (highlightedCells[key]) {
-                ctx.fillStyle = COLORS.HIGHLIGHTED_BLACK_CELL;
-            } else {
-                ctx.fillStyle = COLORS.BLACK_CELL;
-            }
+    function drawSingleCell() {
+        ctx.clearRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        if (highlightedCells[key]) {
+            ctx.fillStyle = color;
+            ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
         }
-        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-        if(board.board[row][col] != null) {
-            board.board[row][col].draw();
-        }
-        board.drawMovableSpots();
     }
 }
 
@@ -267,8 +303,9 @@ function movePiece(piece, row, col, promotion = null) {
     const to = getCorrectedPosition(row, col);
 
     sendSocketMove(from.row, from.col, to.row, to.col, promotion);
-    board.movableSpots = {};
-    board.draw();
+    movableSpots = {};
+    clearCtx(ctxLayers.promotionMenu);
+    renderChessboard();
 }
 
 function applyGameOver(outcome) { //TODO: Cambiare con testo custom, non valore dell'enum (ex. "WHITE_WIN")
@@ -301,7 +338,7 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     handleCastling();
     handlePromotion();
 
-    board.draw();
+    renderChessboard();
 
     function handleSound() {
         if (isCheck) {
@@ -370,12 +407,12 @@ function getMovableSpots(row, col) {
     }).then(response => {
         if (response.ok) {
             response.json().then(data => {
-                board.movableSpots = {};
+                movableSpots = {};
                 data.forEach(move => {
                     const correctedSpot = getCorrectedPosition(move.destination.row, move.destination.col);
-                    board.movableSpots[`${correctedSpot.row}_${correctedSpot.col}`] = move.moveType;
+                    movableSpots[`${correctedSpot.row}_${correctedSpot.col}`] = move.moveType;
                 });
-                board.draw();
+                renderChessboard();
             });
         }
     });
@@ -396,19 +433,18 @@ function Piece(row, col, color, type) {
     this.type = type;
     this.held = false;
     this.img = new Image();
-    this.img.src = `/scacchi/board/sprites/${this.color}_${PIECES_NAME[this.type]}.png`;
+    this.img.src = `/scacchi/board/sprites/${this.color}_${PIECES_NAMES[this.type]}.png`;
     this.img.onload = () => {
-        this.draw();
+        this.draw(ctxLayers.pieces);
     }
 
-    this.draw = function() {
+    this.draw = function(ctx) {
         if (this.held) {
-            ctx.save();
             ctx.globalAlpha = 0.5;
             ctx.drawImage(this.img, this.col * cellSize, this.row * cellSize, cellSize, cellSize);
-            ctx.restore();
         }
         else {
+            ctx.globalAlpha = 1;
             ctx.drawImage(this.img, this.col * cellSize, this.row * cellSize, cellSize, cellSize);
         }
     }
@@ -416,9 +452,9 @@ function Piece(row, col, color, type) {
     this.changeType = function (newType) {
         this.type = newType;
         this.img = new Image();
-        this.img.src = `/scacchi/board/sprites/${this.color}_${PIECES_NAME[this.type]}.png`;
+        this.img.src = `/scacchi/board/sprites/${this.color}_${PIECES_NAMES[this.type]}.png`;
         this.img.onload = () => {
-            this.draw();
+            this.draw(ctxLayers.pieces);
         }
     }
 }
@@ -429,83 +465,20 @@ function Chessboard () {
         this.board[i] = new Array(BOARD_SIZE);
     }
 
-    this.movableSpots = {};
-
     this.draw = function () {
-        highlightedCells = {};
-        this.drawBackground();
-        this.drawLastMove();
-        this.drawPieces();
-        this.drawMovableSpots();
-        this.drawGameNotStarted();
+        this.drawPieces(ctxLayers.background);
     }
 
-    this.drawBackground = function () {
-        for (let i = 0; i < BOARD_SIZE; i++) {
-            for (let j = 0; j < BOARD_SIZE; j++) {
-                ctx.fillStyle = (i + j) % 2 === 0 ? COLORS.WHITE_CELL : COLORS.BLACK_CELL;
-                ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-            }
-        }
-        for(const color of ['w', 'b']) {
-            if (isChecked[color]) {
-                ctx.beginPath();
-                ctx.arc(kingPositions[color].col * cellSize + cellSize / 2, kingPositions[color].row * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
-                ctx.fillStyle = COLORS.CHECK;
-                ctx.fill();
-            }
-        }
-    }
-
-    this.drawPieces = function () {
+    this.drawPieces = function (ctx) {
+        clearCtx(ctx)
         for (let i = 0; i < BOARD_SIZE; i++) {
             for (let j = BOARD_SIZE - 1; j >= 0; j--) {
                 if (this.board[i][j] != null) {
-                    this.board[i][j].draw();
+                    this.board[i][j].draw(ctx);
                 }
             }
         }
     }
-
-    this.drawMovableSpots = function () {
-        for (let spot in this.movableSpots) {
-            const [row, col] = spot.split('_');
-            ctx.beginPath();
-            ctx.arc(col * cellSize + cellSize / 2, row * cellSize + cellSize / 2, cellSize / 6, 0, 2 * Math.PI);
-            ctx.fillStyle = COLORS.MOVABLE_SPOT;
-            ctx.fill();
-            ctx.strokeStyle = COLORS.BLACK;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-    }
-
-    this.drawGameNotStarted = function () {
-        const canvasSize = canvas.width;
-        if (!gamestarted) {
-            ctx.fillStyle = COLORS.LAYER;
-            ctx.fillRect(0, 0, canvasSize, canvasSize);
-            ctx.font = "30px Arial";
-            ctx.fillStyle = COLORS.BLACK;
-            ctx.textAlign = "center";
-            ctx.fillText("Waiting for an opponent...", canvasSize / 2, canvasSize / 2);
-        }
-    }
-
-    this.drawLastMove = function () {
-        if (lastMove !== null) {
-            const from = lastMove.from;
-            const to = lastMove.to;
-
-
-            ctx.fillStyle = COLORS.LAST_MOVE;
-            if (!highlightedCells[`${from.row}_${from.col}`])
-                ctx.fillRect(from.col * cellSize, from.row * cellSize, cellSize, cellSize);
-            if (!highlightedCells[`${to.row}_${to.col}`])
-                ctx.fillRect(to.col * cellSize, to.row * cellSize, cellSize, cellSize);
-        }
-    }
-
 
     this.initialize = function () {
         const initialSetup = JSON.parse(retrievedPosition);
@@ -532,11 +505,13 @@ function Chessboard () {
 
 const board = new Chessboard();
 board.initialize();
-board.draw();
+drawGameNotStarted(ctxLayers.overall);
+renderChessboard();
 
 
-function drawPromotionMenu(col) {
-    board.draw();
+function drawPromotionMenu(ctx, col) {
+    if (choosingPromotionCol === false)
+        return;
     const canvasSize = canvas.width;
     ctx.fillStyle = COLORS.LAYER;
     ctx.fillRect(0, 0, canvasSize, canvasSize);
@@ -547,7 +522,7 @@ function drawPromotionMenu(col) {
     for (let i = 0; i < PROMOTION_PIECES.length; i++) {
         const piece = PROMOTION_PIECES[i];
         const img = new Image();
-        img.src = `/scacchi/board/sprites/${playerColor}_${PIECES_NAME[piece]}.png`;
+        img.src = `/scacchi/board/sprites/${playerColor}_${PIECES_NAMES[piece]}.png`;
         img.onload = () => {
             ctx.drawImage(img, col * cellSize, i * cellSize, cellSize, cellSize);
         }
@@ -568,17 +543,90 @@ function drawPromotionMenu(col) {
     }
 }
 
+function renderChessboard() {
+    drawBackground(ctxLayers.background);
+    board.drawPieces(ctxLayers.pieces);
+    drawMovableSpots(ctxLayers.movableSpots);
+    drawHeldPiece(ctxLayers.overall);
+    for (const layer in canvasLayers) {
+        chessboardCtx.drawImage(canvasLayers[layer], 0, 0);
+    }
+}
+
+function drawBackground(ctx) {
+    for (let i = 0; i < BOARD_SIZE; i++) {
+        for (let j = 0; j < BOARD_SIZE; j++) {
+            ctx.fillStyle = (i + j) % 2 === 0 ? COLORS.WHITE_CELL : COLORS.BLACK_CELL;
+            ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+        }
+    }
+    for(const color of ['w', 'b']) {
+        if (isChecked[color]) {
+            ctx.beginPath();
+            ctx.arc(kingPositions[color].col * cellSize + cellSize / 2, kingPositions[color].row * cellSize + cellSize / 2, cellSize / 2, 0, 2 * Math.PI);
+            ctx.fillStyle = COLORS.CHECK;
+            ctx.fill();
+        }
+    }
+    drawLastMove(ctx);
+}
+
+function drawLastMove(ctx) {
+    if (preferences.drawLastMove && lastMove !== null) {
+        const from = lastMove.from;
+        const to = lastMove.to;
+
+
+        ctx.fillStyle = COLORS.LAST_MOVE;
+        ctx.fillRect(from.col * cellSize, from.row * cellSize, cellSize, cellSize);
+        ctx.fillRect(to.col * cellSize, to.row * cellSize, cellSize, cellSize);
+    }
+}
+
+function drawMovableSpots(ctx) {
+    clearCtx(ctx);
+    for (let spot in movableSpots) {
+        const [row, col] = spot.split('_');
+        ctx.beginPath();
+        ctx.arc(col * cellSize + cellSize / 2, row * cellSize + cellSize / 2, cellSize / 6, 0, 2 * Math.PI);
+        ctx.fillStyle = COLORS.MOVABLE_SPOT;
+        ctx.fill();
+        ctx.strokeStyle = COLORS.BLACK;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+}
+
+function drawGameNotStarted(ctx) {
+    const canvasSize = canvas.width;
+    if (!gamestarted) {
+        ctx.fillStyle = COLORS.LAYER;
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
+        ctx.font = "30px Arial";
+        ctx.fillStyle = COLORS.BLACK;
+        ctx.textAlign = "center";
+        ctx.fillText("Waiting for an opponent...", canvasSize / 2, canvasSize / 2);
+    }
+}
+
+function drawHeldPiece(ctx) {
+    if (!gamestarted)
+        return;
+    clearCtx(ctx);
+    if (heldPiece == null)
+        return;
+    ctx.drawImage(heldPiece.img, mouseX - cellSize / 2, mouseY - cellSize / 2, cellSize, cellSize);
+}
+
+
+function clearCtx(ctx) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+
 function animate() {
     requestAnimationFrame(animate);
-    if(heldPiece == null) {
-        return;
-    }
-    board.draw();
-    drawHeldPiece();
-
-    function drawHeldPiece() {
-        ctx.drawImage(heldPiece.img, mouseX - cellSize / 2, mouseY - cellSize / 2, cellSize, cellSize);
-    }
+    renderChessboard();
 }
 
 animate();
