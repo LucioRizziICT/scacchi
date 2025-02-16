@@ -13,7 +13,7 @@ public record MoveHistoryEntry(Move move, Piece movedPiece, ThreatType threatTyp
         if (move.getMoveType() == MoveType.CASTLING) {
             return move.getDestination().column() == 2 ? "O-O-O" : "O-O";
         }
-        sb.append(movedPiece.getSymbol() == 'P' ? "" : movedPiece.getSymbol());
+        sb.append(movedPiece.getSymbol() == 'P' || move.getPromotion() != null ? "" : movedPiece.getSymbol());
         if (disambiguationColumn) {
             sb.append((char) (move.getOrigin().column()+97));
         }
