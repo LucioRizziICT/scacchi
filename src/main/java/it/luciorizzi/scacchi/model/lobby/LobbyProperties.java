@@ -22,6 +22,6 @@ public class LobbyProperties {
     }
 
     public static LobbyProperties withDefaultProperties() {
-        return new LobbyProperties(false, false, false, 0, 0, true);
+        return new LobbyProperties(false, false, true, 0, 0, true); //TODO TEMP !!!
     }
 }

@@ -2,6 +2,7 @@ package it.luciorizzi.scacchi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.luciorizzi.scacchi.model.TimerInfo;
 import it.luciorizzi.scacchi.model.lobby.*;
 import it.luciorizzi.scacchi.model.lobby.exception.*;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
@@ -199,6 +200,10 @@ public class LobbyService {
         modelAndView.addObject("gameOutcome", lobby.getGameBoard().getMovesHistory().getOutcome());
         modelAndView.addObject("lobbyPreferences", lobbyPreferences);
         modelAndView.addObject("lobbyPreferencesJsonString", objectMapper.writeValueAsString(lobbyPreferences));
+        modelAndView.addObject("lobbyProperties", lobby.getProperties());
+        modelAndView.addObject("timerInfoJsonString", objectMapper.writeValueAsString(lobby.getGameBoard().getTimerInfo()));
+        modelAndView.addObject("noMovesPlayed", lobby.getGameBoard().noMovesPlayed());
+        modelAndView.addObject("playerTurn", lobby.getGameBoard().getCurrentPlayer());
         return modelAndView;
     }
 
@@ -256,5 +261,10 @@ public class LobbyService {
         }
 
         return getLobby(lobbyId).requestRematch(player.getColor());
+    }
+
+    public TimerInfo getTimerInfo(String token, String lobbyId) {
+        Lobby lobby = getValidLobby(token, lobbyId);
+        return lobby.getGameBoard().getTimerInfo();
     }
 }

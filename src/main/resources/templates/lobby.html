@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../board/board.css">
     <title th:text="${lobbyName} + ' - Scacchi'"></title>
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
@@ -19,6 +19,10 @@
     <p id="lobbyId" th:text="${lobbyId}"></p>
     <p id="gameStarted" th:if="${gameStarted}"></p>
     <p id="playerId" th:text="${playerId}"></p>
+    <p id="isTimed" th:if="${lobbyProperties.isTimed}"></p>
+    <p id="timerInfo" th:text="${timerInfoJsonString}"></p>
+    <p id="noMovesPlayed" th:if="${noMovesPlayed}"></p>
+    <p id="playerTurn" th:text="${playerTurn}"></p>
 </div>
 <div id="main">
     <div class="flex-container">
@@ -44,8 +48,22 @@
                 <div id="lobbyInfoContentGame">
                     <h2 id="lobbyName" th:text="${lobbyName}"></h2>
                     <div class="players">
-                        <p th:class="'playerLabel playerLabelColor-' + ${player1Color}">Giocatore 1 <span th:if="${playerNumber == 1}">(Tu)</span>: <span id="player1NameSpan" th:text="${player1Name}"></span> <span th:text="${#strings.equalsIgnoreCase(player1Color, 'WHITE') ? '&#9812;' : '&#9818;'}"></span></p>
-                        <p th:class="'playerLabel playerLabel2 playerLabelColor-' + ${player2Color}">Giocatore 2 <span th:if="${playerNumber == 2}">(Tu)</span>: <span id="player2NameSpan" th:text="${player2Name == null ? 'In attesa...' : player2Name}"></span> <span th:text="${#strings.equalsIgnoreCase(player2Color, 'WHITE') ? '&#9812;' : '&#9818;'}"></span></p>
+                        <p th:class="'playerLabel playerLabelColor-' + ${player1Color}">
+                            <span class="playerTimer" th:id="'playerTimer-' + ${player1Color}" th:if="${lobbyProperties.isTimed}">
+                                0:00:00 |
+                            </span>
+                            <span>
+                                Giocatore 1 <span th:if="${playerNumber == 1}">(Tu)</span>: <span id="player1NameSpan" th:text="${player1Name}"></span> <span th:text="${#strings.equalsIgnoreCase(player1Color, 'WHITE') ? '&#9812;' : '&#9818;'}"></span>
+                            </span>
+                        </p>
+                        <p th:class="'playerLabel playerLabel2 playerLabelColor-' + ${player2Color}">
+                            <span class="playerTimer" th:id="'playerTimer-' + ${player2Color}" th:if="${lobbyProperties.isTimed}">
+                                1:11:11 |
+                            </span>
+                            <span>
+                                Giocatore 2 <span th:if="${playerNumber == 2}">(Tu)</span>: <span id="player2NameSpan" th:text="${player2Name == null ? 'In attesa...' : player2Name}"></span> <span th:text="${#strings.equalsIgnoreCase(player2Color, 'WHITE') ? '&#9812;' : '&#9818;'}"></span>
+                            </span>
+                        </p>
                     </div>
                     <div id="invitePlayerDiv">
                         <button type="button" onclick="openInviteModal();">Invita alla lobby</button>
@@ -173,6 +191,10 @@
     const retrievedGameStarted = !!document.getElementById("gameStarted");
     const retrievedPlayerId = document.getElementById("playerId").innerText;
     const retrievedGameover = document.getElementById("gameEndModal").style.display === "block";
+    const retrievedIsTimed = !!document.getElementById("isTimed");
+    const retrievedTimerInfo = document.getElementById("timerInfo").innerText;
+    const retrievedNoMovesPlayed = !!document.getElementById("noMovesPlayed");
+    const retrievedTurn = document.getElementById("playerTurn").innerText;
 </script>
 <script src="../js/common.js"></script>
 <script src="../js/lobby.js"></script>
@@ -184,6 +206,8 @@
         stompClient.activate();
         writeInviteModalLink();
         updateMovesHistory();
+        updateTimer(JSON.parse(retrievedTimerInfo));
+        startTimer();
     }
 </script>
 </html>

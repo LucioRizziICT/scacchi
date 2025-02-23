@@ -52,4 +52,8 @@ public class MoveHistory {
         }
         return sb.toString();
     }
+
+    public boolean isEmpty() {
+        return history.isEmpty();
+    }
 }

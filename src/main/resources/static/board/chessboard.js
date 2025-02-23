@@ -13,6 +13,9 @@ const HIGHLIGHT_ALPHA = "C0";
 const ARROW_ALPHA = "C0";
 
 const PREFERENCES = JSON.parse(retrievedLobbyPreferences);
+const PROPERTIES = {
+    isTimed: retrievedIsTimed
+}
 
 const COLORS =  {
     WHITE_CELL: '#f0d9b5',
@@ -93,6 +96,13 @@ let gameover = retrievedGameover;
 let gamestarted = retrievedGameStarted;
 let lastMove = null;
 
+let timerTurn = (gamestarted && !gameover && !retrievedNoMovesPlayed) ? (retrievedTurn === "WHITE" ? "w":"b") : null;
+let whiteTimeLastMillis = 0;
+let blackTimeLastMillis = 0;
+let whiteTimeRemainingMillis = 0;
+let blackTimeRemainingMillis = 0;
+
+
 let mouseX = 0;
 let mouseY = 0;
 
@@ -113,6 +123,7 @@ canvas.addEventListener('mousedown', function(event) {
         clearCtx(ctxLayers.arrows);
         clearCtx(ctxLayers.promotionMenu);
         clearCtx(ctxLayers.movableSpots);
+        highlightedCells = {};
         clearCtx(ctxLayers.highlights);
 
         const x = event.offsetX;
@@ -244,6 +255,8 @@ window.addEventListener('resize', resizeCanvas, false);
 function resizeCanvas() {
     setCanvasSize();
     drawGameNotStarted(ctxLayers.overall);
+    highlightedCells = {};
+    clearCtx(ctxLayers.highlights)
     renderChessboard();
 }
 
@@ -329,7 +342,7 @@ function applyGameOver(outcome) { //TODO: Cambiare con testo custom, non valore 
     showPostGameDiv();
 }
 
-function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
+function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck, timerInfo) {
     const from = getCorrectedPosition(fromRow, fromCol);
     const to = getCorrectedPosition(toRow, toCol);
 
@@ -344,6 +357,9 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
     handleEnPassant();
     handleCastling();
     handlePromotion();
+
+    updateTimer(timerInfo);
+    switchTimerTurn();
 
     renderChessboard();
 
@@ -402,6 +418,25 @@ function applyMove(fromRow, fromCol, toRow, toCol, promotion, isCheck) {
             movedPiece.changeType(promotion);
         }
     }
+}
+
+function updateTimer(timerInfo) {
+    whiteTimeLastMillis = Date.now();
+    blackTimeLastMillis = Date.now();
+    whiteTimeRemainingMillis = Math.max(0,timerInfo.whiteTimeMillis);
+    blackTimeRemainingMillis = Math.max(0,timerInfo.whiteTimeMillis);
+    if (retrievedIsTimed) {
+        document.getElementById("playerTimer-WHITE").innerText = formatTimeFromMillis(whiteTimeRemainingMillis) + " | ";
+        document.getElementById("playerTimer-BLACK").innerText = formatTimeFromMillis(blackTimeRemainingMillis) + " | ";
+    }
+}
+
+function formatTimeFromMillis(millis) {
+    const hours = Math.floor(millis / 3600000);
+    const minutes = Math.floor((millis % 3600000) / 60000);
+    const seconds = Math.floor((millis % 60000) / 1000);
+
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 function getMovableSpots(row, col) {
@@ -675,3 +710,29 @@ function animate() {
 }
 
 animate();
+
+function startTimer() {
+    if (!PROPERTIES.isTimed)
+        return;
+    timer();
+}
+
+function switchTimerTurn() {
+    timerTurn = timerTurn === "b" ? "w" : "b";
+}
+
+function timer() {
+    setInterval(() => {
+        const currentMillis = Date.now();
+
+        if (timerTurn === "w") {
+            const elapsedMillis = currentMillis - whiteTimeLastMillis;
+            updateTimer({ whiteTimeMillis: whiteTimeRemainingMillis - elapsedMillis, blackTimeMillis: blackTimeRemainingMillis });
+        }
+        else if (timerTurn === "b") {
+            const elapsedMillis = currentMillis - blackTimeLastMillis;
+            updateTimer({ whiteTimeMillis: whiteTimeRemainingMillis, blackTimeMillis: blackTimeRemainingMillis - elapsedMillis });
+        }
+
+    }, 100);
+}

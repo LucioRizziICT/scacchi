@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class Lobby {
-    private final GameBoard gameBoard = new GameBoard();
+    private final GameBoard gameBoard = new GameBoard(100,0); //TODO TEMP !!!
     @Setter
     private String name;
     @Setter

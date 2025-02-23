@@ -7,11 +7,13 @@ import java.awt.event.ActionEvent;
 
 
 public class PlayerTimer {
+    private static final long NEVER_STARTED = -1;
+
     private long timeMillis;
     private final long incrementMillis;
     PieceColor color;
 
-    private transient long lastNanoTime;
+    private transient long lastNanoTime = NEVER_STARTED;
 
     private final ChessTimer parentTimer;
 
@@ -27,13 +29,12 @@ public class PlayerTimer {
     private void updateTimer(ActionEvent actionEvent) {
         long currentNanoTime = System.nanoTime();
         long elapsedMillis = (currentNanoTime - lastNanoTime) / 1_000_000;
-        lastNanoTime = currentNanoTime;
-        timeMillis -= elapsedMillis;
-        checkTimerFinished();
+        checkTimerFinished(elapsedMillis);
     }
 
-    private void checkTimerFinished() {
-        if (timeMillis <= 0) {
+    private void checkTimerFinished(long elapsedMillis) {
+        if (timeMillis <= elapsedMillis) {
+            timeMillis = 0;
             timer.stop();
             parentTimer.notifyTimeOver(color);
         }
@@ -46,10 +47,27 @@ public class PlayerTimer {
 
     public void stop() {
         timer.stop();
+        if (lastNanoTime == NEVER_STARTED) {
+            return;
+        }
         long currentNanoTime = System.nanoTime();
         long elapsedMillis = (currentNanoTime - lastNanoTime) / 1_000_000;
-        lastNanoTime = currentNanoTime;
         timeMillis -= elapsedMillis;
+        System.out.println("timeMillis = " + timeMillis);
         timeMillis += incrementMillis;
+    }
+
+    public void reset() {
+        //TODO: Implement reset
+    }
+
+    public long getTimeMillis() {
+        if (timer.isRunning()) {
+            long currentNanoTime = System.nanoTime();
+            long elapsedMillis = (currentNanoTime - lastNanoTime) / 1_000_000;
+            return timeMillis - elapsedMillis;
+        } else {
+            return timeMillis;
+        }
     }
 }

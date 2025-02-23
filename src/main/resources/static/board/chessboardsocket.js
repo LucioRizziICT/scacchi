@@ -11,12 +11,12 @@ stompClient.onConnect = function(frame) {
         gamestarted = true;
         const data = JSON.parse(message.body);
         document.getElementById("player2NameSpan").innerText = data.player2.name;
-        board.draw();
+        renderChessboard();
     });
 
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/move', function(message) {
         const data = JSON.parse(message.body);
-        applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck);
+        applyMove(data.fromRow, data.fromCol, data.toRow, data.toCol, data.promotion, data.isCheck, data.timerInfo);
         updateMovesHistory();
     });
 

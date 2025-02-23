@@ -1,5 +1,6 @@
 package it.luciorizzi.scacchi.controller;
 
+import it.luciorizzi.scacchi.model.TimerInfo;
 import it.luciorizzi.scacchi.model.lobby.Player;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.message.*;
@@ -34,12 +35,14 @@ public class GameboardController {
 
     @MessageMapping("/lobby/{lobbyId}/move")
     public void move(@DestinationVariable String lobbyId, MessageWrapper<MoveMessage> messageWrapper) {
+        String token = messageWrapper.playerToken();
         MoveMessage moveMessage = messageWrapper.message();
-        if (lobbyService.move(messageWrapper.playerToken(), lobbyId, moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion())) {
-            Boolean isCheck = lobbyService.isCheck(messageWrapper.playerToken(), lobbyId);
-            MoveMessage response = new MoveMessage(moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion(), isCheck);
+        if (lobbyService.move(token, lobbyId, moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion())) {
+            TimerInfo timerInfo = lobbyService.getTimerInfo(token, lobbyId);
+            boolean isCheck = lobbyService.isCheck(token, lobbyId);
+            MoveMessage response = new MoveMessage(moveMessage.fromRow(), moveMessage.fromCol(), moveMessage.toRow(), moveMessage.toCol(), moveMessage.promotion(), isCheck, timerInfo);
             socketSendMove(lobbyId, response);
-            checkGameEnded(messageWrapper.playerToken(), lobbyId);
+            checkGameEnded(token, lobbyId);
         }
     }
 

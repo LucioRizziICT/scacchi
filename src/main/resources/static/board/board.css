@@ -230,3 +230,6 @@ input[type="text"] {
     to { opacity: 0; }
 }
 
+.playerTimer {
+    font-family: "Roboto Mono", serif;
+}

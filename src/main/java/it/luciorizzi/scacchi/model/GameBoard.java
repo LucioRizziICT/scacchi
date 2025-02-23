@@ -9,7 +9,7 @@ import lombok.Getter;
 
 import java.util.*;
 
-public class GameBoard { //TODO: add thread safety if needed
+public class GameBoard { //TODO: add thread safety
     public final static int ROWS = 8;
     public final static int COLUMNS = 8;
 
@@ -36,7 +36,7 @@ public class GameBoard { //TODO: add thread safety if needed
         saveCurrentState();
     }
 
-    public GameBoard(int timeSeconds, int incrementSeconds) {
+    public GameBoard(int timeSeconds, int incrementSeconds) throws IllegalArgumentException{
         initialize();
         saveCurrentState();
         timer = new ChessTimer(timeSeconds, incrementSeconds, this);
@@ -553,6 +553,17 @@ public class GameBoard { //TODO: add thread safety if needed
         if (!isOngoing())
             return;
         drawAgreement.deny();
+    }
+
+    public TimerInfo getTimerInfo() {
+        if (timer == null) {
+            return null;
+        }
+        return timer.getTimerInfo();
+    }
+
+    public boolean noMovesPlayed() {
+        return movesHistory.isEmpty();
     }
 
     //TODO validate move method

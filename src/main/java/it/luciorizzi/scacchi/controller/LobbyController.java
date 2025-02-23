@@ -84,8 +84,6 @@ public class LobbyController implements LobbyApiDelegate {
 
     @GetMapping("/lobby/testTimer")
     public void testTimer() {
-        ChessTimer timer = new ChessTimer(180, 0, null);
-        timer.switchTurn();
     }
 
     //TODO add complete errors handling and not found pages
