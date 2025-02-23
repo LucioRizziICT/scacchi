@@ -1,4 +1,4 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.timer;
 
 import it.luciorizzi.scacchi.model.type.PieceColor;
 
@@ -10,6 +10,8 @@ public class PlayerTimer {
     private static final long NEVER_STARTED = -1;
 
     private long timeMillis;
+
+    private final long initialTimeMillis;
     private final long incrementMillis;
     PieceColor color;
 
@@ -22,6 +24,7 @@ public class PlayerTimer {
         this.incrementMillis = incrementMillis;
         this.color = color;
         this.parentTimer = parentTimer;
+        this.initialTimeMillis = timeMillis;
     }
 
     private final Timer timer = new Timer(100, this::updateTimer);
@@ -58,7 +61,9 @@ public class PlayerTimer {
     }
 
     public void reset() {
-        //TODO: Implement reset
+        timer.stop();
+        this.timeMillis = initialTimeMillis;
+        lastNanoTime = NEVER_STARTED;
     }
 
     public long getTimeMillis() {

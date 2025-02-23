@@ -1,6 +1,8 @@
 package it.luciorizzi.scacchi.controller;
 
-import it.luciorizzi.scacchi.model.TimerInfo;
+import it.luciorizzi.scacchi.model.timer.ChessTimer;
+import it.luciorizzi.scacchi.model.timer.TimedGameTimeoutEvent;
+import it.luciorizzi.scacchi.model.timer.TimerInfo;
 import it.luciorizzi.scacchi.model.lobby.Player;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.model.message.*;
@@ -9,6 +11,7 @@ import it.luciorizzi.scacchi.service.LobbyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -44,6 +47,13 @@ public class GameboardController {
             socketSendMove(lobbyId, response);
             checkGameEnded(token, lobbyId);
         }
+    }
+
+    @EventListener
+    public void handleTimedGameTimeoutEvent(TimedGameTimeoutEvent event) {
+        String lobbyId = ((ChessTimer) event.getSource()).getLobbyId();
+        GameOutcome gameOutcome = lobbyService.getGameOutcome(lobbyId);
+        socketSendOutcome(lobbyId, new GameoverMessage(gameOutcome));
     }
 
     @MessageMapping("/lobby/{lobbyId}/resign")

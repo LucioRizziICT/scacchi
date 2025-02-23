@@ -1,25 +1,18 @@
 package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import it.luciorizzi.scacchi.model.ChessTimer;
-import it.luciorizzi.scacchi.model.lobby.LobbyPreferences;
-import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
-import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.openapi.api.LobbyApiDelegate;
 import it.luciorizzi.scacchi.openapi.model.*;
 import it.luciorizzi.scacchi.service.LobbyService;
 import it.luciorizzi.scacchi.util.ApiDTOConverter;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class LobbyController implements LobbyApiDelegate {

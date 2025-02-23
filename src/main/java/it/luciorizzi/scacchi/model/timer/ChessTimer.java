@@ -1,6 +1,9 @@
-package it.luciorizzi.scacchi.model;
+package it.luciorizzi.scacchi.model.timer;
 
+import it.luciorizzi.scacchi.model.GameBoard;
 import it.luciorizzi.scacchi.model.type.PieceColor;
+import it.luciorizzi.scacchi.util.EventPublisherHelper;
+import lombok.Getter;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -9,6 +12,9 @@ public class ChessTimer {
     private static final long MAX_INCREMENT = 30*60; // 30 minutes
 
     private final GameBoard parentBoard;
+    @Getter
+    private final String lobbyId;
+
     private final AtomicBoolean finished = new AtomicBoolean(false);
 
     private final PlayerTimer whiteTimer;
@@ -16,13 +22,14 @@ public class ChessTimer {
 
     private PieceColor runningTimerColor = PieceColor.WHITE;
 
-    public ChessTimer(long time, long increment, GameBoard parentBoard) throws IllegalArgumentException {
+    public ChessTimer(long time, long increment, GameBoard parentBoard, String lobbyId) throws IllegalArgumentException {
         if (time <= 0 || time > MAX_TIME || increment < 0 || increment > MAX_INCREMENT) {
             throw new IllegalArgumentException("Illegal time or increment value");
         }
         whiteTimer = new PlayerTimer(time * 1_000, increment * 1_000, PieceColor.WHITE, this);
         blackTimer = new PlayerTimer(time * 1_000, increment * 1_000, PieceColor.BLACK, this);
         this.parentBoard = parentBoard;
+        this.lobbyId = lobbyId;
     }
 
     public PlayerTimer getCurrentTimer() {
@@ -48,8 +55,9 @@ public class ChessTimer {
             return;
         }
         System.out.println("Time over for " + color);
-        parentBoard.handleTimeOver(color);
-        //TODO: Add gameover websocket message somewhere, maybe in Gameboard or here
+        if ( parentBoard.handleTimeOver(color) ) {
+            EventPublisherHelper.publishEvent(new TimedGameTimeoutEvent(this));
+        }
     }
 
     public void reset() {

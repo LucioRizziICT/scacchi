@@ -10,7 +10,8 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class Lobby {
-    private final GameBoard gameBoard = new GameBoard(100,0); //TODO TEMP !!!
+    private final GameBoard gameBoard;
+    private final String id;
     @Setter
     private String name;
     @Setter
@@ -23,11 +24,13 @@ public class Lobby {
     LobbyProperties properties;
     private Agreement rematchAgreement = new Agreement();
 
-    public Lobby(String name, Player playerOne, String password, LobbyProperties properties) {
+    public Lobby(String id, String name, Player playerOne, String password, LobbyProperties properties) {
         this.name = ( name == null || name.isBlank() ) ? "Lobby di " + playerOne.getName() : name;
         this.playerOne = playerOne;
         this.password = password == null || password.isEmpty() ? null : password;
         this.properties = properties;
+        this.id = id;
+        this.gameBoard = new GameBoard(10, 2, id);
     }
 
     public boolean isFull() {

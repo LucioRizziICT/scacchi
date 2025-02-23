@@ -2,7 +2,7 @@ package it.luciorizzi.scacchi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.luciorizzi.scacchi.model.TimerInfo;
+import it.luciorizzi.scacchi.model.timer.TimerInfo;
 import it.luciorizzi.scacchi.model.lobby.*;
 import it.luciorizzi.scacchi.model.lobby.exception.*;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
@@ -40,7 +40,7 @@ public class LobbyService {
         LobbyProperties createdProperties = LobbyProperties.withDefaultProperties(); //TODO: Cambiare con DTO quando lobby prop verranno implementate
         createdProperties.setPrivate(lobbyDTO.getProperties().getIsPrivate());
 
-        Lobby createdLobby = new Lobby(lobbyDTO.getName(), playerOne, lobbyDTO.getPassword(), createdProperties);
+        Lobby createdLobby = new Lobby(lobbyId, lobbyDTO.getName(), playerOne, lobbyDTO.getPassword(), createdProperties);
         lobbies.put( lobbyId, createdLobby ); //todo cambiare settings di default
 
         String token = RandomToken.generatePlayerToken();
@@ -223,6 +223,11 @@ public class LobbyService {
 
     public GameOutcome getGameOutcome(String token, String lobbyId) {
         Lobby lobby = getValidLobby(token, lobbyId);
+        return lobby.getGameBoard().getMovesHistory().getOutcome();
+    }
+
+    public GameOutcome getGameOutcome(String lobbyId) {
+        Lobby lobby = getLobby(lobbyId);
         return lobby.getGameBoard().getMovesHistory().getOutcome();
     }
 

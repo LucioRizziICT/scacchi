@@ -424,7 +424,7 @@ function updateTimer(timerInfo) {
     whiteTimeLastMillis = Date.now();
     blackTimeLastMillis = Date.now();
     whiteTimeRemainingMillis = Math.max(0,timerInfo.whiteTimeMillis);
-    blackTimeRemainingMillis = Math.max(0,timerInfo.whiteTimeMillis);
+    blackTimeRemainingMillis = Math.max(0,timerInfo.blackTimeMillis);
     if (retrievedIsTimed) {
         document.getElementById("playerTimer-WHITE").innerText = formatTimeFromMillis(whiteTimeRemainingMillis) + " | ";
         document.getElementById("playerTimer-BLACK").innerText = formatTimeFromMillis(blackTimeRemainingMillis) + " | ";

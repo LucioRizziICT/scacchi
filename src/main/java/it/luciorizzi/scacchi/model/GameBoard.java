@@ -2,6 +2,8 @@ package it.luciorizzi.scacchi.model;
 
 import it.luciorizzi.scacchi.model.movement.*;
 import it.luciorizzi.scacchi.model.piece.*;
+import it.luciorizzi.scacchi.model.timer.ChessTimer;
+import it.luciorizzi.scacchi.model.timer.TimerInfo;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.GameoverCause;
 import it.luciorizzi.scacchi.model.type.PieceColor;
@@ -36,10 +38,10 @@ public class GameBoard { //TODO: add thread safety
         saveCurrentState();
     }
 
-    public GameBoard(int timeSeconds, int incrementSeconds) throws IllegalArgumentException{
+    public GameBoard(int timeSeconds, int incrementSeconds, String lobbyId) throws IllegalArgumentException{
         initialize();
         saveCurrentState();
-        timer = new ChessTimer(timeSeconds, incrementSeconds, this);
+        timer = new ChessTimer(timeSeconds, incrementSeconds, this, lobbyId);
     }
 
     public char[][] getBoard() {
@@ -59,12 +61,12 @@ public class GameBoard { //TODO: add thread safety
         blackPieces.clear();
         movesHistory.clear();
         drawAgreement = new Agreement();
-        isOngoing = true;
         fiftyMovesCounter = 0;
-        if (timer != null)
-            timer.reset();
         initialize();
         saveCurrentState();
+        if (timer != null)
+            timer.reset();
+        isOngoing = true;
     }
 
     private void saveCurrentState() {
@@ -518,12 +520,20 @@ public class GameBoard { //TODO: add thread safety
         return copy.isCheck();
     }
 
-    public void handleTimeOver(PieceColor color) {
+    /**
+     * Handle ChessTimer callback for time over
+     * @param color
+     * @return true if the game ends thanks to this call, false if the game already ended before the time over
+     */
+    public boolean handleTimeOver(PieceColor color) {
+        if (!isOngoing)
+            return false;
         isOngoing = false;
         if (isMaterialInsufficient(color.opposite()))
             movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.TIME_VS_INSUFFICIENT_MATERIAL) );
         else
             movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.TIME_EXPIRED) );
+        return true;
     }
 
     public void resign(PieceColor color) {
