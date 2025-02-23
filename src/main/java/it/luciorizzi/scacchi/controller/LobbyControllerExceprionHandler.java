@@ -1,9 +1,6 @@
 package it.luciorizzi.scacchi.controller;
 
-import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
-import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
-import it.luciorizzi.scacchi.model.lobby.exception.PlayerNotFoundException;
-import it.luciorizzi.scacchi.model.lobby.exception.PlayerNotInLobbyException;
+import it.luciorizzi.scacchi.model.lobby.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +31,18 @@ public class LobbyControllerExceprionHandler {
     @ExceptionHandler(PlayerNotFoundException.class)
     public void handlePlayerNotFoundException(HttpServletRequest request, Exception exception) {
         logger.warn("Player not found. {}", exception.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(LobbyLoginException.class)
+    public void handleLobbyLoginException(HttpServletRequest request, Exception exception) {
+        logger.warn("Lobby login exception. {}", exception.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(LobbyIsFullException.class)
+    public void handleLobbyIsFullException(HttpServletRequest request, Exception exception) {
+        logger.warn("Lobby is full exception. {}", exception.getMessage());
     }
 
     @ExceptionHandler(LobbyNotFoundException.class)

@@ -3,10 +3,7 @@ package it.luciorizzi.scacchi.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.lobby.*;
-import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
-import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
-import it.luciorizzi.scacchi.model.lobby.exception.PlayerNotFoundException;
-import it.luciorizzi.scacchi.model.lobby.exception.PlayerNotInLobbyException;
+import it.luciorizzi.scacchi.model.lobby.exception.*;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
@@ -63,10 +60,10 @@ public class LobbyService {
     public LobbyDTO joinLobby(String lobbyId, LobbyJoinRequestDTO joinRequest) {
         Lobby lobby = getLobby(lobbyId);
         if (lobby.getPassword() != null && !lobby.getPassword().equals(joinRequest.getPassword())) {
-            throw new IllegalArgumentException("Wrong password");
+            throw new LobbyLoginException("Wrong password");
         }
         if (lobby.isFull()) {
-            throw new IllegalArgumentException("Lobby is full");
+            throw new LobbyIsFullException("Lobby is full");
         }
 
         Player playerTwo = new Player(joinRequest.getPlayerName(), lobbyId, lobby.getPlayerOne().getColor().opposite());
@@ -122,7 +119,7 @@ public class LobbyService {
     private Lobby getValidLobby(String token, String lobbyId) {
         Player player = getPlayer(token);
         if (!lobbyId.equals(player.getGameId())) {
-            throw new IllegalArgumentException("Player not in lobby");
+            throw new PlayerNotInLobbyException("Player not in lobby");
         }
         return getLobby(lobbyId);
     }
@@ -163,7 +160,7 @@ public class LobbyService {
     }
 
     public ModelAndView getLobbyView(String token, String lobbyId, String lobbyPreferencesString) throws JsonProcessingException {
-        LobbyPreferences lobbyPreferences = lobbyPreferencesString == null ? LobbyPreferences.getDefault() : objectMapper.readValue(lobbyPreferencesString, LobbyPreferences.class);
+        LobbyPreferences lobbyPreferences = parsePreferences(lobbyPreferencesString);
 
         Lobby lobby = getLobby(lobbyId);
         Player presentPlayer = players.get(token);
@@ -176,6 +173,14 @@ public class LobbyService {
             return getJoinLobbyView(lobbyId, lobby);
         }
         return getFullLobbyView(lobby);
+    }
+
+    private LobbyPreferences parsePreferences(String lobbyPreferencesString) {
+        try {
+            return lobbyPreferencesString == null ? LobbyPreferences.getDefault() : objectMapper.readValue(lobbyPreferencesString, LobbyPreferences.class);
+        } catch (JsonProcessingException e) {
+            return LobbyPreferences.getDefault();
+        }
     }
 
     private ModelAndView getPlayerLobbyView(Player player, String lobbyId, Lobby lobby, int playerNumber, LobbyPreferences lobbyPreferences ) throws JsonProcessingException {
