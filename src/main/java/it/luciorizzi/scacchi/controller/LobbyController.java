@@ -2,6 +2,7 @@ package it.luciorizzi.scacchi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import it.luciorizzi.scacchi.model.ChessTimer;
+import it.luciorizzi.scacchi.model.lobby.LobbyPreferences;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
 import it.luciorizzi.scacchi.openapi.api.LobbyApiDelegate;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class LobbyController implements LobbyApiDelegate {
@@ -68,8 +70,8 @@ public class LobbyController implements LobbyApiDelegate {
     }
 
     @GetMapping("/lobby/{lobbyId}")
-    public ModelAndView getLobbyView(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId) throws JsonProcessingException {
-        return lobbyService.getLobbyView(token, lobbyId);
+    public ModelAndView getLobbyView(@CookieValue(value = "playerToken", required = false) String token, @PathVariable("lobbyId") String lobbyId, @CookieValue(value = "lobbyPreferences", required = false) String lobbyPreferencesString) throws JsonProcessingException {
+        return lobbyService.getLobbyView(token, lobbyId, lobbyPreferencesString);
     }
 
     @GetMapping("/lobby/testLobbyFull")

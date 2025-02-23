@@ -61,7 +61,7 @@ function copyInviteLink() {
     inviteLink.select();
     inviteLink.setSelectionRange(0, 99999);
     document.execCommand("copy");
-    showFeedbackPopup("Link copiato!");
+    showFeedbackPopup("Link copiato");
 }
 
 window.onclick = function(event) {
@@ -312,8 +312,42 @@ function updateMovesHistory() {
         const movesHistory = document.getElementById("movesHistorySpace");
         let moves = '';
         for(let i=0; i<data.length; i+=2) {
-            moves += (i/2 + 1) + '. ' + data[i] + ' ' + (data[i+1] ? data[i+1] : '') + '<br>';
+            moves += (i/2 + 1) + '. ' + data[i] + ' &nbsp; ' + (data[i+1] ? data[i+1] : '') + '<br>';
         }
         movesHistory.innerHTML = moves;
     });
+}
+
+function saveLobbyPreferences() {
+    const newLobbyPreferences = getLobbyPreferencesObject();
+    setCookie('lobbyPreferences', encodeURIComponent(JSON.stringify(newLobbyPreferences)), 90000);
+    showFeedbackPopup("Preferenze salvate");
+    window.location.reload();
+}
+
+function getLobbyPreferencesObject() {
+    return {
+        showPossibleMoves: document.getElementById("preferencesFormShowPossibleMoves").checked,
+        showLastMove: document.getElementById("preferencesFormShowLastMove").checked,
+        showCheck: document.getElementById("preferencesFormShowCheck").checked,
+        setWhiteAlwaysBottom: document.getElementById("preferencesFormSetWhiteAlwaysBottom").checked,
+        highlightColors : {
+            color1: document.getElementById("preferencesFormHighlightColor1").value,
+            color2: document.getElementById("preferencesFormHighlightColor2").value,
+            color3: document.getElementById("preferencesFormHighlightColor3").value,
+            color4: document.getElementById("preferencesFormHighlightColor4").value
+        },
+        arrowColors : {
+            color1: document.getElementById("preferencesFormArrowColor1").value,
+            color2: document.getElementById("preferencesFormArrowColor2").value,
+            color3: document.getElementById("preferencesFormArrowColor3").value,
+            color4: document.getElementById("preferencesFormArrowColor4").value
+        }
+    }
+}
+
+function resetLobbyPreferences() {
+    setCookie('lobbyPreferences', '', -1);
+    showFeedbackPopup("Preferenze resettate");
+    window.location.reload();
 }

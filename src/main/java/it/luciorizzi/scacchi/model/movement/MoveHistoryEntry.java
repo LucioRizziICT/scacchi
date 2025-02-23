@@ -14,7 +14,7 @@ public record MoveHistoryEntry(Move move, Piece movedPiece, ThreatType threatTyp
             return move.getDestination().column() == 2 ? "O-O-O" : "O-O";
         }
         sb.append(movedPiece.getSymbol() == 'P' || move.getPromotion() != null ? "" : movedPiece.getSymbol());
-        if (disambiguationColumn) {
+        if (disambiguationColumn || (move.isCapture() && (movedPiece.getSymbol() == 'P' || move.getPromotion() != null)) ) {
             sb.append((char) (move.getOrigin().column()+97));
         }
         if (disambiguationRow) {

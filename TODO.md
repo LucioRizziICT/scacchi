@@ -5,8 +5,8 @@
 - [ ] aggiungere logging decente
 - [ ] refactor canvas animato
 - [ ] Scrivere la documentazione
-- [ ] personalizzazione frecce
-- [ ] impostazioni lobby
+- [x] personalizzazione frecce
+- [x] impostazioni lobby
 - [x] mostrare cronologia mosse giocare
 - [ ] timer per partite a tempo
 - [x] segnare ultima mossa giocata
@@ -23,7 +23,7 @@
 - [x] altri colori frecce
 - [x] altri colori evidenziazione celle
 - [x] mostrare scacchi per entrambi giocatori non solo quelli subiti
-- [ ] salvare preferenze utente
+- [x] salvare preferenze utente
 - [x] password se nulla sempre valida
 - [ ] gestione errori e messaggi di errore e pagine di errore
 - [x] togliere le ambiguità nelle mosse
@@ -35,8 +35,9 @@
 - [x] aggiungere popup di feedback
 - [x] aggiungere notifiche
 - [x] mettere canvas a più layer
-- [ ] gestire concorrenza
+- [ ] gestire concorrenza (almeno un minimo)
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni
 - [ ] implementare la possibilità di giocare con il computer
+- [ ] gestire concorrenza (seriamente)

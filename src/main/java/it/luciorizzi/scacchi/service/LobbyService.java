@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.luciorizzi.scacchi.model.lobby.*;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyActionException;
 import it.luciorizzi.scacchi.model.lobby.exception.LobbyNotFoundException;
+import it.luciorizzi.scacchi.model.lobby.exception.PlayerNotFoundException;
+import it.luciorizzi.scacchi.model.lobby.exception.PlayerNotInLobbyException;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
@@ -136,7 +138,7 @@ public class LobbyService {
     public Player getPlayer(String token) {
         Player player = players.get(token);
         if (player == null) {
-            throw new RuntimeException("Player not found");
+            throw new PlayerNotFoundException("Player not found");
         }
         return player;
     }
@@ -160,13 +162,15 @@ public class LobbyService {
         return result;
     }
 
-    public ModelAndView getLobbyView(String token, String lobbyId) throws JsonProcessingException {
+    public ModelAndView getLobbyView(String token, String lobbyId, String lobbyPreferencesString) throws JsonProcessingException {
+        LobbyPreferences lobbyPreferences = lobbyPreferencesString == null ? LobbyPreferences.getDefault() : objectMapper.readValue(lobbyPreferencesString, LobbyPreferences.class);
+
         Lobby lobby = getLobby(lobbyId);
         Player presentPlayer = players.get(token);
 
         if ( presentPlayer != null && lobbyId.equals(presentPlayer.getGameId()) ) {
-            int playerNumber = lobby.getPlayerOne().equals(presentPlayer) ? 1 : 2; // TODO: fix equals not implemented
-            return getPlayerLobbyView(presentPlayer, lobbyId, lobby, playerNumber);
+            int playerNumber = lobby.getPlayerOne().equals(presentPlayer) ? 1 : 2;
+            return getPlayerLobbyView(presentPlayer, lobbyId, lobby, playerNumber, lobbyPreferences);
         }
         if (!lobby.isFull()) {
             return getJoinLobbyView(lobbyId, lobby);
@@ -174,7 +178,7 @@ public class LobbyService {
         return getFullLobbyView(lobby);
     }
 
-    private ModelAndView getPlayerLobbyView(Player player, String lobbyId, Lobby lobby, int playerNumber) throws JsonProcessingException {
+    private ModelAndView getPlayerLobbyView(Player player, String lobbyId, Lobby lobby, int playerNumber, LobbyPreferences lobbyPreferences ) throws JsonProcessingException {
         ModelAndView modelAndView = new ModelAndView("lobby");
         modelAndView.addObject("playerId", player.getId());
         modelAndView.addObject("playerNumber", playerNumber);
@@ -188,6 +192,8 @@ public class LobbyService {
         modelAndView.addObject("gameBoard", objectMapper.writeValueAsString(lobby.getGameBoard().getBoard()));
         modelAndView.addObject("gameStarted", lobby.gameStarted());
         modelAndView.addObject("gameOutcome", lobby.getGameBoard().getMovesHistory().getOutcome());
+        modelAndView.addObject("lobbyPreferences", lobbyPreferences);
+        modelAndView.addObject("lobbyPreferencesJsonString", objectMapper.writeValueAsString(lobbyPreferences));
         return modelAndView;
     }
 
@@ -218,7 +224,7 @@ public class LobbyService {
     public void resign(String token, String lobbyId) {
         Player player = getPlayer(token);
         if (!lobbyId.equals(player.getGameId())) {
-            throw new IllegalArgumentException("Player not in lobby");
+            throw new PlayerNotInLobbyException("Player not in lobby");
         }
 
         getLobby(lobbyId).getGameBoard().resign(player.getColor());
@@ -227,7 +233,7 @@ public class LobbyService {
     public boolean requestDraw(String token, String lobbyId) {
         Player player = getPlayer(token);
         if (!lobbyId.equals(player.getGameId())) {
-            throw new IllegalArgumentException("Player not in lobby");
+            throw new PlayerNotInLobbyException("Player not in lobby");
         }
 
         return getLobby(lobbyId).getGameBoard().requestDraw(player.getColor());
@@ -241,7 +247,7 @@ public class LobbyService {
     public boolean requestRematch(String token, String lobbyId) {
         Player player = getPlayer(token);
         if (!lobbyId.equals(player.getGameId())) {
-            throw new IllegalArgumentException("Player not in lobby");
+            throw new PlayerNotInLobbyException("Player not in lobby");
         }
 
         return getLobby(lobbyId).requestRematch(player.getColor());

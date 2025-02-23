@@ -9,17 +9,22 @@ const PIECES_NAMES = {
 };
 const PROMOTION_PIECES = ['q', 'r', 'b', 'n'];
 const BOARD_SIZE = 8;
+const HIGHLIGHT_ALPHA = "C0";
+const ARROW_ALPHA = "C0";
+
+const PREFERENCES = JSON.parse(retrievedLobbyPreferences);
+
 const COLORS =  {
     WHITE_CELL: '#f0d9b5',
     BLACK_CELL: '#b58863',
-    HIGHLIGHTED_CELL1: 'rgba(188,48,48,0.64)',
-    HIGHLIGHTED_CELL2: 'rgba(30,165,228,0.8)',
-    HIGHLIGHTED_CELL3: 'rgba(30,228,37,0.8)',
-    HIGHLIGHTED_CELL4: 'rgba(126,30,228,0.8)',
-    ARROW1: 'rgba(255,95,38,0.8)',
-    ARROW2: 'rgba(30,165,228,0.8)',
-    ARROW3: 'rgba(30,228,37,0.8)',
-    ARROW4: 'rgba(126,30,228,0.8)',
+    HIGHLIGHTED_CELL1: PREFERENCES.highlightColors.color1,
+    HIGHLIGHTED_CELL2: PREFERENCES.highlightColors.color2,
+    HIGHLIGHTED_CELL3: PREFERENCES.highlightColors.color3,
+    HIGHLIGHTED_CELL4: PREFERENCES.highlightColors.color4,
+    ARROW1: PREFERENCES.arrowColors.color1,
+    ARROW2: PREFERENCES.arrowColors.color2,
+    ARROW3: PREFERENCES.arrowColors.color3,
+    ARROW4: PREFERENCES.arrowColors.color4,
     CHECK: 'rgba(211,0,0,0.77)',
     MOVABLE_SPOT: 'rgba(217,217,217,0.82)',
     LAYER: 'rgba(33,33,33,0.56)',
@@ -27,10 +32,6 @@ const COLORS =  {
     BLACK: '#000000',
     LAST_MOVE: 'rgba(255, 255, 0, 0.5)'
 };
-
-const preferences = {
-    drawLastMove : true
-}
 
 const canvas = document.getElementById('chessboardCanvas');
 
@@ -158,12 +159,15 @@ canvas.addEventListener('mouseup', function(event) {
     if (choosingPromotionCol !== false) {
 
         if(col === choosingPromotionCol) {
-            if( row < PROMOTION_PIECES.length ) {
+            if( !(PREFERENCES.setWhiteAlwaysBottom && playerColor === 'b') && row < PROMOTION_PIECES.length ) {
                 movePiece(selectedPiece, 0, choosingPromotionCol, PROMOTION_PIECES[row]);
+            } else if( (PREFERENCES.setWhiteAlwaysBottom && playerColor === 'b') && row > BOARD_SIZE - 1 - PROMOTION_PIECES.length ) {
+                movePiece(selectedPiece, BOARD_SIZE -1, choosingPromotionCol, PROMOTION_PIECES[BOARD_SIZE - 1 - row]);
             }
         }
 
         choosingPromotionCol = false;
+        clearCtx(ctxLayers.promotionMenu);
         renderChessboard();
         return;
     }
@@ -176,9 +180,9 @@ canvas.addEventListener('mouseup', function(event) {
 
         if ( selectedPiece != null && (selectedPiece.row !== row || selectedPiece.col !== col) ) {
             if (movableSpots[`${row}_${col}`]) {
-                if (selectedPiece.type === 'p' && row === 0) {
+                if (selectedPiece.type === 'p' && (row === 0 || row === BOARD_SIZE - 1) ) {
                     choosingPromotionCol = col;
-                    drawPromotionMenu(ctxLayers.promotionMenu, choosingPromotionCol);
+                    drawPromotionMenu(ctxLayers.promotionMenu, choosingPromotionCol, row);
                     renderChessboard();
                     return;
                 }
@@ -201,6 +205,7 @@ canvas.addEventListener('mouseup', function(event) {
         } else {
             drawArrow(ctxLayers.arrows, arrowStart.row, arrowStart.col, centerRow, centerCol, getArrowColor());
         }
+        renderChessboard();
 
         function getHighlightColor() {
             if (event.ctrlKey) {
@@ -227,7 +232,6 @@ canvas.addEventListener('mouseup', function(event) {
             }
             return COLORS.ARROW1;
         }
-        renderChessboard();
     }
 });
 
@@ -245,6 +249,8 @@ function resizeCanvas() {
 
 //from codepen
 function drawArrow(ctx, fromy, fromx, toy, tox, color){
+    color += ARROW_ALPHA;
+
     const headLength = cellSize / 3;
     const angle = Math.atan2(toy-fromy,tox-fromx);
 
@@ -280,6 +286,7 @@ function drawArrow(ctx, fromy, fromx, toy, tox, color){
 }
 
 function highlightCell(ctx, row, col, color) {
+    color += HIGHLIGHT_ALPHA;
     const key = `${row}_${col}`;
     if (highlightedCells[key] === color) {
         delete highlightedCells[key];
@@ -419,7 +426,7 @@ function getMovableSpots(row, col) {
 }
 
 function getCorrectedPosition(row, col) {
-    if (playerColor === 'w') {
+    if (PREFERENCES.setWhiteAlwaysBottom || playerColor === 'w') {
         return { row: BOARD_SIZE - 1 - row, col: col };
     } else {
         return { row: row, col: BOARD_SIZE - 1 - col };
@@ -509,27 +516,55 @@ drawGameNotStarted(ctxLayers.overall);
 renderChessboard();
 
 
-function drawPromotionMenu(ctx, col) {
+function drawPromotionMenu(ctx, col, row) {
+    clearCtx(ctx);
     if (choosingPromotionCol === false)
         return;
+
     const canvasSize = canvas.width;
     ctx.fillStyle = COLORS.LAYER;
     ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-    ctx.fillStyle = COLORS.PROMOTION_MENU_BG;
-    ctx.fillRect( col * cellSize, 0, cellSize, cellSize * (PROMOTION_PIECES.length + 1) );
-
-    for (let i = 0; i < PROMOTION_PIECES.length; i++) {
-        const piece = PROMOTION_PIECES[i];
-        const img = new Image();
-        img.src = `/scacchi/board/sprites/${playerColor}_${PIECES_NAMES[piece]}.png`;
-        img.onload = () => {
-            ctx.drawImage(img, col * cellSize, i * cellSize, cellSize, cellSize);
-        }
+    if (row === 0) {
+        drawTopPromotionMenu();
+    }
+    else if (row === BOARD_SIZE - 1) {
+        drawBottomPromotionMenu();
     }
 
-    ctx.fillStyle = COLORS.BLACK;
-    drawX(col * cellSize + cellSize / 4, (PROMOTION_PIECES.length) * cellSize + cellSize / 4, cellSize / 2, cellSize / 2);
+    function drawTopPromotionMenu() {
+        ctx.fillStyle = COLORS.PROMOTION_MENU_BG;
+        ctx.fillRect( col * cellSize, 0, cellSize, cellSize * (PROMOTION_PIECES.length + 1) );
+
+        for (let i = 0; i < PROMOTION_PIECES.length; i++) {
+            const piece = PROMOTION_PIECES[i];
+            const img = new Image();
+            img.src = `/scacchi/board/sprites/${playerColor}_${PIECES_NAMES[piece]}.png`;
+            img.onload = () => {
+                ctx.drawImage(img, col * cellSize, i * cellSize, cellSize, cellSize);
+            }
+        }
+
+        ctx.fillStyle = COLORS.BLACK;
+        drawX(col * cellSize + cellSize / 4, (PROMOTION_PIECES.length) * cellSize + cellSize / 4, cellSize / 2, cellSize / 2);
+    }
+
+    function drawBottomPromotionMenu() {
+        ctx.fillStyle = COLORS.PROMOTION_MENU_BG;
+        ctx.fillRect( col * cellSize, (BOARD_SIZE - (PROMOTION_PIECES.length + 1)) * cellSize, cellSize, cellSize * (PROMOTION_PIECES.length + 1) );
+
+        for (let i = 0; i < PROMOTION_PIECES.length; i++) {
+            const piece = PROMOTION_PIECES[i];
+            const img = new Image();
+            img.src = `/scacchi/board/sprites/${playerColor}_${PIECES_NAMES[piece]}.png`;
+            img.onload = () => {
+                ctx.drawImage(img, col * cellSize, (BOARD_SIZE - 1 - i) * cellSize, cellSize, cellSize);
+            }
+        }
+
+        ctx.fillStyle = COLORS.BLACK;
+        drawX(col * cellSize + cellSize / 4, (BOARD_SIZE - 1 - PROMOTION_PIECES.length) * cellSize + cellSize / 4, cellSize / 2, cellSize / 2);
+    }
 
     function drawX(x, y, width, height) {
         ctx.beginPath();
@@ -560,6 +595,14 @@ function drawBackground(ctx) {
             ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
         }
     }
+    drawCheck(ctx);
+    drawLastMove(ctx);
+}
+
+function drawCheck(ctx) {
+    if (!PREFERENCES.showCheck)
+        return;
+
     for(const color of ['w', 'b']) {
         if (isChecked[color]) {
             ctx.beginPath();
@@ -568,11 +611,10 @@ function drawBackground(ctx) {
             ctx.fill();
         }
     }
-    drawLastMove(ctx);
 }
 
 function drawLastMove(ctx) {
-    if (preferences.drawLastMove && lastMove !== null) {
+    if (PREFERENCES.showLastMove && lastMove !== null) {
         const from = lastMove.from;
         const to = lastMove.to;
 
@@ -585,6 +627,9 @@ function drawLastMove(ctx) {
 
 function drawMovableSpots(ctx) {
     clearCtx(ctx);
+    if (!PREFERENCES.showPossibleMoves)
+        return;
+
     for (let spot in movableSpots) {
         const [row, col] = spot.split('_');
         ctx.beginPath();

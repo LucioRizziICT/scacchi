@@ -14,6 +14,7 @@
 
 <div id="retrievedLobbyInfo">
     <p id="currentPosition" th:text="${gameBoard}"></p>
+    <p id="lobbyPreferences" th:text="${lobbyPreferencesJsonString}"></p>
     <p id="playerColor" th:text="${playerColor}"></p>
     <p id="lobbyId" th:text="${lobbyId}"></p>
     <p id="gameStarted" th:if="${gameStarted}"></p>
@@ -74,7 +75,52 @@
                     </div>
                 </div>
                 <div id="lobbyInfoContentSettings" style="display: none;">
+                    <h2>Impostazioni Lobby</h2>
+                    <form id="preferences">
+                        <label for="preferencesFormShowPossibleMoves">Mostra mosse possibili:</label>
+                        <input type="checkbox" id="preferencesFormShowPossibleMoves" name="preferencesFormShowPossibleMoves" th:checked="${lobbyPreferences.showPossibleMoves}">
+                        <br>
+                        <label for="preferencesFormShowLastMove">Mostra ultima mossa:</label>
+                        <input type="checkbox" id="preferencesFormShowLastMove" name="preferencesFormShowLastMove" th:checked="${lobbyPreferences.showLastMove}">
+                        <br>
+                        <label for="preferencesFormShowCheck">Mostra scacchi:</label>
+                        <input type="checkbox" id="preferencesFormShowCheck" name="preferencesFormShowCheck" th:checked="${lobbyPreferences.showCheck}">
+                        <br>
+                        <label for="preferencesFormSetWhiteAlwaysBottom">Fissa bianco in basso:</label>
+                        <input type="checkbox" id="preferencesFormSetWhiteAlwaysBottom" name="preferencesFormSetWhiteAlwaysBottom" th:checked="${lobbyPreferences.setWhiteAlwaysBottom}">
+                        <br>
+                        <h3>Colori Evidenziazione</h3>
+                        <label for="preferencesFormHighlightColor1">Colore evidenziazione 1:</label>
+                        <input type="color" id="preferencesFormHighlightColor1" name="preferencesFormHighlightColor1" th:value="${lobbyPreferences.highlightColors.color1}">
+                        <br>
+                        <label for="preferencesFormHighlightColor2">Colore evidenziazione 2:</label>
+                        <input type="color" id="preferencesFormHighlightColor2" name="preferencesFormHighlightColor2" th:value="${lobbyPreferences.highlightColors.color2}">
+                        <br>
+                        <label for="preferencesFormHighlightColor3">Colore evidenziazione 3:</label>
+                        <input type="color" id="preferencesFormHighlightColor3" name="preferencesFormHighlightColor3" th:value="${lobbyPreferences.highlightColors.color3}">
+                        <br>
+                        <label for="preferencesFormHighlightColor4">Colore evidenziazione 4:</label>
+                        <input type="color" id="preferencesFormHighlightColor4" name="preferencesFormHighlightColor4" th:value="${lobbyPreferences.highlightColors.color4}">
+                        <br>
+                        <h3>Colori Frecce</h3>
+                        <label for="preferencesFormArrowColor1">Colore freccia 1:</label>
+                        <input type="color" id="preferencesFormArrowColor1" name="preferencesFormArrowColor1" th:value="${lobbyPreferences.arrowColors.color1}">
+                        <br>
+                        <label for="preferencesFormArrowColor2">Colore freccia 2:</label>
+                        <input type="color" id="preferencesFormArrowColor2" name="preferencesFormArrowColor2" th:value="${lobbyPreferences.arrowColors.color2}">
+                        <br>
+                        <label for="preferencesFormArrowColor3">Colore freccia 3:</label>
+                        <input type="color" id="preferencesFormArrowColor3" name="preferencesFormArrowColor3" th:value="${lobbyPreferences.arrowColors.color3}">
+                        <br>
+                        <label for="preferencesFormArrowColor4">Colore freccia 4:</label>
+                        <input type="color" id="preferencesFormArrowColor4" name="preferencesFormArrowColor4" th:value="${lobbyPreferences.arrowColors.color4}">
+                        <br>
 
+
+
+                        <button type="button" onclick="saveLobbyPreferences();">Salva</button>
+                        <button type="button" onclick="resetLobbyPreferences();">Reset</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -121,6 +167,7 @@
 </body>
 <script>
     const retrievedPosition = document.getElementById("currentPosition").innerText;
+    const retrievedLobbyPreferences = document.getElementById("lobbyPreferences").innerText;
     const retrievedPlayerColor = document.getElementById("playerColor").innerText;
     const retrievedLobbyId = document.getElementById("lobbyId").innerText;
     const retrievedGameStarted = !!document.getElementById("gameStarted");
