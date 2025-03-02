@@ -8,6 +8,7 @@ import it.luciorizzi.scacchi.model.lobby.exception.*;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
+import it.luciorizzi.scacchi.model.type.PieceColor;
 import it.luciorizzi.scacchi.openapi.model.ColorEnum;
 import it.luciorizzi.scacchi.openapi.model.LobbyDTO;
 import it.luciorizzi.scacchi.openapi.model.LobbyJoinRequestDTO;
@@ -85,7 +86,7 @@ public class LobbyService {
 
     public MoveSet getPossibleMoves(String token, String lobbyId, Position position) {
         Lobby lobby = getValidLobby(token, lobbyId);
-        if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
+        if (lobby.getGameBoard().isNotCurrentPlayer(getPlayer(token).getColor())) {
             throw new LobbyActionException("Not your turn");
         }
         return lobby.getGameBoard().getPossibleMoves(position);
@@ -93,12 +94,17 @@ public class LobbyService {
 
     public boolean move(String token, String lobbyId, int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
         Lobby lobby = getValidLobby(token, lobbyId);
-        if (lobby.getGameBoard().getCurrentPlayer() != getPlayer(token).getColor()) {
+        PieceColor playerColor = getPlayer(token).getColor();
+        if (lobby.getGameBoard().isNotCurrentPlayer(playerColor)) {
             throw new LobbyActionException("Not your turn");
         }
         if (!lobby.gameStarted()) {
             throw new LobbyActionException("Game not started");
         }
+        if (lobby.getGameBoard().getPieceAt(new Position(fromRow, fromCol)).getColor() != playerColor) {
+            throw new LobbyActionException("Not your piece, hands down");
+        }
+
         return lobby.getGameBoard().movePiece(fromRow, fromCol, toRow, toCol, promotion);
     }
 
@@ -202,7 +208,7 @@ public class LobbyService {
         modelAndView.addObject("lobbyPreferencesJsonString", objectMapper.writeValueAsString(lobbyPreferences));
         modelAndView.addObject("lobbyProperties", lobby.getProperties());
         modelAndView.addObject("timerInfoJsonString", objectMapper.writeValueAsString(lobby.getGameBoard().getTimerInfo()));
-        modelAndView.addObject("noMovesPlayed", lobby.getGameBoard().noMovesPlayed());
+        modelAndView.addObject("noMovesPlayed", lobby.getGameBoard().areNoMovesPlayed());
         modelAndView.addObject("playerTurn", lobby.getGameBoard().getCurrentPlayer());
         return modelAndView;
     }

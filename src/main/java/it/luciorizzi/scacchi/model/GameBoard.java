@@ -7,6 +7,7 @@ import it.luciorizzi.scacchi.model.timer.TimerInfo;
 import it.luciorizzi.scacchi.model.type.GameOutcome;
 import it.luciorizzi.scacchi.model.type.GameoverCause;
 import it.luciorizzi.scacchi.model.type.PieceColor;
+import it.luciorizzi.scacchi.util.BoardValidator;
 import lombok.Getter;
 
 import java.util.*;
@@ -69,15 +70,6 @@ public class GameBoard { //TODO: add thread safety
         isOngoing = true;
     }
 
-    private void saveCurrentState() {
-        String state = getPositionHash();
-        if (previousStates.containsKey(state)) {
-            previousStates.put(state, previousStates.get(state) + 1);
-        } else {
-            previousStates.put(state, 1);
-        }
-    }
-
     private String getPositionHash() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ROWS; i++) {
@@ -88,6 +80,9 @@ public class GameBoard { //TODO: add thread safety
         return sb.toString();
     }
 
+    /**
+     * Sets the board to the initial default position of a chess game, fills the PiecesSets with the initial pieces and sets initial kings positions
+     */
     private void initialize() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {
@@ -136,82 +131,73 @@ public class GameBoard { //TODO: add thread safety
         blackKingPosition = new Position(7, 4);
     }
 
-    public MoveSet getPossibleMoves(Position position) {
+    public MoveSet getPossibleMoves(Position position) throws BoardValidationException {
         if (!isOngoing) {
             return new MoveSet();
         }
-        return getPiece(position).getPossibleMoves(this);
+        return getPieceAt(position).getPossibleMoves(this);
     }
 
-    public Piece getPiece(Position position) {
-        if (position.row() < 0 || position.row() >= ROWS || position.column() < 0 || position.column() >= COLUMNS) {
-            return null;
-        }
-        return board[position.row()][position.column()];
+    public boolean isEmpty(Position position) throws BoardValidationException {
+        return getPieceAt(position) instanceof EmptyPiece;
     }
 
-    public boolean isEmpty(Position position) {
-        return getPiece(position) instanceof EmptyPiece;
-    }
-
-    public boolean isEnemy(Position position, PieceColor color) {
+    public boolean isEnemy(Position position, PieceColor color) throws BoardValidationException {
         if (isEmpty(position)) {
             return false;
         }
-        Piece piece = getPiece(position);
+        Piece piece = getPieceAt(position);
         if (piece == null) {
             return false;
         }
         return piece.getColor() != color;
     }
 
-    public boolean movePiece(int fromRow, int fromCol, int toRow, int toCol, Character promotion) {
-        return movePiece(new Position(fromRow, fromCol), new Position(toRow, toCol), promotion);
+    /**
+     * @return true if the move is correctly executed, false otherwise
+     * @throws BoardValidationException if the move is invalid
+     * @see BoardValidator
+     */
+    public boolean movePiece(int fromRow, int fromCol, int toRow, int toCol, Character promotion) throws BoardValidationException {
+        if (!isOngoing)
+            return false;
+
+        return movePieceWithCorrectMove(new Position(fromRow, fromCol), new Position(toRow, toCol), promotion);
     }
 
-    public boolean movePiece(Position origin, Position destination, Character promotion) {
-        Piece movedPiece = getPiece(origin);
+    private boolean movePieceWithCorrectMove(Position origin, Position destination, Character promotion) throws BoardValidationException {
+        Piece movedPiece = getPieceAt(origin);
+
+        BoardValidator.validatePosition(destination);
+
         if (movedPiece instanceof Pawn && (destination.row() == 0 || destination.row() == 7)) {
             if (promotion == null) {
                 return false;
             }
             if (isEnemy(destination, movedPiece.getColor())) {
-                return movePiece(Move.promotionCapture(origin, destination, promotion));
+                return movePieceInternal(Move.promotionCapture(origin, destination, promotion));
             }
-            return movePiece(Move.promotionMovement(origin, destination, promotion));
+            return movePieceInternal(Move.promotionMovement(origin, destination, promotion));
         }
         if (isEnemy(destination, movedPiece.getColor())) {
-            return movePiece(Move.capture(origin, destination));
+            return movePieceInternal(Move.capture(origin, destination));
         }
         if (movedPiece instanceof Pawn && Math.abs(destination.column() - origin.column()) == 1) {
-            return movePiece(Move.enPassant(origin, destination));
+            return movePieceInternal(Move.enPassant(origin, destination));
         }
         if (movedPiece instanceof King && Math.abs(destination.column() - origin.column()) == 2) {
-            return movePiece(Move.castling(origin, destination));
+            return movePieceInternal(Move.castling(origin, destination));
         }
-        return movePiece(Move.movement(origin, destination));
+        return movePieceInternal(Move.movement(origin, destination));
     }
 
-    public boolean movePiece(Move move) {
-        if (!isOngoing) {
+    private boolean movePieceInternal(Move move) throws BoardValidationException {
+        if (getPieceAt(move.getOrigin()).getColor() != turn)
             return false;
-        }
-        if (move == null) {
-            return false;
-        }
-        if (isEmpty(move.getOrigin())) {
-            return false;
-        }
-        if (getPiece(move.getOrigin()).getColor() != turn) {
-            return false;
-        }
-        if (getPiece(move.getOrigin()).move(this, move)) {
+
+        if (getPieceAt(move.getOrigin()).move(this, move.getDestination())) {
             if (move.isCastling()) {
-                if (move.getDestination().column() == 2) {
-                    getPiece(new Position(move.getDestination().row(), 0)).move(this, new Position(move.getDestination().row(), 3));
-                } else {
-                    getPiece(new Position(move.getDestination().row(), 7)).move(this, new Position(move.getDestination().row(), 5));
-                }
+                moveCastlingRook(move);
             }
 
             applyMove(move);
@@ -221,106 +207,66 @@ public class GameBoard { //TODO: add thread safety
         return false;
     }
 
+    private void moveCastlingRook(Move move) {
+        if (move.getDestination().column() == 2) {
+            getPieceAt(new Position(move.getDestination().row(), 0)).move(this, new Position(move.getDestination().row(), 3));
+        } else {
+            getPieceAt(new Position(move.getDestination().row(), 7)).move(this, new Position(move.getDestination().row(), 5));
+        }
+    }
+
     private void applyMove(Move move) {
-        Piece movedPiece = getPiece(move.getOrigin());
+        Piece movedPiece = getPieceAt(move.getOrigin());
+
         updateKingPosition(move, movedPiece);
+        handleCaptureMove(move);
+        handleEnPassantMove(move);
+        handleCastlingMove(move);
+        actuallyMovePiece(move, movedPiece);
+        handlePromotion(move, movedPiece);
+    }
+
+    private void updateKingPosition(Move move, Piece movedPiece) {
+        if (movedPiece instanceof King) {
+            if (movedPiece.getColor() == PieceColor.WHITE) {
+                whiteKingPosition = move.getDestination();
+            } else {
+                blackKingPosition = move.getDestination();
+            }
+        }
+    }
+
+    private void handleCaptureMove(Move move) {
         if (move.isCapture())
-            getPieces(getPiece(move.getDestination()).getColor()).remove(board[move.getDestination().row()][move.getDestination().column()]);
+            getPieces(getPieceAt(move.getDestination()).getColor()).remove(getPieceAt(move.getDestination()));
+    }
+
+    private void handleEnPassantMove(Move move) {
         if (move.isEnPassant()) {
             Position takenPiecePosition = new Position(move.getDestination().row() - turn.getValue(), move.getDestination().column());
-            Piece takenPiece = getPiece(takenPiecePosition);
-            board[takenPiecePosition.row()][takenPiecePosition.column()] = new EmptyPiece(takenPiecePosition);
+            Piece takenPiece = getPieceAt(takenPiecePosition);
+            setPieceAt(takenPiecePosition, new EmptyPiece(takenPiecePosition));
             getPieces(turn.opposite()).remove(takenPiece);
         }
+    }
+
+    private void handleCastlingMove(Move move) {
         if (move.isCastling()) {
             Position rookOrigin = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 7 : 0);
             Position rookDestination = new Position(move.getDestination().row(), move.getDestination().column() > 4 ? 5 : 3);
-            board[rookDestination.row()][rookDestination.column()] = getPiece(rookOrigin);
-            board[rookOrigin.row()][rookOrigin.column()] = new EmptyPiece(rookOrigin);
+            setPieceAt(rookDestination, getPieceAt(rookOrigin));
+            setPieceAt(rookOrigin, new EmptyPiece(rookOrigin));
         }
+    }
 
-        board[move.getDestination().row()][move.getDestination().column()] = getPiece(move.getOrigin());
-        board[move.getOrigin().row()][move.getOrigin().column()] = new EmptyPiece(move.getOrigin());
+    private void actuallyMovePiece(Move move, Piece movedPiece) {
+        setPieceAt(move.getDestination(), movedPiece);
+        setPieceAt(move.getOrigin(), new EmptyPiece(move.getOrigin()));
+    }
 
+    private void handlePromotion(Move move, Piece movedPiece) {
         if (move.getPromotion() != null) {
             promotePiece(move, movedPiece);
-        }
-    }
-
-    private void executePostMoveOperations(Move move) {
-        cachedCheck = null;
-        fiftyMovesCounter++;
-        handleEnPassantable(move);
-        saveCurrentState();
-        switchTurn();
-        addMoveToHistory(move);
-        checkGameStatus();
-        if (isOngoing && timer != null) {
-            timer.switchTurn();
-        }
-        if (!isOngoing && timer != null) {
-            timer.stop();
-        }
-    }
-
-    private void switchTurn() {
-        turn = turn.opposite();
-    }
-
-    private void addMoveToHistory(Move move) {
-
-
-        Piece movedPiece = getPiece(move.getDestination());
-        Class<? extends Piece> movedPieceOriginalClass = move.getPromotion() != null ? Pawn.class : movedPiece.getClass();
-
-        boolean disambiguationColumn = false;
-        boolean disambiguationRow = false;
-
-        if ( !(movedPiece instanceof King) ) { //TODO extraxt or refactor
-            //TODO make thread safe (is now probably super unsafe)
-            if (move.getMoveType() == MoveType.CAPTURE) {
-                board[move.getDestination().row()][move.getDestination().column()] = new Queen(turn, move.getDestination());
-            } else {
-                board[move.getDestination().row()][move.getDestination().column()] = new EmptyPiece(move.getDestination());
-            }
-
-
-            for (Piece piece : getPieces(turn.opposite())) {
-                if (movedPieceOriginalClass.equals(piece.getClass())) {
-                    if (piece.couldReach(this, move.getDestination())) {
-                        if (move.getOrigin().column() != piece.getPosition().column()) {
-                            disambiguationColumn = true;
-                        } else {
-                            disambiguationRow = true;
-                        }
-                    }
-                }
-            }
-
-            board[move.getDestination().row()][move.getDestination().column()] = movedPiece;
-        }
-
-
-
-        if (isCheck()) {
-            if (isCheckmate()) {
-                movesHistory.addCheckmate(move, movedPiece, disambiguationColumn, disambiguationRow);
-            } else {
-                movesHistory.addCheck(move, movedPiece, disambiguationColumn, disambiguationRow);
-            }
-        } else {
-            movesHistory.add(move, movedPiece, disambiguationColumn, disambiguationRow);
-        }
-    }
-
-    private void handleEnPassantable(Move move) {
-        if (enPassantablePawn != null) {
-            enPassantablePawn.setEnPassantable(false);
-            enPassantablePawn = null;
-        }
-        Piece movedPiece = getPiece(move.getDestination());
-        if (movedPiece instanceof Pawn && ((Pawn) movedPiece).isEnPassantable()) {
-            enPassantablePawn = (Pawn) movedPiece;
         }
     }
 
@@ -334,86 +280,177 @@ public class GameBoard { //TODO: add thread safety
         };
         getPieces(turn).remove(movedPiece);
         getPieces(turn).add(promotedPiece);
-        board[move.getDestination().row()][move.getDestination().column()] = promotedPiece;
+        setPieceAt(move.getDestination(), promotedPiece);
     }
 
-    private void updateKingPosition(Move move, Piece movedPiece) {
-        if (movedPiece instanceof King) {
-            if (movedPiece.getColor() == PieceColor.WHITE) {
-                whiteKingPosition = move.getDestination();
-            } else {
-                blackKingPosition = move.getDestination();
-            }
+
+    private void executePostMoveOperations(Move move) {
+        cachedCheck = null;
+        incrementOrResetFiftyMovesCounter(move);
+        handleEnPassantable(move);
+        saveCurrentState();
+        switchTurn();
+        addMoveToHistory(move);
+        checkGameStatus();
+        if (timer != null) {
+            if (isOngoing)
+                timer.switchTurn();
+            else
+                timer.stop();
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public void print() {
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLUMNS; j++) {
-                System.out.print(board[i][j].getColorSymbol() + " ");
+    private void incrementOrResetFiftyMovesCounter(Move move) {
+        if (move.isCapture() || move.isEnPassant() || getPieceAt(move.getDestination()) instanceof Pawn) {
+            fiftyMovesCounter = 0;
+        } else {
+            fiftyMovesCounter++;
+        }
+    }
+
+    private void handleEnPassantable(Move move) {
+        if (enPassantablePawn != null) {
+            enPassantablePawn.setEnPassantable(false);
+            enPassantablePawn = null;
+        }
+        Piece movedPiece = getPieceAt(move.getDestination());
+        if (movedPiece instanceof Pawn && ((Pawn) movedPiece).isEnPassantable()) {
+            enPassantablePawn = (Pawn) movedPiece;
+        }
+    }
+
+    private void saveCurrentState() {
+        String state = getPositionHash();
+        if (previousStates.containsKey(state)) {
+            previousStates.put(state, previousStates.get(state) + 1);
+        } else {
+            previousStates.put(state, 1);
+        }
+    }
+
+    private void switchTurn() {
+        turn = turn.opposite();
+    }
+
+    private void addMoveToHistory(Move move) {
+        Piece movedPiece = getPieceAt(move.getDestination());
+        Class<? extends Piece> movedPieceOriginalClass = move.getPromotion() != null ? Pawn.class : movedPiece.getClass();
+
+        if (movedPiece instanceof King)
+            addMoveWithThreatAndDisambiguation(move, movedPiece, false, false);
+        else
+            findDisambiguationAndAddMove(move, movedPieceOriginalClass, movedPiece);
+    }
+
+    private void findDisambiguationAndAddMove(Move move, Class<? extends Piece> movedPieceOriginalClass, Piece movedPiece) {
+        setMockPieceInDestination(move);
+
+        boolean disambiguationColumn = checkDisambiguationColumn(move, movedPieceOriginalClass);
+        boolean disambiguationRow = checkDisambiguationRow(move, movedPieceOriginalClass);
+
+        setPieceAt(move.getDestination(), movedPiece);
+
+        addMoveWithThreatAndDisambiguation(move, movedPiece, disambiguationColumn, disambiguationRow);
+    }
+
+    private void setMockPieceInDestination(Move move) {
+        if (move.isCapture()) {
+            setPieceAt(move.getDestination(), new Queen(turn, move.getDestination()));
+        } else {
+            setPieceAt(move.getDestination(), new EmptyPiece(move.getDestination()));
+        }
+    }
+
+    private boolean checkDisambiguationColumn(Move move, Class<? extends Piece> movedPieceOriginalClass) {
+        for (Piece piece : getPieces(turn.opposite())) {
+            if (movedPieceOriginalClass.equals(piece.getClass()) && piece.couldReach(this, move.getDestination())) {
+                if (move.getOrigin().column() != piece.getPosition().column()) {
+                    return true;
+                }
             }
-            System.out.println();
+        }
+        return false;
+    }
+
+    private boolean checkDisambiguationRow(Move move, Class<? extends Piece> movedPieceOriginalClass) {
+        for (Piece piece : getPieces(turn.opposite())) {
+            if (movedPieceOriginalClass.equals(piece.getClass()) && piece.couldReach(this, move.getDestination())) {
+                if (move.getOrigin().column() == piece.getPosition().column()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void addMoveWithThreatAndDisambiguation(Move move, Piece movedPiece, boolean disambiguationColumn, boolean disambiguationRow) {
+        if (isCheck()) {
+            if (isCheckmate()) {
+                movesHistory.addCheckmate(move, movedPiece, disambiguationColumn, disambiguationRow);
+            } else {
+                movesHistory.addCheck(move, movedPiece, disambiguationColumn, disambiguationRow);
+            }
+        } else {
+            movesHistory.add(move, movedPiece, disambiguationColumn, disambiguationRow);
         }
     }
 
     private void checkGameStatus() {
-        //Wins
         if (isCheckmate()) {
-            isOngoing = false;
-            movesHistory.setOutcome( new GameOutcome().withWinner(turn.opposite()).withCause(GameoverCause.CHECKMATE) );
+            endGameWithOutcome(GameOutcome.win(turn.opposite()).withCause(GameoverCause.CHECKMATE));
         }
-        //Draws
         else {
-            if(gameRepeatedThreeTimes()) {
-                isOngoing = false;
-                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.THREEFOLD_REPETITION) );
-            }
-            if(isFiftyMovesRuleBroken()) {
-                isOngoing = false;
-                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.FIFTY_MOVES_RULE) );
-            }
-            if(isStalemate()) {
-                isOngoing = false;
-                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.STALEMATE) );
-            }
-            if(isMaterialInsufficient()) {
-                isOngoing = false;
-                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.INSUFFICIENT_MATERIAL) );
-            }
-            if(isAgreedDraw()) {
-                isOngoing = false;
-                movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.AGREED_DRAW) );
-            }
-            //TODO if time will be added add draw by time vs insufficient material
+            checkDrawConditions();
         }
+    }
+
+    private boolean isCheckmate() {
+        return isCheck() && currentPlayerCantMove();
+    }
+
+    private void checkDrawConditions() {
+        if(gameRepeatedThreeTimes()) {
+            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.THREEFOLD_REPETITION));
+        }
+        else if(isFiftyMovesRuleBroken()) {
+            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.FIFTY_MOVES_RULE));
+        }
+        else if(isStalemate()) {
+            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.STALEMATE));
+        }
+        else if(isMaterialInsufficient()) {
+            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.INSUFFICIENT_MATERIAL));
+        }
+    }
+
+    private boolean gameRepeatedThreeTimes() {
+        return previousStates.get(getPositionHash()) >= 3;
     }
 
     private boolean isFiftyMovesRuleBroken() {
         return fiftyMovesCounter >= 100; //100 moves = 50 turns
     }
 
-    @Deprecated(forRemoval = true)
-    private boolean hasSurrendered(PieceColor pieceColor) {
-        //Only cowards flee from the battlefield
-        return false;
-    }
-
-    private boolean isAgreedDraw() {
-        //Peace was never an option...
-        return false;
-    }
-
     private boolean isStalemate() {
-        if (isCheck()) {
-            return false;
-        }
+        return !isCheck() && currentPlayerCantMove();
+    }
+
+    private boolean currentPlayerCantMove() {
         for (Piece piece : getCurrentPlayerPieces()) {
             if (!piece.getPossibleMoves(this).isEmpty()) {
                 return false;
             }
         }
         return true;
+    }
+
+    private Set<Piece> getCurrentPlayerPieces() {
+        return getPieces(turn);
+    }
+
+    private void endGameWithOutcome(GameOutcome outcome) {
+        isOngoing = false;
+        movesHistory.setOutcome( outcome );
     }
 
     private boolean isMaterialInsufficient() {
@@ -422,9 +459,11 @@ public class GameBoard { //TODO: add thread safety
 
     private boolean isMaterialInsufficient(PieceColor color) {
         Set<Piece> pieces = getPieces(color);
-        if(pieces.size() >= 3)
-            return false;
-        for (Piece piece : whitePieces) {
+        return pieces.size() < 3 && onlyKingAndOneMinorPieceRemaining(pieces);
+    }
+
+    private boolean onlyKingAndOneMinorPieceRemaining(Set<Piece> pieces) {
+        for (Piece piece : pieces) {
             if (!(piece instanceof Bishop || piece instanceof Knight || piece instanceof King)) {
                 return false;
             }
@@ -432,78 +471,62 @@ public class GameBoard { //TODO: add thread safety
         return true;
     }
 
-    private boolean gameRepeatedThreeTimes() {
-        return previousStates.get(getPositionHash()) >= 3;
-    }
 
-    public boolean isCurrentPlayer(PieceColor color) {
-        return turn == color;
+
+    public boolean isNotCurrentPlayer(PieceColor color) {
+        return turn != color;
     }
 
     public PieceColor getCurrentPlayer() {
         return turn;
     }
 
+    public boolean isCheck() {
+        if (cachedCheck == null) {
+            cachedCheck = isCheckInternal();
+        }
+        return cachedCheck;
+    }
+
+    private boolean isCheckInternal() {
+        for (Piece piece : getPieces(turn.opposite())) {
+            if (pieceCouldCaptureKing(piece))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean pieceCouldCaptureKing(Piece piece) {
+        Position kingPosition = getCurrentPlayerKingPosition();
+
+        if (piece instanceof King) //using manual king to avoid infinite loop call to isCheck
+            return kingCouldCaptureKing((King) piece, kingPosition);
+        else
+            return piece.couldReach(this, kingPosition);
+    }
+
     private Position getCurrentPlayerKingPosition() {
         return turn == PieceColor.WHITE ? whiteKingPosition : blackKingPosition;
     }
 
-    private Set<Piece> getCurrentPlayerPieces() {
-        return getPieces(turn);
+    private boolean kingCouldCaptureKing(King piece, Position kingPosition) {
+        return Math.abs(piece.getPosition().row() - kingPosition.row()) <= 1 && Math.abs(piece.getPosition().column() - kingPosition.column()) <= 1;
     }
+
 
     private Set<Piece> getPieces(PieceColor color) {
         return color == PieceColor.WHITE ? whitePieces : blackPieces;
     }
 
-    public boolean isCheck() {
-        if (cachedCheck == null) {
-            cachedCheck = isCheckInternal(getCurrentPlayerKingPosition(), turn);
-        }
-        return cachedCheck;
-    }
-
-    private boolean isCheckInternal(Position kingPosition, PieceColor color) {
-        for (Piece piece : getPieces(color.opposite())) {
-            if (piece instanceof King) { //using manual king to avoid infinite loop call to isCheck
-                if (Math.abs(piece.getPosition().row() - kingPosition.row()) <= 1 && Math.abs(piece.getPosition().column() - kingPosition.column()) <= 1) {
-                    return true;
-                }
-                continue;
-            }
-            if (piece.couldReach(this, kingPosition)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public boolean isCheckmate() {
-        if (!isCheck()) {
+    public boolean isLegalMove(Move move) throws BoardValidationException {
+        BoardValidator.validateMove(move);
+        if (!isOngoing || getPieceAt(move.getOrigin()).getColor() != turn) {
             return false;
         }
-        for (Piece piece : getCurrentPlayerPieces()) {
-            if (!piece.getPossibleMoves(this).isEmpty()) {
-                return false;
-            }
-        }
-        return true;
+        return !wouldAllowCheck(move);
     }
 
-    public boolean isIllegalMove(Move move) {
-        if (move == null) {
-            return true;
-        }
-        if (isEmpty(move.getOrigin())) {
-            return true;
-        }
-        if (getPiece(move.getOrigin()).getColor() != turn) {
-            return true;
-        }
-        return wouldAllowCheck(move);
-    }
-
+    //TODO rewrite without copying the whole board
     private boolean wouldAllowCheck(Move move) {
         GameBoard copy = new GameBoard();
         copy.turn = turn;
@@ -516,31 +539,39 @@ public class GameBoard { //TODO: add thread safety
             System.arraycopy(board[i], 0, copy.board[i], 0, COLUMNS);
         }
         copy.applyMove(move);
-        copy.cachedCheck = null;
         return copy.isCheck();
     }
+
+    public Piece getPieceAt(Position position) throws BoardValidationException{
+        BoardValidator.validatePosition(position);
+        return board[position.row()][position.column()];
+    }
+
+    private void setPieceAt(Position position, Piece piece) {
+        board[position.row()][position.column()] = piece;
+    }
+
 
     /**
      * Handle ChessTimer callback for time over
      * @param color
      * @return true if the game ends thanks to this call, false if the game already ended before the time over
      */
-    public boolean handleTimeOver(PieceColor color) {
+    public boolean handleTimeOver(PieceColor color) { //TODO handle with semaphore specifically
         if (!isOngoing)
             return false;
-        isOngoing = false;
+
         if (isMaterialInsufficient(color.opposite()))
-            movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.TIME_VS_INSUFFICIENT_MATERIAL) );
+            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.INSUFFICIENT_MATERIAL));
         else
-            movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.TIME_EXPIRED) );
+            endGameWithOutcome(GameOutcome.win(color.opposite()).withCause(GameoverCause.TIME_EXPIRED));
         return true;
     }
 
     public void resign(PieceColor color) {
-        if (!isOngoing())
+        if (!isOngoing)
             return;
-        isOngoing = false;
-        movesHistory.setOutcome( new GameOutcome().withWinner(color.opposite()).withCause(GameoverCause.RESIGNATION) );
+        endGameWithOutcome(GameOutcome.win(color.opposite()).withCause(GameoverCause.RESIGNATION));
     }
 
     /**
@@ -548,20 +579,21 @@ public class GameBoard { //TODO: add thread safety
      * @return true if the draw is accepted with this call
      */
     public boolean requestDraw(PieceColor color) {
-        if (!isOngoing())
+        if (!isOngoing)
             return false;
+
         drawAgreement.agree(color);
         if (drawAgreement.isAccepted()) {
-            isOngoing = false;
-            movesHistory.setOutcome( new GameOutcome().withDraw().withCause(GameoverCause.AGREED_DRAW) );
+            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.AGREED_DRAW));
             return true;
         }
         return false;
     }
 
     public void denyDraw() {
-        if (!isOngoing())
+        if (!isOngoing)
             return;
+
         drawAgreement.deny();
     }
 
@@ -572,9 +604,18 @@ public class GameBoard { //TODO: add thread safety
         return timer.getTimerInfo();
     }
 
-    public boolean noMovesPlayed() {
+    public boolean areNoMovesPlayed() {
         return movesHistory.isEmpty();
     }
 
-    //TODO validate move method
+
+    @Deprecated(forRemoval = true)
+    public void print() {
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                System.out.print(board[i][j].getColorSymbol() + " ");
+            }
+            System.out.println();
+        }
+    }
 }

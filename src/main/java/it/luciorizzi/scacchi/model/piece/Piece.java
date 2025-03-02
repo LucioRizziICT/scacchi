@@ -5,12 +5,9 @@ import it.luciorizzi.scacchi.model.movement.Move;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.PieceColor;
+import it.luciorizzi.scacchi.util.BoardValidator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @Getter
 @AllArgsConstructor
@@ -32,14 +29,14 @@ public abstract class Piece {
     }
 
     public MoveSet getPossibleMoves(GameBoard gameBoard) {
-        if (!gameBoard.isCurrentPlayer(getColor())) {
+        if (gameBoard.isNotCurrentPlayer(getColor())) {
             return new MoveSet();
         }
         MoveSet possibleMoves = getPossibleMovesInternal(gameBoard);
         MoveSet result = new MoveSet();
 
         for (Move move : possibleMoves.getMoves()) {
-            if (!gameBoard.isIllegalMove(move)) {
+            if (gameBoard.isLegalMove(move)) {
                 result.addMove(move);
             }
         }
@@ -50,25 +47,13 @@ public abstract class Piece {
         return new MoveSet();
     }
 
-    public boolean move(GameBoard gameBoard, Position to) {
-        if (to == null) {
-            return false;
-        }
-        if (getPossibleMoves(gameBoard).canReach(to)) {
+    public boolean move(GameBoard gameBoard, Position to) throws BoardValidationException {
+        BoardValidator.validatePosition(to);
+        if (canReach(gameBoard, to)) {
             position = to;
             return true;
         }
         return false;
-    }
-
-    public boolean move(GameBoard gameBoard, Move move) {
-        if (move == null) {
-            return false;
-        }
-        if (!move.getOrigin().equals(position)) {
-            return false;
-        }
-        return move(gameBoard, move.getDestination());
     }
 
     protected void addStraightMoves(MoveSet possibleMoves, GameBoard gameBoard) {
@@ -109,5 +94,27 @@ public abstract class Piece {
 
     public char getColorSymbol() {
         return color == PieceColor.WHITE ? Character.toUpperCase(symbol) : Character.toLowerCase(symbol);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(getColorSymbol());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Piece other = (Piece) obj;
+        return other.getColor() == this.getColor() && other.getPosition().equals(this.getPosition());
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * position.hashCode() + color.hashCode();
     }
 }

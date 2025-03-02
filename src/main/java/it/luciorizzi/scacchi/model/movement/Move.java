@@ -88,4 +88,9 @@ public class Move {
     public int hashCode() {
         return Objects.hash(origin, destination, moveType);
     }
+
+    @Override
+    public String toString() {
+        return "Move{" + "origin=" + origin.toString() + ", destination=" + destination.toString() + ", moveType=" + moveType + ", promotion=" + promotion + '}';
+    }
 }

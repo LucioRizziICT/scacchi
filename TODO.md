@@ -37,6 +37,8 @@
 - [ ] possibilità di rivedere partite finite senza perdere il token attuale
 - [ ] aggiungere spettatori
 - [ ] gestire concorrenza (almeno un minimo)
+- [ ] cache possible moves dei pezzi
+- [ ] refactor classi dei pezzi
 
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni

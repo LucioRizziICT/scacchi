@@ -1,5 +1,6 @@
 package it.luciorizzi.scacchi.controller;
 
+import it.luciorizzi.scacchi.model.BoardValidationException;
 import it.luciorizzi.scacchi.model.lobby.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -44,6 +45,14 @@ public class LobbyControllerExceprionHandler {
     public void handleLobbyIsFullException(HttpServletRequest request, Exception exception) {
         logger.warn("Lobby is full exception. {}", exception.getMessage());
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BoardValidationException.class)
+    public void handleBoardValidationException(HttpServletRequest request, Exception exception) {
+        logger.warn("Board validation exception. {}", exception.getMessage());
+    }
+
+
 
     @ExceptionHandler(LobbyNotFoundException.class)
     public ModelAndView handleLobbyNotFound() {

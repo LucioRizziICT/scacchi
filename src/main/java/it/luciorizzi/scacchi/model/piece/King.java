@@ -41,7 +41,7 @@ public class King extends Piece {
         }
         if (neverMoved && !gameBoard.isCheck()) {
             Position leftRook = new Position(position.row(), 0);
-            if (gameBoard.getPiece(leftRook) instanceof Rook && ((Rook) gameBoard.getPiece(leftRook)).hasNeverMoved()) {
+            if (gameBoard.getPieceAt(leftRook) instanceof Rook && ((Rook) gameBoard.getPieceAt(leftRook)).hasNeverMoved()) {
                 boolean canCastle = true;
                 for (int i = 1; i < position.column(); i++) {
                     if (!gameBoard.isEmpty(new Position(position.row(), i))) {
@@ -49,12 +49,12 @@ public class King extends Piece {
                         break;
                     }
                 }
-                if (canCastle && !gameBoard.isIllegalMove(Move.movement(getPosition(), new Position(position.row(), position.column() - 1)))) {
+                if (canCastle && gameBoard.isLegalMove(Move.movement(getPosition(), new Position(position.row(), position.column() - 1)))) {
                     possibleMoves.addCastling(getPosition(), new Position(position.row(), position.column() - 2));
                 }
             }
             Position rightRook = new Position(position.row(), 7);
-            if (gameBoard.getPiece(rightRook) instanceof Rook && ((Rook) gameBoard.getPiece(rightRook)).hasNeverMoved()) {
+            if (gameBoard.getPieceAt(rightRook) instanceof Rook && ((Rook) gameBoard.getPieceAt(rightRook)).hasNeverMoved()) {
                 boolean canCastle = true;
                 for (int i = position.column() + 1; i < 7; i++) {
                     if (!gameBoard.isEmpty(new Position(position.row(), i))) {
@@ -62,7 +62,7 @@ public class King extends Piece {
                         break;
                     }
                 }
-                if (canCastle && !gameBoard.isIllegalMove(Move.movement(getPosition(), new Position(position.row(), position.column() + 1)))) {
+                if (canCastle && gameBoard.isLegalMove(Move.movement(getPosition(), new Position(position.row(), position.column() + 1)))) {
                     possibleMoves.addCastling(getPosition(), new Position(position.row(), position.column() + 2));
                 }
             }

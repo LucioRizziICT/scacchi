@@ -1,7 +1,6 @@
 package it.luciorizzi.scacchi.model.piece;
 
 import it.luciorizzi.scacchi.model.*;
-import it.luciorizzi.scacchi.model.movement.Move;
 import it.luciorizzi.scacchi.model.movement.MoveSet;
 import it.luciorizzi.scacchi.model.movement.Position;
 import it.luciorizzi.scacchi.model.type.PieceColor;
@@ -37,11 +36,11 @@ public class Pawn extends Piece {
             possibleMoves.addCapture(getPosition(), diag2);
         }
         Position side1 = new Position(position.row(), position.column() - 1);
-        if (gameBoard.isEnemy(side1, getColor()) && gameBoard.getPiece(side1) instanceof Pawn && ((Pawn) gameBoard.getPiece(side1)).enPassantable) {
+        if (gameBoard.isEnemy(side1, getColor()) && gameBoard.getPieceAt(side1) instanceof Pawn && ((Pawn) gameBoard.getPieceAt(side1)).enPassantable) {
             possibleMoves.addEnPassant(getPosition(), diag1);
         }
         Position side2 = new Position(position.row(), position.column() + 1);
-        if (gameBoard.isEnemy(side2, getColor()) && gameBoard.getPiece(side2) instanceof Pawn && ((Pawn) gameBoard.getPiece(side2)).enPassantable) {
+        if (gameBoard.isEnemy(side2, getColor()) && gameBoard.getPieceAt(side2) instanceof Pawn && ((Pawn) gameBoard.getPieceAt(side2)).enPassantable) {
             possibleMoves.addEnPassant(getPosition(), diag2);
         }
         return possibleMoves;
@@ -49,22 +48,10 @@ public class Pawn extends Piece {
 
     @Override
     public boolean move(GameBoard gameBoard, Position to) {
-        if (Math.abs(to.row() - position.row()) == 2) {
-            enPassantable = true;
-        }
         if (super.move(gameBoard, to)) {
-            if (!neverMoved)
-                enPassantable = false;
-            neverMoved = false;
-            return true;
-        }
-        enPassantable = false;
-        return false;
-    }
-
-    @Override
-    public boolean move(GameBoard gameBoard, Move move) {
-        if (super.move(gameBoard, move)) {
+            if (Math.abs(to.row() - position.row()) == 2) {
+                enPassantable = true;
+            }
             neverMoved = false;
             return true;
         }

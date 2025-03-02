@@ -20,9 +20,17 @@ public class GameOutcome {
         return this;
     }
 
+    public static GameOutcome draw() {
+        return new GameOutcome().withDraw();
+    }
+
     public GameOutcome withDraw() {
         this.status = GameStatus.DRAW;
         return this;
+    }
+
+    public static GameOutcome win(PieceColor winner) {
+        return new GameOutcome().withWinner(winner);
     }
 
     public GameOutcome withCause(GameoverCause cause) {
