@@ -24,10 +24,10 @@
 - [x] aggiungere notifiche
 - [x] mettere canvas a più layer
 - [ ] aggiungere logging decente
-- [ ] refactor canvas animato
+- [x] refactor canvas animato
 - [ ] Scrivere la documentazione
 - [ ] refactor LobbyService
-- [ ] refactor gameboard
+- [x] refactor gameboard
 - [ ] gestione errori e messaggi di errore e pagine di errore
 - [ ] fixare lobby attuale nel menù
 - [ ] rifare grafica form creazione lobby
