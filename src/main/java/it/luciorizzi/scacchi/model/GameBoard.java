@@ -138,11 +138,17 @@ public class GameBoard { //TODO: add thread safety
         return getPieceAt(position).getPossibleMoves(this);
     }
 
-    public boolean isEmpty(Position position) throws BoardValidationException {
+    public boolean isEmpty(Position position) {
+        if (!BoardValidator.isValidPosition(position)) {
+            return false;
+        }
         return getPieceAt(position) instanceof EmptyPiece;
     }
 
-    public boolean isEnemy(Position position, PieceColor color) throws BoardValidationException {
+    public boolean isEnemy(Position position, PieceColor color) {
+        if (!BoardValidator.isValidPosition(position)) {
+            return false;
+        }
         if (isEmpty(position)) {
             return false;
         }
