@@ -9,13 +9,14 @@ const canvas = document.getElementById('mainCanvas');
 resizeCanvas();
 const ctx = canvas.getContext('2d');
 
-const NUMBER_OF_PIECES = 150;
+const NUMBER_OF_PIECES = 100;
 const MOUSE_RADIUS = 100;
 const PIECE_RADIUS = 30;
 const SPRITE_SIZE = 240;
 const DRAWING_SIZE = 60;
 const PIECE_MAX_SPEED = 1;
 const PIECE_FRICTION = 0.02;
+const ADJUSTMENT_FACTOR = 120;
 const mouse = { x: 0, y: 0 };
 
 window.addEventListener('resize', resizeCanvas, false);
@@ -68,13 +69,13 @@ function Piece(x, y, xspeed, yspeed, radius, r, rspeed, drawing) {
         ctx.drawImage(this.drawing, 0, 0, SPRITE_SIZE, SPRITE_SIZE, -DRAWING_SIZE/2, -DRAWING_SIZE/2, DRAWING_SIZE, DRAWING_SIZE);
     }
 
-    this.update = function() {
+    this.update = function(deltaTime) {
         this.checkBorderCollision();
         this.checkMouseInteraction();
         this.checkCollisionWithPieces();
         this.addFriction();
 
-        this.move();
+        this.move(deltaTime);
         this.draw();
     }
 
@@ -157,10 +158,10 @@ function Piece(x, y, xspeed, yspeed, radius, r, rspeed, drawing) {
         if (this.yspeed < -PIECE_MAX_SPEED) this.accelerateY(PIECE_FRICTION);
     }
 
-    this.move = function() {
-        this.y += this.yspeed;
-        this.x += this.xspeed;
-        this.r += this.rspeed;
+    this.move = function(deltaTime) {
+        this.y += this.yspeed * deltaTime * ADJUSTMENT_FACTOR;
+        this.x += this.xspeed * deltaTime * ADJUSTMENT_FACTOR;
+        this.r += this.rspeed * deltaTime * ADJUSTMENT_FACTOR;
     }
 
     this.accelerateX = function(n) {
@@ -189,13 +190,18 @@ function createNewPiece() {
     return new Piece(x, y, xspeed, yspeed, radius,0, rspeed, drawing)
 }
 
+let lastTime = Date.now();
+
 function animate() {
     requestAnimationFrame(animate);
+    const time = Date.now();
+    const deltaTime = (time - lastTime) / 1000; // Convert to seconds
+    lastTime = time;
 
-    ctx.setTransform(1,0,0,1,0,0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     drawBackground();
     for (let i = 0; i < pieces.length; i++) {
-        pieces[i].update();
+        pieces[i].update(deltaTime);
     }
 }
 

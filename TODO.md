@@ -40,6 +40,12 @@
 - [ ] cache possible moves dei pezzi
 - [ ] refactor classi dei pezzi
 
+
+---
+Movable Spots at the end of game should be cleared
+
+---
+
 ### Lungo termine ipotetico
 - [ ] aggiungere animazioni
 - [ ] implementare la possibilità di giocare con il computer
