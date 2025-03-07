@@ -35,7 +35,7 @@ stompClient.onConnect = function(frame) {
         if (data.playerId === retrievedPlayerId) {
             return;
         }
-        showNotification(data); //TODO dont show self sent notifications and only if it makes sense (ex. dont show accept draw if game is over)
+        showNotification(data);
     });
 
     stompClient.subscribe('/topic/lobby/' + retrievedLobbyId + '/rematch', function(message) {

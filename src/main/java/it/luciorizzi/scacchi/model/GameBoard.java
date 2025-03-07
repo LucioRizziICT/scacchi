@@ -568,7 +568,7 @@ public class GameBoard { //TODO: add thread safety
             return false;
 
         if (isMaterialInsufficient(color.opposite()))
-            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.INSUFFICIENT_MATERIAL));
+            endGameWithOutcome(GameOutcome.draw().withCause(GameoverCause.TIME_VS_INSUFFICIENT_MATERIAL));
         else
             endGameWithOutcome(GameOutcome.win(color.opposite()).withCause(GameoverCause.TIME_EXPIRED));
         return true;

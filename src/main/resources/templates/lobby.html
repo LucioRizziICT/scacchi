@@ -155,7 +155,7 @@
         <div id="gameEndModalContent" class="modalContent">
             <span class="close" onclick="closeGameEndModal();">&times;</span>
 
-            <h3 th:id="'gameEndModalStatus'" class="gameEndModalStatus" th:if="${gameOutcome == null ? '' : (#strings.equalsIgnoreCase('WHITE_WIN', gameOutcome.status) ? 'Il bianco vince' : (#strings.equalsIgnoreCase('BLACK_WIN', gameOutcome.status) ? 'Il nero vince' : 'Pareggio' ) ) }">Vittoria del Bianco</h3>
+            <h3 th:id="'gameEndModalStatus'" class="gameEndModalStatus" th:text="${gameOutcome == null ? '' : (#strings.equalsIgnoreCase('WHITE_WIN', gameOutcome.status) ? 'Il bianco vince' : (#strings.equalsIgnoreCase('BLACK_WIN', gameOutcome.status) ? 'Il nero vince' : 'Pareggio' ) ) }"></h3>
 
 
             <h4 id="gameEndModalCause" class="gameEndModalCause" th:text="${gameOutcome != null ? gameOutcome.cause : ''}"></h4>

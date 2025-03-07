@@ -26,6 +26,5 @@ public record MoveHistoryEntry(Move move, Piece movedPiece, ThreatType threatTyp
         sb.append(move.getPromotion() != null ? "=" + Character.toUpperCase(move.getPromotion()) : "");
         sb.append(threatType == null ? "" : threatType == ThreatType.CHECK ? "+" : "#");
         return sb.toString();
-        //TODO: does not consider ambiguity
     }
 }

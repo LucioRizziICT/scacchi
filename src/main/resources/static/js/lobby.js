@@ -253,15 +253,21 @@ function declineRematch() {
     showFeedbackPopup("Richiesta rifiutata");
 }
 
+const OpenedNotifications = new Uint8Array(1);
+
 function showNotification(data) {
     document.getElementById("notification-header").innerText = data.title;
     document.getElementById("notification-body").innerText = data.message;
 
     switchNotificationType(data.type);
-
+    Atomics.compareExchange(OpenedNotifications, 0, -1, 0);
+    Atomics.add(OpenedNotifications, 0, 1);
     document.getElementById("notification-content").style.display = "block";
     setTimeout(() => {
-        closeNotification(); //TODO: buggato se si sovrappongono più notifiche non si resetta il timer
+        Atomics.compareExchange(OpenedNotifications, 0, 0, 1);
+        if (Atomics.sub(OpenedNotifications, 0, 1) <= 1) {
+            closeNotification();
+        }
     }, 5000);
 
     function switchNotificationType(type) {
